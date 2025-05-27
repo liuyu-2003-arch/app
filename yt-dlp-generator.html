@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yt-dlp命令生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .option-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .option-card input[type="checkbox"] {
+            display: none;
+        }
+
+        .option-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .option-card .title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .option-card .desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .subtitle-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .subtitle-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .subtitle-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .subtitle-card input[type="checkbox"] {
+            display: none;
+        }
+
+        .output-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .output-section h3 {
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            color: #ecf0f1;
+        }
+
+        .command-output {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-all;
+            white-space: pre-wrap;
+            border: 1px solid #444;
+            color: #00ff41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+        }
+
+        .copy-button {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #00c851, #007e33);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 200, 81, 0.3);
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 200, 81, 0.4);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            animation: fadeIn 0.6s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 yt-dlp命令生成器</h1>
+        </div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="url">视频URL</label>
+                <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." />
+            </div>
+
+            <div class="form-group">
+                <label>下载内容（可多选）</label>
+                <div class="option-grid">
+                    <div class="option-card selected" onclick="toggleDownloadType('video')">
+                        <input type="checkbox" name="downloadType" id="video" value="video" checked />
+                        <span class="icon">🎥</span>
+                        <div class="title">视频</div>
+                        <div class="desc">最佳质量MP4</div>
+                    </div>
+                    <div class="option-card" onclick="toggleDownloadType('audio')">
+                        <input type="checkbox" name="downloadType" id="audio" value="audio" />
+                        <span class="icon">🎵</span>
+                        <div class="title">音频</div>
+                        <div class="desc">提取音频文件</div>
+                    </div>
+                    <div class="option-card" onclick="toggleDownloadType('subtitle')">
+                        <input type="checkbox" name="downloadType" id="subtitle" value="subtitle" />
+                        <span class="icon">📄</span>
+                        <div class="title">字幕</div>
+                        <div class="desc">中英文字幕</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+                <label for="outputPath">输出路径</label>
+                <input type="text" id="outputPath" value="~/Movies/YouTube DL/%(title)s.%(ext)s" />
+            </div>
+
+            <div class="output-section">
+                <h3>🚀 生成的命令</h3>
+                <div class="command-output" id="commandOutput">yt-dlp</div>
+                <button class="copy-button" onclick="copyCommand()">📋 复制命令</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDownloadType(type) {
+            const card = event.currentTarget;
+            const checkbox = document.getElementById(type);
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+            
+            generateCommand();
+        }
+
+        function generateCommand() {
+            let command = 'yt-dlp';
+            const url = document.getElementById('url').value.trim();
+            
+            // URL
+            if (url) {
+                command += ` "${url}"`;
+            }
+            
+            // 下载类型
+            const videoChecked = document.getElementById('video').checked;
+            const audioChecked = document.getElementById('audio').checked;
+            const subtitleChecked = document.getElementById('subtitle').checked;
+            
+            // 构建格式选择器
+            if (videoChecked && !audioChecked) {
+                // 仅视频
+                command += ' -f best --merge-output-format mp4';
+            } else if (!videoChecked && audioChecked) {
+                // 仅音频
+                command += ' -x --audio-format mp3';
+            } else if (videoChecked && audioChecked) {
+                // 视频和音频都要
+                command += ' -f best --merge-output-format mp4';
+            } else if (!videoChecked && !audioChecked && subtitleChecked) {
+                // 仅字幕
+                command += ' --skip-download';
+            }
+            
+            // 字幕处理（如果选择了字幕）
+            if (subtitleChecked) {
+                command += ' --write-subs --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en" --sub-format srt --write-auto-subs';
+            }
+            
+            // 输出路径
+            const outputPath = document.getElementById('outputPath').value.trim();
+            if (outputPath) {
+                command += ` -o "${outputPath}"`;
+            }
+            
+            document.getElementById('commandOutput').textContent = command;
+        }
+        
+        function copyCommand() {
+            const command = document.getElementById('commandOutput').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                const button = document.querySelector('.copy-button');
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+        
+        // 监听URL输入变化
+        document.getElementById('url').addEventListener('input', generateCommand);
+        document.getElementById('outputPath').addEventListener('input', generateCommand);
+        
+        // 初始化
+        generateCommand();
+    </script>
+</body>
+</html>
