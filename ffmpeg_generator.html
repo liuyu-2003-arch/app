@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFmpeg命令生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="1" fill="white" opacity="0.1"/><circle cx="40" cy="60" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .function-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .function-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .function-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .function-btn.active {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .function-panel {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .function-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px dashed #4facfe;
+            border-radius: 10px;
+            background: rgba(79, 172, 254, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: #666;
+        }
+
+        .file-input:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-color: #f5576c;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+
+        .result-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .result-panel h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .command-output {
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            word-break: break-all;
+            white-space: pre-wrap;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .quality-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quality-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .quality-option input[type="radio"] {
+            display: none;
+        }
+
+        .quality-option label {
+            display: block;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .quality-option input[type="radio"]:checked + label {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .tips {
+            background: linear-gradient(45deg, #ffeaa7, #fab1a0);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255, 234, 167, 0.3);
+        }
+
+        .tips h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .tips ul {
+            color: #555;
+            padding-left: 20px;
+        }
+
+        .tips li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 FFmpeg命令生成器</h1>
+        </div>
+        
+        <div class="content">
+            <div class="function-selector">
+                <button class="function-btn active" onclick="switchFunction('video2audio')">
+                    🎵 视频转MP3
+                </button>
+                <button class="function-btn" onclick="switchFunction('subtitle')">
+                    📝 字幕合成
+                </button>
+            </div>
+
+            <!-- 视频转MP3面板 -->
+            <div id="video2audio-panel" class="function-panel active">
+                <div class="form-group">
+                    <label>📁 选择视频文件</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="video-input" class="file-input" placeholder="点击选择视频文件或直接输入文件路径..." readonly onclick="document.getElementById('video-file').click()">
+                        <input type="file" id="video-file" accept="video/*" style="display: none" onchange="updateFileName('video-input', this)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🎛️ 音频质量</label>
+                    <div class="quality-options">
+                        <div class="quality-option">
+                            <input type="radio" id="quality-high" name="audio-quality" value="320" checked>
+                            <label for="quality-high">高质量<br>(320kbps)</label>
+                        </div>
+                        <div class="quality-option">
+                            <input type="radio" id="quality-medium" name="audio-quality" value="192">
+                            <label for="quality-medium">标准质量<br>(192kbps)</label>
+                        </div>
+                        <div class="quality-option">
+                            <input type="radio" id="quality-low" name="audio-quality" value="128">
+                            <label for="quality-low">压缩质量<br>(128kbps)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" onclick="generateVideoToAudioCommand()">
+                    🚀 生成FFmpeg命令
+                </button>
+
+                <div class="tips" style="margin-top: 25px;">
+                    <h4>💡 使用提示</h4>
+                    <ul>
+                        <li>支持常见视频格式：MP4、AVI、MOV、MKV等</li>
+                        <li>可选择不同音质，高质量适合音乐，标准质量适合语音</li>
+                        <li>生成的MP3文件将保存在原视频同目录下</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 字幕合成面板 -->
+            <div id="subtitle-panel" class="function-panel">
+                <div class="form-group">
+                    <label>📁 选择视频文件</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="subtitle-video-input" class="file-input" placeholder="点击选择视频文件或直接输入文件路径..." readonly onclick="document.getElementById('subtitle-video-file').click()">
+                        <input type="file" id="subtitle-video-file" accept="video/*" style="display: none" onchange="updateFileName('subtitle-video-input', this)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>📄 选择字幕文件</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="subtitle-file-input" class="file-input" placeholder="点击选择字幕文件或直接输入文件路径..." readonly onclick="document.getElementById('subtitle-file').click()">
+                        <input type="file" id="subtitle-file" accept=".srt,.ass,.ssa,.vtt,.sub" style="display: none" onchange="updateFileName('subtitle-file-input', this)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🌍 字幕语言</label>
+                    <div class="quality-options">
+                        <div class="quality-option">
+                            <input type="radio" id="lang-auto" name="subtitle-language" value="" checked>
+                            <label for="lang-auto">自动检测</label>
+                        </div>
+                        <div class="quality-option">
+                            <input type="radio" id="lang-chi" name="subtitle-language" value="chi">
+                            <label for="lang-chi">中文</label>
+                        </div>
+                        <div class="quality-option">
+                            <input type="radio" id="lang-eng" name="subtitle-language" value="eng">
+                            <label for="lang-eng">英文</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" onclick="generateSubtitleCommand()">
+                    🚀 生成FFmpeg命令
+                </button>
+
+                <div class="tips" style="margin-top: 25px;">
+                    <h4>💡 使用提示</h4>
+                    <ul>
+                        <li>支持SRT、ASS、VTT等常见字幕格式</li>
+                        <li>输出为MKV格式，保持原视频质量</li>
+                        <li>字幕将被嵌入到视频中，支持多语言字幕</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 结果显示面板 -->
+            <div id="result" class="result-panel" style="display: none;">
+                <h3>🎯 生成的FFmpeg命令</h3>
+                <div id="command-output" class="command-output"></div>
+                <button class="copy-btn" onclick="copyCommand()">📋 复制命令</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCommand = '';
+
+        function switchFunction(func) {
+            // 更新按钮状态
+            document.querySelectorAll('.function-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 切换面板
+            document.querySelectorAll('.function-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(func + '-panel').classList.add('active');
+
+            // 隐藏结果面板
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function updateFileName(inputId, fileInput) {
+            const input = document.getElementById(inputId);
+            if (fileInput.files.length > 0) {
+                input.value = fileInput.files[0].name;
+            }
+        }
+
+        function generateVideoToAudioCommand() {
+            const videoInput = document.getElementById('video-input').value.trim();
+            const quality = document.querySelector('input[name="audio-quality"]:checked').value;
+
+            if (!videoInput) {
+                alert('请选择视频文件！');
+                return;
+            }
+
+            // 生成同名输出文件
+            const baseName = videoInput.replace(/\.[^/.]+$/, '');
+            const outputName = baseName + '.mp3';
+
+            // 构建FFmpeg命令
+            const command = `ffmpeg -i "${videoInput}" -vn -acodec mp3 -ab ${quality}k "${outputName}"`;
+
+            displayResult(command);
+        }
+
+        function generateSubtitleCommand() {
+            const videoInput = document.getElementById('subtitle-video-input').value.trim();
+            const subtitleInput = document.getElementById('subtitle-file-input').value.trim();
+            const language = document.querySelector('input[name="subtitle-language"]:checked').value;
+
+            if (!videoInput) {
+                alert('请选择视频文件！');
+                return;
+            }
+
+            if (!subtitleInput) {
+                alert('请选择字幕文件！');
+                return;
+            }
+
+            // 生成同名输出文件
+            const baseName = videoInput.replace(/\.[^/.]+$/, '');
+            const outputName = baseName + '_with_subtitle.mkv';
+
+            // 构建FFmpeg命令
+            let command = `ffmpeg -i "${videoInput}" -i "${subtitleInput}" -c:v copy -c:a copy -c:s srt`;
+            
+            if (language) {
+                command += ` -metadata:s:s:0 language=${language}`;
+            }
+            
+            command += ` "${outputName}"`;
+
+            displayResult(command);
+        }
+
+        function displayResult(command) {
+            currentCommand = command;
+            document.getElementById('command-output').textContent = command;
+            document.getElementById('result').style.display = 'block';
+            
+            // 滚动到结果区域
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyCommand() {
+            if (currentCommand) {
+                navigator.clipboard.writeText(currentCommand).then(() => {
+                    const btn = event.target;
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ 已复制';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                }).catch(() => {
+                    // 备用复制方法
+                    const textArea = document.createElement('textarea');
+                    textArea.value = currentCommand;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    const btn = event.target;
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ 已复制';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                });
+            }
+        }
+
+        // 允许用户直接在输入框中输入文件路径
+        document.getElementById('video-input').addEventListener('click', function() {
+            this.readOnly = false;
+            this.placeholder = '请输入视频文件路径...';
+        });
+
+        document.getElementById('subtitle-video-input').addEventListener('click', function() {
+            this.readOnly = false;
+            this.placeholder = '请输入视频文件路径...';
+        });
+
+        document.getElementById('subtitle-file-input').addEventListener('click', function() {
+            this.readOnly = false;
+            this.placeholder = '请输入字幕文件路径...';
+        });
+    </script>
+</body>
+</html>
