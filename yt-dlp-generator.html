@@ -100,10 +100,12 @@
             display: flex;
             gap: 15px;
             align-items: flex-start;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .url-input-wrapper {
             flex: 1;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .form-group input[type="text"] {
@@ -124,11 +126,11 @@
         }
 
         .url-info {
-            flex: 0 0 250px;
+            width: 0;
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border: 2px solid #dee2e6;
             border-radius: 10px;
-            padding: 12px 15px;
+            padding: 0;
             height: 48px;
             display: flex;
             align-items: center;
@@ -138,29 +140,18 @@
             position: relative;
             opacity: 0;
             visibility: hidden;
-            transform: translateX(20px);
+            flex-shrink: 0;
         }
 
         .url-info.visible {
             opacity: 1;
             visibility: visible;
-            transform: translateX(0);
+            width: 250px;
+            padding: 12px 15px;
         }
 
         .url-info.expanded {
-            flex: 0 0 400px;
-            animation: expandLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        @keyframes expandLeft {
-            0% {
-                flex-basis: 250px;
-                transform: translateX(0);
-            }
-            100% {
-                flex-basis: 400px;
-                transform: translateX(-75px);
-            }
+            width: 300px;
         }
 
         .url-info.has-content {
@@ -445,12 +436,12 @@
             }
             
             .url-info {
-                flex: none;
-                transform: translateY(-10px);
+                width: 100% !important;
+                margin-top: 10px;
             }
             
             .url-info.visible {
-                transform: translateY(0);
+                width: 100% !important;
             }
             
             .option-grid {
@@ -562,7 +553,7 @@
             const urlInfoText = urlInfo.querySelector('.url-info-text');
             
             if (!url) {
-                // 隐藏信息窗口
+                // 隐藏信息窗口 - 宽度归零
                 urlInfo.className = 'url-info';
                 urlInfoText.textContent = '';
                 return;
