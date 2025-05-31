@@ -19,50 +19,99 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             color: white;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
         }
 
         .content {
-            padding: 20px;
+            padding: 25px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(30px); }
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 600;
             color: #333;
-            font-size: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .url-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .url-input-wrapper {
+            flex: 1;
         }
 
         .form-group input[type="text"] {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 15px;
             border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 10px;
+            font-size: 1rem;
             transition: all 0.3s ease;
             background: #fff;
         }
@@ -70,38 +119,86 @@
         .form-group input[type="text"]:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
             transform: translateY(-2px);
+        }
+
+        .url-info {
+            flex: 0 0 250px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 15px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .url-info.has-content {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .url-info.playlist {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .url-info-text {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .option-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-top: 12px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
         }
 
         .option-card {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 15px;
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .option-card:hover::before {
+            left: 100%;
         }
 
         .option-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
 
         .option-card.selected {
             border-color: #667eea;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            transform: translateY(-5px);
         }
 
         .option-card input[type="checkbox"] {
@@ -109,43 +206,67 @@
         }
 
         .option-card .icon {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            font-size: 2rem;
+            margin-bottom: 10px;
             display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .option-card:hover .icon {
+            transform: scale(1.2);
         }
 
         .option-card .title {
             font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 4px;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
         }
 
         .option-card .desc {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             opacity: 0.8;
+        }
+
+        .subtitle-section {
+            margin-top: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .subtitle-section.active {
+            opacity: 1;
+            pointer-events: all;
+            border-color: #667eea;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
         }
 
         .subtitle-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             margin-top: 15px;
         }
 
         .subtitle-card {
-            background: #f8f9fa;
+            background: #ffffff;
             border: 2px solid #e9ecef;
             border-radius: 10px;
             padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .subtitle-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         .subtitle-card.selected {
@@ -158,64 +279,124 @@
             display: none;
         }
 
+        .path-hint {
+            margin-top: 8px;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #1565c0;
+            border-left: 4px solid #2196f3;
+        }
+
         .output-section {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 25px;
+            padding: 25px;
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            border-radius: 12px;
+            border-radius: 15px;
             color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .output-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00c851, #007e33, #00c851);
+            animation: progress 2s infinite;
+        }
+
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .output-section h3 {
-            margin-bottom: 12px;
-            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
             color: #ecf0f1;
         }
 
         .command-output {
             background: #1a1a1a;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.6;
             word-break: break-all;
             white-space: pre-wrap;
             border: 1px solid #444;
             color: #00ff41;
             text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+            min-height: 60px;
+            position: relative;
         }
 
         .copy-button {
-            margin-top: 12px;
-            padding: 10px 20px;
+            margin-top: 15px;
+            padding: 12px 25px;
             background: linear-gradient(45deg, #00c851, #007e33);
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 200, 81, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 200, 81, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .copy-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .copy-button:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .copy-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 200, 81, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 200, 81, 0.4);
         }
 
         .copy-button:active {
             transform: translateY(0);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .copy-button span {
+            position: relative;
+            z-index: 1;
         }
 
-        .form-group {
-            animation: fadeIn 0.6s ease forwards;
+        @media (max-width: 768px) {
+            .url-container {
+                flex-direction: column;
+            }
+            
+            .url-info {
+                flex: none;
+            }
+            
+            .option-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -228,7 +409,16 @@
         <div class="content">
             <div class="form-group">
                 <label for="url">视频URL</label>
-                <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." />
+                <div class="url-container">
+                    <div class="url-input-wrapper">
+                        <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=... 或播放列表链接" />
+                    </div>
+                    <div class="url-info" id="urlInfo">
+                        <div class="url-info-text">
+                            <div>📋 粘贴链接后显示信息</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -238,34 +428,37 @@
                         <input type="checkbox" name="downloadType" id="video" value="video" checked />
                         <span class="icon">🎥</span>
                         <div class="title">视频</div>
-                        <div class="desc">最佳质量MP4</div>
+                        <div class="desc">最佳质量MP4（含音频）</div>
                     </div>
                     <div class="option-card" onclick="toggleDownloadType('audio')">
                         <input type="checkbox" name="downloadType" id="audio" value="audio" />
                         <span class="icon">🎵</span>
                         <div class="title">音频</div>
-                        <div class="desc">提取音频文件</div>
+                        <div class="desc">提取MP3音频</div>
                     </div>
                     <div class="option-card" onclick="toggleDownloadType('subtitle')">
                         <input type="checkbox" name="downloadType" id="subtitle" value="subtitle" />
                         <span class="icon">📄</span>
                         <div class="title">字幕</div>
-                        <div class="desc">中英文字幕</div>
+                        <div class="desc">中英文SRT字幕</div>
                     </div>
                 </div>
             </div>
 
-
-
             <div class="form-group">
                 <label for="outputPath">输出路径</label>
                 <input type="text" id="outputPath" value="~/Movies/YouTube DL/%(title)s.%(ext)s" />
+                <div class="path-hint">
+                    💡 默认保存到影片文件夹下的YouTube DL目录，%(title)s为视频标题，%(ext)s为文件扩展名
+                </div>
             </div>
 
             <div class="output-section">
                 <h3>🚀 生成的命令</h3>
                 <div class="command-output" id="commandOutput">yt-dlp</div>
-                <button class="copy-button" onclick="copyCommand()">📋 复制命令</button>
+                <button class="copy-button" onclick="copyCommand()">
+                    <span>📋 复制命令</span>
+                </button>
             </div>
         </div>
     </div>
@@ -286,41 +479,67 @@
             generateCommand();
         }
 
+        function analyzeUrl(url) {
+            const urlInfo = document.getElementById('urlInfo');
+            const urlInfoText = urlInfo.querySelector('.url-info-text');
+            
+            if (!url) {
+                urlInfo.className = 'url-info';
+                urlInfoText.innerHTML = '<div>📋 粘贴链接后显示信息</div>';
+                return;
+            }
+            
+            // 检测是否为播放列表
+            if (url.includes('playlist?list=') || url.includes('&list=')) {
+                urlInfo.className = 'url-info playlist';
+                urlInfoText.innerHTML = '<div>📂 播放列表</div><div style="font-size:0.8rem;margin-top:4px;">将下载全部视频</div>';
+            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                urlInfo.className = 'url-info has-content';
+                urlInfoText.innerHTML = '<div>🎬 单个视频</div><div style="font-size:0.8rem;margin-top:4px;">YouTube视频链接</div>';
+            } else if (url.includes('bilibili.com')) {
+                urlInfo.className = 'url-info has-content';
+                urlInfoText.innerHTML = '<div>📺 B站视频</div><div style="font-size:0.8rem;margin-top:4px;">哔哩哔哩视频</div>';
+            } else {
+                urlInfo.className = 'url-info has-content';
+                urlInfoText.innerHTML = '<div>🌐 其他平台</div><div style="font-size:0.8rem;margin-top:4px;">支持的视频网站</div>';
+            }
+        }
+
         function generateCommand() {
             let command = 'yt-dlp';
             const url = document.getElementById('url').value.trim();
-            
-            // URL
-            if (url) {
-                command += ` "${url}"`;
-            }
             
             // 下载类型
             const videoChecked = document.getElementById('video').checked;
             const audioChecked = document.getElementById('audio').checked;
             const subtitleChecked = document.getElementById('subtitle').checked;
             
-            // 构建格式选择器
+            // 格式选择
             if (videoChecked && !audioChecked) {
-                // 仅视频（无音频）
-                command += ' -f "bv*" --merge-output-format mp4';
+                // 仅视频但包含音频
+                command += ' -f "bv*+ba*/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4';
             } else if (!videoChecked && audioChecked) {
                 // 仅音频
                 command += ' -x --audio-format mp3 --audio-quality 0';
             } else if (videoChecked && audioChecked) {
-                // 视频和音频都要 - 强制包含音频并转换
-                command += ' -f "bv*+ba*/b[ext=mp4]/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4 --embed-chapters --embed-metadata';
+                // 视频和音频都要
+                command += ' -f "bv*+ba*/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4 -x --audio-format mp3 --audio-quality 0';
             } else if (videoChecked) {
-                // 默认视频选项 - 强制包含音频并转换
-                command += ' -f "bv*+ba*/b[ext=mp4]/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4 --embed-chapters --embed-metadata';
+                // 默认视频选项（包含音频）
+                command += ' -f "bv*+ba*/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4';
             } else if (!videoChecked && !audioChecked && subtitleChecked) {
                 // 仅字幕
                 command += ' --skip-download';
             }
             
-            // 字幕处理（如果选择了字幕）
+            // 字幕处理
             if (subtitleChecked) {
                 command += ' --write-subs --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en" --sub-format srt --write-auto-subs';
+            }
+            
+            // 添加章节和元数据嵌入（仅对视频）
+            if (videoChecked) {
+                command += ' --embed-chapters --embed-metadata';
             }
             
             // 输出路径
@@ -329,13 +548,18 @@
                 command += ` -o "${outputPath}"`;
             }
             
+            // URL
+            if (url) {
+                command += ` "${url}"`;
+            }
+            
             document.getElementById('commandOutput').textContent = command;
         }
         
         function copyCommand() {
             const command = document.getElementById('commandOutput').textContent;
             navigator.clipboard.writeText(command).then(() => {
-                const button = document.querySelector('.copy-button');
+                const button = document.querySelector('.copy-button span');
                 const originalText = button.textContent;
                 button.textContent = '✅ 已复制!';
                 setTimeout(() => {
@@ -345,7 +569,11 @@
         }
         
         // 监听URL输入变化
-        document.getElementById('url').addEventListener('input', generateCommand);
+        document.getElementById('url').addEventListener('input', function() {
+            analyzeUrl(this.value);
+            generateCommand();
+        });
+        
         document.getElementById('outputPath').addEventListener('input', generateCommand);
         
         // 初始化
