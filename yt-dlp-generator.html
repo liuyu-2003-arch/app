@@ -133,7 +133,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .url-info.expanded {
+            flex: 0 0 400px;
+            animation: expandLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes expandLeft {
+            0% {
+                flex-basis: 250px;
+                transform: translateX(0);
+            }
+            100% {
+                flex-basis: 400px;
+                transform: translateX(-75px);
+            }
         }
 
         .url-info.has-content {
@@ -148,10 +166,42 @@
             color: #856404;
         }
 
+        .url-info.loading {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+            color: #1565c0;
+        }
+
+        .url-info.loading .url-info-text::after {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            margin-left: 4px;
+            animation: loading-dots 1.4s infinite both;
+        }
+
+        @keyframes loading-dots {
+            0%, 80%, 100% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         .url-info-text {
             text-align: center;
             font-size: 0.9rem;
             font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         .option-grid {
@@ -220,11 +270,6 @@
             font-weight: 600;
             font-size: 1.1rem;
             margin-bottom: 6px;
-        }
-
-        .option-card .desc {
-            font-size: 0.9rem;
-            opacity: 0.8;
         }
 
         .subtitle-section {
@@ -414,9 +459,7 @@
                         <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=... 或播放列表链接" />
                     </div>
                     <div class="url-info" id="urlInfo">
-                        <div class="url-info-text">
-                            <div>📋 粘贴链接后显示信息</div>
-                        </div>
+                        <div class="url-info-text">📋 粘贴链接后显示信息</div>
                     </div>
                 </div>
             </div>
@@ -428,19 +471,16 @@
                         <input type="checkbox" name="downloadType" id="video" value="video" checked />
                         <span class="icon">🎥</span>
                         <div class="title">视频</div>
-                        <div class="desc">最佳质量MP4（含音频）</div>
                     </div>
                     <div class="option-card" onclick="toggleDownloadType('audio')">
                         <input type="checkbox" name="downloadType" id="audio" value="audio" />
                         <span class="icon">🎵</span>
                         <div class="title">音频</div>
-                        <div class="desc">提取MP3音频</div>
                     </div>
                     <div class="option-card" onclick="toggleDownloadType('subtitle')">
                         <input type="checkbox" name="downloadType" id="subtitle" value="subtitle" />
                         <span class="icon">📄</span>
                         <div class="title">字幕</div>
-                        <div class="desc">中英文SRT字幕</div>
                     </div>
                 </div>
             </div>
@@ -449,7 +489,8 @@
                 <label for="outputPath">输出路径</label>
                 <input type="text" id="outputPath" value="~/Movies/YouTube DL/%(title)s.%(ext)s" />
                 <div class="path-hint">
-                    💡 默认保存到影片文件夹下的YouTube DL目录，%(title)s为视频标题，%(ext)s为文件扩展名
+                    💡 默认保存到影片文件夹下的YouTube DL目录，%(title)s为视频标题，%(ext)s为文件扩展名<br>
+                    📂 播放列表会自动创建以播放列表名称命名的文件夹
                 </div>
             </div>
 
@@ -479,29 +520,78 @@
             generateCommand();
         }
 
-        function analyzeUrl(url) {
+        function extractVideoInfo(url) {
+            // 提取URL中的基本信息
+            if (url.includes('playlist?list=') || url.includes('&list=')) {
+                return { type: 'playlist', platform: 'youtube' };
+            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                return { 
+                    type: 'video', 
+                    platform: 'youtube',
+                    id: videoIdMatch ? videoIdMatch[1] : null
+                };
+            } else if (url.includes('bilibili.com')) {
+                return { type: 'video', platform: 'bilibili' };
+            } else if (url.includes('twitter.com') || url.includes('x.com')) {
+                return { type: 'video', platform: 'twitter' };
+            } else if (url.includes('instagram.com')) {
+                return { type: 'video', platform: 'instagram' };
+            } else if (url.includes('tiktok.com')) {
+                return { type: 'video', platform: 'tiktok' };
+            }
+            return { type: 'video', platform: 'other' };
+        }
+
+        async function analyzeUrl(url) {
             const urlInfo = document.getElementById('urlInfo');
             const urlInfoText = urlInfo.querySelector('.url-info-text');
-
+            
             if (!url) {
                 urlInfo.className = 'url-info';
-                urlInfoText.innerHTML = '📋 粘贴链接后显示信息'; // 已修改为单行
+                urlInfoText.textContent = '📋 粘贴链接后显示信息';
                 return;
             }
-
-            // 检测是否为播放列表
-            if (url.includes('playlist?list=') || url.includes('&list=')) {
-                urlInfo.className = 'url-info playlist';
-                urlInfoText.innerHTML = '📂 播放列表：将下载全部视频'; // 已修改为单行
-            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                urlInfo.className = 'url-info has-content';
-                urlInfoText.innerHTML = '🎬 单个视频：YouTube视频链接'; // 已修改为单行
-            } else if (url.includes('bilibili.com')) {
-                urlInfo.className = 'url-info has-content';
-                urlInfoText.innerHTML = '📺 B站视频：哔哩哔哩视频'; // 已修改为单行
+            
+            // 显示解析中状态
+            urlInfo.className = 'url-info loading';
+            urlInfoText.textContent = '🔄 识别链接类型';
+            
+            // 模拟识别延迟
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const info = extractVideoInfo(url);
+            
+            // 根据平台和类型显示信息
+            if (info.type === 'playlist') {
+                urlInfo.className = 'url-info playlist expanded';
+                urlInfoText.textContent = '📂 YouTube播放列表';
             } else {
-                urlInfo.className = 'url-info has-content';
-                urlInfoText.innerHTML = '🌐 其他平台：支持的视频网站'; // 已修改为单行
+                switch (info.platform) {
+                    case 'youtube':
+                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfoText.textContent = `🎬 YouTube视频${info.id ? ` (${info.id})` : ''}`;
+                        break;
+                    case 'bilibili':
+                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfoText.textContent = '📺 哔哩哔哩视频';
+                        break;
+                    case 'twitter':
+                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfoText.textContent = '🐦 Twitter/X视频';
+                        break;
+                    case 'instagram':
+                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfoText.textContent = '📷 Instagram视频';
+                        break;
+                    case 'tiktok':
+                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfoText.textContent = '🎵 TikTok视频';
+                        break;
+                    default:
+                        urlInfo.className = 'url-info has-content';
+                        urlInfoText.textContent = '🌐 支持的视频平台';
+                }
             }
         }
 
@@ -514,38 +604,73 @@
             const audioChecked = document.getElementById('audio').checked;
             const subtitleChecked = document.getElementById('subtitle').checked;
             
-            // 格式选择
+            // 检测是否为播放列表 - 更完善的检测逻辑
+            const isPlaylist = url && (
+                url.includes('playlist?list=') || 
+                url.includes('&list=') && !url.includes('&list=RD') // 排除自动播放列表
+            );
+            
+            // 格式选择 - 不限制质量，确保音频不丢失
             if (videoChecked && !audioChecked) {
-                // 仅视频但包含音频
-                command += ' -f "bv*+ba*/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4';
+                // 仅视频但必须包含音频 - 选择最佳质量
+                command += ' -f "bestvideo+bestaudio/best" --merge-output-format mp4';
+                // 仅视频时，合并成功后删除中间文件
             } else if (!videoChecked && audioChecked) {
                 // 仅音频
                 command += ' -x --audio-format mp3 --audio-quality 0';
             } else if (videoChecked && audioChecked) {
-                // 视频和音频都要
-                command += ' -f "bv*+ba*/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4 -x --audio-format mp3 --audio-quality 0';
+                // 视频和音频都要 - 下载视频并同时提取音频
+                command += ' -f "bestvideo+bestaudio/best" --merge-output-format mp4';
+                // 同时提取音频文件
+                command += ' -x --audio-format mp3 --audio-quality 0';
+                // 不保留中间文件，只保留最终的MP4和MP3
             } else if (videoChecked) {
-                // 默认视频选项（包含音频）
-                command += ' -f "bv*+ba*/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4';
+                // 默认视频选项（包含音频）- 选择最佳质量
+                command += ' -f "bestvideo+bestaudio/best" --merge-output-format mp4';
+                // 合并成功后删除中间文件
             } else if (!videoChecked && !audioChecked && subtitleChecked) {
                 // 仅字幕
                 command += ' --skip-download';
             }
             
+            // 添加音频相关的安全选项
+            if (videoChecked) {
+                // 确保音频编码正确和元数据嵌入
+                command += ' --embed-metadata --embed-chapters';
+            }
+            
             // 字幕处理
             if (subtitleChecked) {
                 command += ' --write-subs --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en" --sub-format srt --write-auto-subs';
+                if (videoChecked) {
+                    command += ' --embed-subs';
+                }
             }
             
-            // 添加章节和元数据嵌入（仅对视频）
-            if (videoChecked) {
-                command += ' --embed-chapters --embed-metadata';
-            }
-            
-            // 输出路径
-            const outputPath = document.getElementById('outputPath').value.trim();
+            // 输出路径处理
+            let outputPath = document.getElementById('outputPath').value.trim();
             if (outputPath) {
+                // 如果是播放列表，修改输出路径以创建文件夹
+                if (isPlaylist) {
+                    // 检查路径是否已经包含播放列表文件夹结构
+                    if (!outputPath.includes('%(playlist)s') && !outputPath.includes('%(playlist_title)s')) {
+                        // 在文件名前添加播放列表文件夹
+                        const pathParts = outputPath.split('/');
+                        const fileName = pathParts.pop();
+                        const basePath = pathParts.join('/');
+                        outputPath = `${basePath}/%(playlist_title)s/%(playlist_index)02d - ${fileName}`;
+                    }
+                }
                 command += ` -o "${outputPath}"`;
+            }
+            
+            // 播放列表特殊选项
+            if (isPlaylist) {
+                // 忽略播放列表中的错误，继续下载其他视频
+                command += ' --ignore-errors --no-abort-on-error';
+            } else {
+                // 单个视频的错误处理
+                command += ' --ignore-errors --no-abort-on-error';
             }
             
             // URL
@@ -569,8 +694,8 @@
         }
         
         // 监听URL输入变化
-        document.getElementById('url').addEventListener('input', function() {
-            analyzeUrl(this.value);
+        document.getElementById('url').addEventListener('input', async function() {
+            await analyzeUrl(this.value);
             generateCommand();
         });
         
