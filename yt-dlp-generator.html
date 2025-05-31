@@ -308,11 +308,11 @@
                 // 仅音频
                 command += ' -x --audio-format mp3 --audio-quality 0';
             } else if (videoChecked && audioChecked) {
-                // 视频和音频都要 - 确保包含音频
-                command += ' -f "bv*+ba*/b" --merge-output-format mp4';
+                // 视频和音频都要 - 强制包含音频并转换
+                command += ' -f "bv*+ba*/b[ext=mp4]/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4 --embed-chapters --embed-metadata';
             } else if (videoChecked) {
-                // 默认视频选项 - 包含音频
-                command += ' -f "bv*+ba*/b" --merge-output-format mp4';
+                // 默认视频选项 - 强制包含音频并转换
+                command += ' -f "bv*+ba*/b[ext=mp4]/best[ext=mp4]/best" --merge-output-format mp4 --recode-video mp4 --embed-chapters --embed-metadata';
             } else if (!videoChecked && !audioChecked && subtitleChecked) {
                 // 仅字幕
                 command += ' --skip-download';
