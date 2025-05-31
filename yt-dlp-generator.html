@@ -482,26 +482,26 @@
         function analyzeUrl(url) {
             const urlInfo = document.getElementById('urlInfo');
             const urlInfoText = urlInfo.querySelector('.url-info-text');
-            
+
             if (!url) {
                 urlInfo.className = 'url-info';
-                urlInfoText.innerHTML = '📋 粘贴链接后显示信息';
+                urlInfoText.innerHTML = '📋 粘贴链接后显示信息'; // 已修改为单行
                 return;
             }
-            
+
             // 检测是否为播放列表
             if (url.includes('playlist?list=') || url.includes('&list=')) {
                 urlInfo.className = 'url-info playlist';
-                urlInfoText.innerHTML = '<div>📂 播放列表</div><div style="font-size:0.8rem;margin-top:4px;">将下载全部视频</div>';
+                urlInfoText.innerHTML = '📂 播放列表：将下载全部视频'; // 已修改为单行
             } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
                 urlInfo.className = 'url-info has-content';
-                urlInfoText.innerHTML = '<div>🎬 单个视频</div><div style="font-size:0.8rem;margin-top:4px;">YouTube视频链接</div>';
+                urlInfoText.innerHTML = '🎬 单个视频：YouTube视频链接'; // 已修改为单行
             } else if (url.includes('bilibili.com')) {
                 urlInfo.className = 'url-info has-content';
-                urlInfoText.innerHTML = '<div>📺 B站视频</div><div style="font-size:0.8rem;margin-top:4px;">哔哩哔哩视频</div>';
+                urlInfoText.innerHTML = '📺 B站视频：哔哩哔哩视频'; // 已修改为单行
             } else {
                 urlInfo.className = 'url-info has-content';
-                urlInfoText.innerHTML = '<div>🌐 其他平台</div><div style="font-size:0.8rem;margin-top:4px;">支持的视频网站</div>';
+                urlInfoText.innerHTML = '🌐 其他平台：支持的视频网站'; // 已修改为单行
             }
         }
 
