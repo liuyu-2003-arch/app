@@ -136,6 +136,15 @@
             transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             overflow: hidden;
             position: relative;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(20px);
+        }
+
+        .url-info.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
         }
 
         .url-info.expanded {
@@ -437,6 +446,11 @@
             
             .url-info {
                 flex: none;
+                transform: translateY(-10px);
+            }
+            
+            .url-info.visible {
+                transform: translateY(0);
             }
             
             .option-grid {
@@ -459,7 +473,7 @@
                         <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=... 或播放列表链接" />
                     </div>
                     <div class="url-info" id="urlInfo">
-                        <div class="url-info-text">📋 粘贴链接后显示信息</div>
+                        <div class="url-info-text"></div>
                     </div>
                 </div>
             </div>
@@ -548,13 +562,14 @@
             const urlInfoText = urlInfo.querySelector('.url-info-text');
             
             if (!url) {
+                // 隐藏信息窗口
                 urlInfo.className = 'url-info';
-                urlInfoText.textContent = '📋 粘贴链接后显示信息';
+                urlInfoText.textContent = '';
                 return;
             }
             
-            // 显示解析中状态
-            urlInfo.className = 'url-info loading';
+            // 显示窗口并显示解析中状态
+            urlInfo.className = 'url-info loading visible';
             urlInfoText.textContent = '🔄 识别链接类型';
             
             // 模拟识别延迟
@@ -564,32 +579,32 @@
             
             // 根据平台和类型显示信息
             if (info.type === 'playlist') {
-                urlInfo.className = 'url-info playlist expanded';
+                urlInfo.className = 'url-info playlist expanded visible';
                 urlInfoText.textContent = '📂 YouTube播放列表';
             } else {
                 switch (info.platform) {
                     case 'youtube':
-                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfo.className = 'url-info has-content expanded visible';
                         urlInfoText.textContent = `🎬 YouTube视频${info.id ? ` (${info.id})` : ''}`;
                         break;
                     case 'bilibili':
-                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfo.className = 'url-info has-content expanded visible';
                         urlInfoText.textContent = '📺 哔哩哔哩视频';
                         break;
                     case 'twitter':
-                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfo.className = 'url-info has-content expanded visible';
                         urlInfoText.textContent = '🐦 Twitter/X视频';
                         break;
                     case 'instagram':
-                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfo.className = 'url-info has-content expanded visible';
                         urlInfoText.textContent = '📷 Instagram视频';
                         break;
                     case 'tiktok':
-                        urlInfo.className = 'url-info has-content expanded';
+                        urlInfo.className = 'url-info has-content expanded visible';
                         urlInfoText.textContent = '🎵 TikTok视频';
                         break;
                     default:
-                        urlInfo.className = 'url-info has-content';
+                        urlInfo.className = 'url-info has-content visible';
                         urlInfoText.textContent = '🌐 支持的视频平台';
                 }
             }
