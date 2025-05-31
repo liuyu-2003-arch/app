@@ -302,14 +302,17 @@
             
             // 构建格式选择器
             if (videoChecked && !audioChecked) {
-                // 仅视频
+                // 仅视频（无音频）
                 command += ' -f "bv*" --merge-output-format mp4';
             } else if (!videoChecked && audioChecked) {
                 // 仅音频
                 command += ' -x --audio-format mp3 --audio-quality 0';
             } else if (videoChecked && audioChecked) {
-                // 视频和音频都要 - 让yt-dlp自动选择最佳组合
-                command += ' --merge-output-format mp4';
+                // 视频和音频都要 - 确保包含音频
+                command += ' -f "bv*+ba*/b" --merge-output-format mp4';
+            } else if (videoChecked) {
+                // 默认视频选项 - 包含音频
+                command += ' -f "bv*+ba*/b" --merge-output-format mp4';
             } else if (!videoChecked && !audioChecked && subtitleChecked) {
                 // 仅字幕
                 command += ' --skip-download';
