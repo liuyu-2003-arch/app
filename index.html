@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人主页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to override or extend Tailwind for specific design requirements */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font */
+            background-color: #f0f2f5; /* Light gray background */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #app-container {
+            background-color: #ffffff;
+            border-radius: 16px; /* More rounded corners for the main container */
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px; /* Spacing between header elements */
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Spacing between buttons */
+        }
+
+        .action-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px; /* Rounded buttons */
+            background-color: #007aff; /* Apple blue */
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px rgba(0, 122, 255, 0.3);
+        }
+
+        .action-buttons button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .action-buttons button:active {
+            transform: translateY(0);
+        }
+
+        .bookmark-group {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .group-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .group-title.editing .group-name-text {
+            cursor: text;
+        }
+
+        .group-title-input {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #444;
+            width: calc(100% - 40px); /* Adjust width for buttons */
+            padding: 5px 0;
+            border-bottom: 1px dashed #ccc;
+            outline: none;
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .group-actions button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.2s ease;
+        }
+
+        .group-actions button:hover {
+            color: #333;
+        }
+
+        .bookmarks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px; /* Spacing between icons */
+        }
+
+        .bookmark-item {
+            width: 100px; /* Fixed width for icon container */
+            text-align: center;
+            position: relative;
+            cursor: grab; /* Indicates draggable */
+            transition: transform 0.2s ease-out, opacity 0.2s ease;
+            user-select: none; /* Prevent text selection during drag */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+ */
+        }
+
+        .bookmark-item.dragging {
+            opacity: 0.7;
+            transform: scale(1.05);
+            z-index: 10; /* Bring dragged item to front */
+        }
+
+        .bookmark-item.editing {
+            animation: shake 0.5s infinite cubic-bezier(.36,.07,.19,.97) alternate; /* Shaking animation */
+        }
+
+        .bookmark-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #f0f0f0; /* Default background for icons */
+            border-radius: 18%; /* Rounded corners for the icon, similar to Safari */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Ensure images fit within the rounded square */
+            margin: 0 auto 8px auto;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.1s ease;
+        }
+
+        .bookmark-icon:hover {
+            transform: scale(1.02);
+        }
+
+        .bookmark-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the icon area */
+            border-radius: 18%; /* Match parent border-radius */
+        }
+
+        .bookmark-icon .default-icon-text {
+            font-size: 3em;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .bookmark-name {
+            font-size: 0.9em;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 5px; /* Add some padding to prevent text overflow issues */
+        }
+
+        .delete-button {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff3b30; /* Red for delete */
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8em;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid white;
+            z-index: 10;
+            opacity: 0; /* Hidden by default */
+            pointer-events: none; /* Do not block clicks when hidden */
+            transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+
+        .bookmark-item.editing .delete-button {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .delete-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .modal-content input[type="text"],
+        .modal-content input[type="url"],
+        .modal-content input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .modal-content label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .modal-content .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-content button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .modal-content #save-new-link,
+        .modal-content #save-new-group,
+        .modal-content #confirm-dialog-ok {
+            background-color: #007aff;
+            color: white;
+        }
+
+        .modal-content #save-new-link:hover,
+        .modal-content #save-new-group:hover,
+        .modal-content #confirm-dialog-ok:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .modal-content .close-modal,
+        .modal-content #confirm-dialog-cancel {
+            background-color: #e0e0e0;
+            color: #555;
+        }
+
+        .modal-content .close-modal:hover,
+        .modal-content #confirm-dialog-cancel:hover {
+            background-color: #c0c0c0;
+            transform: translateY(-1px);
+        }
+
+        /* Confirmation Dialog */
+        #confirm-dialog .modal-content {
+            padding: 25px;
+        }
+        #confirm-dialog-message {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        /* Shake Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) rotate(-0.5deg); }
+            20%, 40%, 60%, 80% { transform: translateX(2px) rotate(0.5deg); }
+        }
+
+        /* Modal Fade In Animation */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .action-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            .action-buttons button {
+                flex-grow: 1;
+            }
+            .bookmarks {
+                justify-content: center;
+            }
+            .bookmark-item {
+                width: 90px;
+            }
+            .bookmark-icon {
+                width: 70px;
+                height: 70px;
+            }
+            .bookmark-icon .default-icon-text {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <header>
+            <h1>我的书签</h1>
+            <div class="action-buttons">
+                <button id="add-link-btn">添加链接</button>
+                <button id="add-group-btn">添加分组</button>
+                <button id="save-btn">保存</button>
+                <button id="edit-mode-toggle">编辑模式</button>
+            </div>
+        </header>
+
+        <main id="bookmark-container">
+            <section class="bookmark-group" data-group-name="个人收藏">
+                <h2 class="group-title">
+                    <span class="group-name-text">个人收藏</span>
+                    <div class="group-actions hidden">
+                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                        <button class="delete-group-btn" title="删除分组">🗑</button>
+                    </div>
+                </h2>
+                <div class="bookmarks" id="group-个人收藏">
+                    </div>
+            </section>
+
+            <section class="bookmark-group" data-group-name="书签菜单">
+                <h2 class="group-title">
+                    <span class="group-name-text">书签菜单</span>
+                    <div class="group-actions hidden">
+                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                        <button class="delete-group-btn" title="删除分组">🗑</button>
+                    </div>
+                </h2>
+                <div class="bookmarks" id="group-书签菜单">
+                    </div>
+            </section>
+
+            <section class="bookmark-group" data-group-name="标签页组个人收藏">
+                <h2 class="group-title">
+                    <span class="group-name-text">标签页组个人收藏</span>
+                    <div class="group-actions hidden">
+                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                        <button class="delete-group-btn" title="删除分组">🗑</button>
+                    </div>
+                </h2>
+                <div class="bookmarks" id="group-标签页组个人收藏">
+                    </div>
+            </section>
+
+            <section class="bookmark-group" data-group-name="阅读列表">
+                <h2 class="group-title">
+                    <span class="group-name-text">阅读列表</span>
+                    <div class="group-actions hidden">
+                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                        <button class="delete-group-btn" title="删除分组">🗑</button>
+                    </div>
+                </h2>
+                <div class="bookmarks" id="group-阅读列表">
+                    </div>
+            </section>
+        </main>
+
+        <div id="add-link-modal" class="modal">
+            <div class="modal-content">
+                <h2>添加新链接</h2>
+                <label for="link-name">名称:</label>
+                <input type="text" id="link-name" placeholder="例如：Google">
+                <label for="link-url">URL:</label>
+                <input type="url" id="link-url" placeholder="例如：https://www.google.com/">
+                <label for="link-icon-upload">上传图标 (可选):</label>
+                <input type="file" id="link-icon-upload" accept="image/*">
+                <div class="modal-buttons">
+                    <button id="save-new-link">保存</button>
+                    <button class="close-modal">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="add-group-modal" class="modal">
+            <div class="modal-content">
+                <h2>添加新分组</h2>
+                <label for="group-name">分组名称:</label>
+                <input type="text" id="group-name" placeholder="例如：我的工具">
+                <div class="modal-buttons">
+                    <button id="save-new-group">保存</button>
+                    <button class="close-modal">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirm-dialog" class="modal">
+            <div class="modal-content">
+                <p id="confirm-dialog-message"></p>
+                <div class="modal-buttons">
+                    <button id="confirm-dialog-ok">确定</button>
+                    <button id="confirm-dialog-cancel">取消</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bookmarkContainer = document.getElementById('bookmark-container');
+            const addLinkBtn = document.getElementById('add-link-btn');
+            const addGroupBtn = document.getElementById('add-group-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const editModeToggle = document.getElementById('edit-mode-toggle');
+
+            const addLinkModal = document.getElementById('add-link-modal');
+            const addGroupModal = document.getElementById('add-group-modal');
+            const confirmDialog = document.getElementById('confirm-dialog');
+
+            const saveNewLinkBtn = document.getElementById('save-new-link');
+            const saveNewGroupBtn = document.getElementById('save-new-group');
+            const closeModals = document.querySelectorAll('.close-modal');
+            const confirmDialogOkBtn = document.getElementById('confirm-dialog-ok');
+            const confirmDialogCancelBtn = document.getElementById('confirm-dialog-cancel');
+            const confirmDialogMessage = document.getElementById('confirm-dialog-message');
+
+            let isEditing = false;
+            let bookmarksData = {}; // Stores all bookmark data
+            let currentDraggedItem = null; // Reference to the currently dragged bookmark item
+            let longPressTimer = null; // Timer for long press detection
+            const LONG_PRESS_DURATION = 500; // 500ms for long press
+
+            // Initial bookmark data parsed from the provided HTML
+            const initialBookmarks = {
+                "个人收藏": [
+                    { name: "Jemch", url: "https://www.jemch.com/" },
+                    { name: "网站收藏", url: "https://jemch.notion.site/11582912d2b280588005fa9a24637dc0?v=11582912d2b280b397fb000cb13e17e7" },
+                    { name: "YouTube", url: "https://www.youtube.com/" },
+                    { name: "SubEasy", url: "https://www.subeasy.ai/workspace" },
+                    { name: "哔哩哔哩", url: "https://www.bilibili.com/" },
+                    { name: "Notion", url: "https://www.notion.so/jemch" },
+                    { name: "Grok", url: "https://grok.com/" },
+                    { name: "Claude", url: "https://claude.ai/new" },
+                    { name: "ChatGPT", url: "https://chatgpt.com/" },
+                    { name: "Gemini", url: "https://gemini.google.com/app" },
+                    { name: "阿里云盘", url: "https://www.aliyundrive.com/drive" },
+                    { name: "Gmail", url: "https://mail.google.com/mail/u/0/#inbox" },
+                    { name: "Google 艺术", url: "https://artsandculture.google.com/?hl=zh-CN" },
+                    { name: "维基百科", url: "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5" },
+                    { name: "Google", url: "https://www.google.com/" },
+                    { name: "纽约时报", url: "https://m.cn.nytimes.com/" },
+                    { name: "BBC News 中文", url: "https://www.bbc.com/zhongwen/simp" },
+                    { name: "豆瓣电影", url: "https://movie.douban.com/" },
+                    { name: "猫狸盘搜", url: "https://www.alipansou.com/" },
+                    { name: "UP云搜", url: "https://www.upyunso.com/" },
+                    { name: "磁力熊", url: "https://www.cilixiong.com/movie/" },
+                    { name: "得到", url: "https://www.dedao.cn/" },
+                    { name: "Shadowsocks", url: "https://portal.shadowsocks.au/clientarea.php?action=productdetails&id=1760452" },
+                    { name: "Internet Archive", url: "https://archive.org/" },
+                    { name: "yt-dlp命令", url: "https://liuyu-2003-arch.github.io/jemch/yt-dlp-generator.html" },
+                    { name: "FFmpeg命令生成器", url: "https://liuyu-2003-arch.github.io/jemch/ffmpeg_generator.html" },
+                    { name: "Whisper 命令生成器", url: "https://liuyu-2003-arch.github.io/jemch/Whisper.html" },
+                    { name: "Claude-JX", url: "https://claude6.claudechat.pro/" }
+                ],
+                "书签菜单": [],
+                "标签页组个人收藏": [],
+                "阅读列表": [
+                    { name: "纽约时报中文网", url: "https://m.cn.nytimes.com/" }
+                ]
+            };
+
+            /**
+             * Shows a custom confirmation dialog.
+             * @param {string} message - The message to display.
+             * @returns {Promise<boolean>} - Resolves true if confirmed, false if cancelled.
+             */
+            function showConfirmDialog(message) {
+                return new Promise((resolve) => {
+                    confirmDialogMessage.textContent = message;
+                    confirmDialog.style.display = 'flex';
+
+                    const onConfirm = () => {
+                        confirmDialog.style.display = 'none';
+                        confirmDialogOkBtn.removeEventListener('click', onConfirm);
+                        confirmDialogCancelBtn.removeEventListener('click', onCancel);
+                        resolve(true);
+                    };
+
+                    const onCancel = () => {
+                        confirmDialog.style.display = 'none';
+                        confirmDialogOkBtn.removeEventListener('click', onConfirm);
+                        confirmDialogCancelBtn.removeEventListener('click', onCancel);
+                        resolve(false);
+                    };
+
+                    confirmDialogOkBtn.addEventListener('click', onConfirm);
+                    confirmDialogCancelBtn.addEventListener('click', onCancel);
+                });
+            }
+
+            /**
+             * Loads bookmarks from localStorage or uses initial data if none found.
+             */
+            function loadBookmarks() {
+                try {
+                    const savedBookmarks = localStorage.getItem('personalBookmarks');
+                    if (savedBookmarks) {
+                        bookmarksData = JSON.parse(savedBookmarks);
+                    } else {
+                        bookmarksData = initialBookmarks; // Use initial data if no saved data
+                    }
+                } catch (e) {
+                    console.error("从 localStorage 加载书签失败:", e);
+                    bookmarksData = initialBookmarks; // Fallback to initial data on error
+                }
+            }
+
+            /**
+             * Saves current bookmarks data to localStorage.
+             */
+            function saveBookmarks() {
+                try {
+                    localStorage.setItem('personalBookmarks', JSON.stringify(bookmarksData));
+                    showConfirmDialog('书签已保存！').then(() => {}); // Use custom dialog for feedback
+                } catch (e) {
+                    console.error("保存书签到 localStorage 失败:", e);
+                    showConfirmDialog('保存失败！').then(() => {});
+                }
+            }
+
+            /**
+             * Renders all bookmark groups and items based on bookmarksData.
+             */
+            function renderBookmarks() {
+                // Clear existing groups and items
+                bookmarkContainer.innerHTML = '';
+
+                for (const groupName in bookmarksData) {
+                    const groupSection = document.createElement('section');
+                    groupSection.classList.add('bookmark-group');
+                    groupSection.dataset.groupName = groupName;
+
+                    const groupTitle = document.createElement('h2');
+                    groupTitle.classList.add('group-title');
+                    groupTitle.innerHTML = `
+                        <span class="group-name-text">${groupName}</span>
+                        <div class="group-actions ${isEditing ? '' : 'hidden'}">
+                            <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                            <button class="delete-group-btn" title="删除分组">🗑</button>
+                        </div>
+                    `;
+                    groupSection.appendChild(groupTitle);
+
+                    const bookmarksDiv = document.createElement('div');
+                    bookmarksDiv.classList.add('bookmarks');
+                    bookmarksDiv.id = `group-${groupName.replace(/\s+/g, '-')}`; // Create a valid ID
+
+                    bookmarksData[groupName].forEach((bookmark, index) => {
+                        const bookmarkItem = createBookmarkItem(bookmark, groupName, index);
+                        bookmarksDiv.appendChild(bookmarkItem);
+                    });
+
+                    groupSection.appendChild(bookmarksDiv);
+                    bookmarkContainer.appendChild(groupSection);
+
+                    // Add event listeners for group actions
+                    const editGroupBtn = groupTitle.querySelector('.edit-group-name-btn');
+                    const deleteGroupBtn = groupTitle.querySelector('.delete-group-btn');
+                    const groupNameText = groupTitle.querySelector('.group-name-text');
+
+                    if (editGroupBtn) {
+                        editGroupBtn.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent other group title events
+                            editGroupName(groupNameText, groupName);
+                        });
+                    }
+                    if (deleteGroupBtn) {
+                        deleteGroupBtn.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent other group title events
+                            deleteGroup(groupName);
+                        });
+                    }
+                }
+                updateEditModeVisuals(); // Apply editing visuals after rendering
+            }
+
+            /**
+             * Creates a single bookmark item DOM element.
+             * @param {object} bookmark - The bookmark object.
+             * @param {string} groupName - The name of the group the bookmark belongs to.
+             * @param {number} index - The index of the bookmark within its group.
+             * @returns {HTMLElement} The created bookmark item element.
+             */
+            function createBookmarkItem(bookmark, groupName, index) {
+                const bookmarkItem = document.createElement('div');
+                bookmarkItem.classList.add('bookmark-item');
+                bookmarkItem.setAttribute('draggable', true);
+                bookmarkItem.dataset.group = groupName;
+                bookmarkItem.dataset.index = index;
+
+                let iconHtml = '';
+                if (bookmark.icon) {
+                    iconHtml = `<img src="${bookmark.icon}" alt="${bookmark.name}图标">`;
+                } else {
+                    // Attempt to use favicon from Google's service
+                    // Fallback to a text-based icon if favicon fails or is not available
+                    const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=64`;
+                    iconHtml = `
+                        <img src="${faviconUrl}" alt="${bookmark.name}图标" 
+                             onerror="this.onerror=null; this.outerHTML='<div class=\\'default-icon-text\\'>${bookmark.name.charAt(0).toUpperCase()}</div>';"/>
+                    `;
+                }
+
+                bookmarkItem.innerHTML = `
+                    <div class="bookmark-icon">
+                        ${iconHtml}
+                    </div>
+                    <div class="bookmark-name">${bookmark.name}</div>
+                    <div class="delete-button">×</div>
+                `;
+
+                // Click to open link (only if not in editing mode)
+                bookmarkItem.querySelector('.bookmark-icon').addEventListener('click', (e) => {
+                    if (!isEditing) {
+                        window.open(bookmark.url, '_blank');
+                    }
+                });
+
+                // Delete button click
+                bookmarkItem.querySelector('.delete-button').addEventListener('click', async (e) => {
+                    e.stopPropagation(); // Prevent opening the link or triggering drag
+                    const confirmed = await showConfirmDialog(`确定要删除 "${bookmark.name}" 吗？`);
+                    if (confirmed) {
+                        deleteBookmark(groupName, index);
+                    }
+                });
+
+                // Long press for touch devices to enter edit mode
+                let pressTimer;
+                bookmarkItem.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        pressTimer = setTimeout(() => {
+                            if (!isEditing) {
+                                toggleEditMode();
+                            }
+                        }, LONG_PRESS_DURATION);
+                    }
+                }, { passive: true }); // Use passive to avoid blocking scroll
+
+                bookmarkItem.addEventListener('touchend', () => {
+                    clearTimeout(pressTimer);
+                });
+
+                bookmarkItem.addEventListener('touchmove', () => {
+                    clearTimeout(pressTimer);
+                });
+
+
+                return bookmarkItem;
+            }
+
+            /**
+             * Deletes a bookmark from the data and re-renders.
+             * @param {string} groupName - The group name of the bookmark.
+             * @param {number} index - The index of the bookmark in its group.
+             */
+            function deleteBookmark(groupName, index) {
+                if (bookmarksData[groupName] && bookmarksData[groupName][index]) {
+                    bookmarksData[groupName].splice(index, 1);
+                    renderBookmarks();
+                    saveBookmarks();
+                }
+            }
+
+            /**
+             * Handles adding a new link via the modal.
+             */
+            async function addLink() {
+                const nameInput = document.getElementById('link-name');
+                const urlInput = document.getElementById('link-url');
+                const iconFileInput = document.getElementById('link-icon-upload');
+
+                const name = nameInput.value.trim();
+                const url = urlInput.value.trim();
+                const iconFile = iconFileInput.files[0];
+
+                if (!name || !url) {
+                    showConfirmDialog('名称和URL不能为空！').then(() => {});
+                    return;
+                }
+
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    showConfirmDialog('URL必须以 http:// 或 https:// 开头！').then(() => {});
+                    return;
+                }
+
+                let iconData = null;
+                if (iconFile) {
+                    // Read file as Data URL
+                    iconData = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(iconFile);
+                    });
+                }
+
+                // Add to the first existing group, or create a default one if none exists
+                let targetGroup = Object.keys(bookmarksData)[0];
+                if (!targetGroup) {
+                    const confirmed = await showConfirmDialog('没有可用的分组，是否创建默认分组 "我的书签"？');
+                    if (confirmed) {
+                        bookmarksData["我的书签"] = [];
+                        targetGroup = "我的书签";
+                        // Dynamically add the new group section to HTML
+                        const newGroupSection = document.createElement('section');
+                        newGroupSection.classList.add('bookmark-group');
+                        newGroupSection.dataset.groupName = targetGroup;
+                        newGroupSection.innerHTML = `
+                            <h2 class="group-title">
+                                <span class="group-name-text">${targetGroup}</span>
+                                <div class="group-actions ${isEditing ? '' : 'hidden'}">
+                                    <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                                    <button class="delete-group-btn" title="删除分组">🗑</button>
+                                </div>
+                            </h2>
+                            <div class="bookmarks" id="group-${targetGroup.replace(/\s+/g, '-')}"></div>
+                        `;
+                        bookmarkContainer.appendChild(newGroupSection);
+                    } else {
+                        return; // User cancelled creating default group
+                    }
+                }
+
+                if (targetGroup) {
+                    bookmarksData[targetGroup].push({ name, url, icon: iconData });
+                    renderBookmarks();
+                    saveBookmarks();
+                    addLinkModal.style.display = 'none';
+                    nameInput.value = '';
+                    urlInput.value = '';
+                    iconFileInput.value = ''; // Clear file input
+                }
+            }
+
+            /**
+             * Handles adding a new group via the modal.
+             */
+            async function addGroup() {
+                const groupNameInput = document.getElementById('group-name');
+                const groupName = groupNameInput.value.trim();
+
+                if (!groupName) {
+                    showConfirmDialog('分组名称不能为空！').then(() => {});
+                    return;
+                }
+                if (bookmarksData[groupName]) {
+                    showConfirmDialog('分组已存在！').then(() => {});
+                    return;
+                }
+
+                bookmarksData[groupName] = [];
+                // Dynamically add new group section to HTML
+                const newGroupSection = document.createElement('section');
+                newGroupSection.classList.add('bookmark-group');
+                newGroupSection.dataset.groupName = groupName;
+                newGroupSection.innerHTML = `
+                    <h2 class="group-title">
+                        <span class="group-name-text">${groupName}</span>
+                        <div class="group-actions ${isEditing ? '' : 'hidden'}">
+                            <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
+                            <button class="delete-group-btn" title="删除分组">🗑</button>
+                        </div>
+                    </h2>
+                    <div class="bookmarks" id="group-${groupName.replace(/\s+/g, '-')}"></div>
+                `;
+                bookmarkContainer.appendChild(newGroupSection);
+                renderBookmarks(); // Re-render to attach event listeners to new group
+                saveBookmarks();
+                addGroupModal.style.display = 'none';
+                groupNameInput.value = '';
+            }
+
+            /**
+             * Edits the name of a group.
+             * @param {HTMLElement} groupNameTextElement - The span element displaying the group name.
+             * @param {string} oldGroupName - The current name of the group.
+             */
+            async function editGroupName(groupNameTextElement, oldGroupName) {
+                if (!isEditing) return;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.classList.add('group-title-input');
+                input.value = oldGroupName;
+
+                groupNameTextElement.replaceWith(input);
+                input.focus();
+
+                const saveEdit = async () => {
+                    const newGroupName = input.value.trim();
+                    if (newGroupName === oldGroupName) {
+                        input.replaceWith(groupNameTextElement);
+                        groupNameTextElement.textContent = oldGroupName;
+                        return;
+                    }
+                    if (!newGroupName) {
+                        showConfirmDialog('分组名称不能为空！').then(() => {
+                            input.focus(); // Keep focus if empty
+                        });
+                        return;
+                    }
+                    if (bookmarksData[newGroupName]) {
+                        showConfirmDialog('该分组名称已存在！').then(() => {
+                            input.focus(); // Keep focus if exists
+                        });
+                        return;
+                    }
+
+                    const confirmed = await showConfirmDialog(`确定将分组 "${oldGroupName}" 重命名为 "${newGroupName}" 吗？`);
+                    if (confirmed) {
+                        const groupData = bookmarksData[oldGroupName];
+                        delete bookmarksData[oldGroupName];
+                        bookmarksData[newGroupName] = groupData;
+                        renderBookmarks();
+                        saveBookmarks();
+                    } else {
+                        input.replaceWith(groupNameTextElement);
+                        groupNameTextElement.textContent = oldGroupName;
+                    }
+                };
+
+                input.addEventListener('blur', saveEdit);
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        input.blur(); // Trigger blur to save
+                    }
+                });
+            }
+
+
+            /**
+             * Deletes an entire group.
+             * @param {string} groupName - The name of the group to delete.
+             */
+            async function deleteGroup(groupName) {
+                if (!isEditing) return;
+
+                const confirmed = await showConfirmDialog(`确定要删除分组 "${groupName}" 及其所有书签吗？`);
+                if (confirmed) {
+                    delete bookmarksData[groupName];
+                    renderBookmarks();
+                    saveBookmarks();
+                }
+            }
+
+
+            /**
+             * Toggles the editing mode for the page.
+             */
+            function toggleEditMode() {
+                isEditing = !isEditing;
+                editModeToggle.textContent = isEditing ? '完成编辑' : '编辑模式';
+                updateEditModeVisuals();
+            }
+
+            /**
+             * Applies or removes editing mode visuals across all elements.
+             */
+            function updateEditModeVisuals() {
+                document.querySelectorAll('.bookmark-item').forEach(item => {
+                    if (isEditing) {
+                        item.classList.add('editing');
+                    } else {
+                        item.classList.remove('editing');
+                        item.style.animation = ''; // Stop shaking animation
+                    }
+                });
+                document.querySelectorAll('.group-actions').forEach(actionsDiv => {
+                    if (isEditing) {
+                        actionsDiv.classList.remove('hidden');
+                    } else {
+                        actionsDiv.classList.add('hidden');
+                    }
+                });
+            }
+
+            // --- Drag and Drop Logic ---
+            let dragSrcEl = null; // The element being dragged
+
+            bookmarkContainer.addEventListener('dragstart', (e) => {
+                if (!isEditing) {
+                    e.preventDefault(); // Only allow dragging in edit mode
+                    return;
+                }
+                const targetItem = e.target.closest('.bookmark-item');
+                if (targetItem) {
+                    dragSrcEl = targetItem;
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', ''); // Required for Firefox to enable dragging
+                    setTimeout(() => {
+                        targetItem.classList.add('dragging');
+                    }, 0); // Add class after dragstart event finishes
+                }
+            });
+
+            bookmarkContainer.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Allow drop
+                if (isEditing && dragSrcEl) {
+                    const targetItem = e.target.closest('.bookmark-item');
+                    const targetBookmarksDiv = e.target.closest('.bookmarks');
+
+                    if (targetItem && targetItem !== dragSrcEl) {
+                        // Dragging over another bookmark item
+                        const rect = targetItem.getBoundingClientRect();
+                        const next = (e.clientX - rect.left) / (rect.right - rect.left) > 0.5;
+                        targetItem.parentNode.insertBefore(dragSrcEl, next ? targetItem.nextSibling : targetItem);
+                    } else if (targetBookmarksDiv && !targetItem && targetBookmarksDiv !== dragSrcEl.parentNode) {
+                        // Dragging over an empty group's bookmark area
+                        targetBookmarksDiv.appendChild(dragSrcEl);
+                    }
+                }
+            });
+
+            bookmarkContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (isEditing && dragSrcEl) {
+                    dragSrcEl.classList.remove('dragging');
+                    updateBookmarkOrder(); // Update data based on new DOM order
+                    saveBookmarks();
+                    dragSrcEl = null;
+                }
+            });
+
+            bookmarkContainer.addEventListener('dragend', (e) => {
+                if (dragSrcEl) {
+                    dragSrcEl.classList.remove('dragging');
+                    dragSrcEl = null;
+                }
+            });
+
+            /**
+             * Updates the bookmarksData object to reflect the current DOM order of bookmarks.
+             */
+            function updateBookmarkOrder() {
+                const newBookmarksData = {};
+                document.querySelectorAll('.bookmark-group').forEach(groupElement => {
+                    const groupName = groupElement.dataset.groupName;
+                    const bookmarksInGroup = [];
+                    groupElement.querySelectorAll('.bookmark-item').forEach(itemElement => {
+                        const originalGroup = itemElement.dataset.group;
+                        const originalIndex = parseInt(itemElement.dataset.index);
+                        // Find the original bookmark object using its original group and index
+                        // This prevents issues if bookmarks have identical names/URLs
+                        const bookmark = bookmarksData[originalGroup][originalIndex];
+                        if (bookmark) {
+                            bookmarksInGroup.push(bookmark);
+                        }
+                    });
+                    newBookmarksData[groupName] = bookmarksInGroup;
+                });
+                bookmarksData = newBookmarksData;
+
+                // Re-assign data-group and data-index after reordering to ensure correct deletion/updates
+                document.querySelectorAll('.bookmark-group').forEach(groupElement => {
+                    const groupName = groupElement.dataset.groupName;
+                    groupElement.querySelectorAll('.bookmark-item').forEach((itemElement, index) => {
+                        itemElement.dataset.group = groupName;
+                        itemElement.dataset.index = index;
+                    });
+                });
+            }
+
+
+            // --- Event Listeners ---
+            addLinkBtn.addEventListener('click', () => {
+                addLinkModal.style.display = 'flex';
+                document.getElementById('link-name').focus();
+            });
+
+            addGroupBtn.addEventListener('click', () => {
+                addGroupModal.style.display = 'flex';
+                document.getElementById('group-name').focus();
+            });
+
+            saveBtn.addEventListener('click', saveBookmarks);
+            editModeToggle.addEventListener('click', toggleEditMode);
+
+            saveNewLinkBtn.addEventListener('click', addLink);
+            saveNewGroupBtn.addEventListener('click', addGroup);
+
+            // Close modals when clicking on the close button or outside
+            closeModals.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.target.closest('.modal').style.display = 'none';
+                });
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === addLinkModal) {
+                    addLinkModal.style.display = "none";
+                }
+                if (event.target === addGroupModal) {
+                    addGroupModal.style.display = "none";
+                }
+                if (event.target === confirmDialog) {
+                    // Prevent closing confirm dialog by clicking outside, it needs explicit action
+                }
+            });
+
+            // Initial load and render
+            loadBookmarks();
+            renderBookmarks();
+        });
+    </script>
+</body>
+</html>
