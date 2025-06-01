@@ -342,6 +342,43 @@
             color: #666;
             margin-top: 8px;
         }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .footer-link:hover {
+            color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .footer-icon {
+            font-size: 1.1rem;
+        }
+
+        .footer-divider {
+            color: rgba(102, 126, 234, 0.4);
+            font-weight: 300;
+        }
     </style>
 </head>
 <body>
@@ -409,7 +446,7 @@
                         </div>
                         <div class="radio-item">
                             <input type="radio" id="subtitle" name="format" value="srt">
-                            <label for="subtitle">字幕(SRT)</label>
+                            <label for="subtitle">字幕</label>
                         </div>
                     </div>
                 </div>
@@ -421,6 +458,18 @@
                 <button class="copy-btn" onclick="copyCommand()">复制</button>
                 whisper --model medium --output_dir "/Users/yuliu/Movies/YouTube DL" --output_format txt "选择文件..."
             </div>
+        </div>
+
+        <div class="footer">
+            <a href="https://github.com" target="_blank" class="footer-link">
+                <span class="footer-icon">🔗</span>
+                GitHub
+            </a>
+            <span class="footer-divider">|</span>
+            <a href="#" class="footer-link">
+                <span class="footer-icon">👤</span>
+                Jemch
+            </a>
         </div>
     </div>
 
