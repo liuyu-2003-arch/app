@@ -81,7 +81,6 @@
         .form-group:nth-child(2) { animation-delay: 0.2s; }
         .form-group:nth-child(3) { animation-delay: 0.3s; }
         .form-group:nth-child(4) { animation-delay: 0.4s; }
-        .form-group:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             to { opacity: 1; transform: translateY(0); }
@@ -146,12 +145,8 @@
         .url-info.visible {
             opacity: 1;
             visibility: visible;
-            width: 250px;
+            width: 280px;
             padding: 12px 15px;
-        }
-
-        .url-info.expanded {
-            width: 300px;
         }
 
         .url-info.has-content {
@@ -251,7 +246,7 @@
             transform: translateY(-5px);
         }
 
-        .option-card input[type="checkbox"] {
+        .option-card input[type="radio"] {
             display: none;
         }
 
@@ -272,66 +267,10 @@
             margin-bottom: 6px;
         }
 
-        .subtitle-section {
-            margin-top: 15px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 12px;
-            border: 2px solid #dee2e6;
-            transition: all 0.3s ease;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .subtitle-section.active {
-            opacity: 1;
-            pointer-events: all;
-            border-color: #667eea;
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-        }
-
-        .subtitle-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .subtitle-card {
-            background: #ffffff;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .subtitle-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .subtitle-card.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .subtitle-card input[type="checkbox"] {
-            display: none;
-        }
-
-        .path-hint {
-            margin-top: 8px;
-            padding: 10px 15px;
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #1565c0;
-            border-left: 4px solid #2196f3;
+        .option-card .description {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            line-height: 1.3;
         }
 
         .output-section {
@@ -470,20 +409,20 @@
             </div>
 
             <div class="form-group">
-                <label>下载内容（可多选）</label>
+                <label>下载内容</label>
                 <div class="option-grid">
-                    <div class="option-card selected" onclick="toggleDownloadType('video')">
-                        <input type="checkbox" name="downloadType" id="video" value="video" checked />
+                    <div class="option-card selected" onclick="selectDownloadType('video')">
+                        <input type="radio" name="downloadType" id="video" value="video" checked />
                         <span class="icon">🎥</span>
                         <div class="title">视频</div>
                     </div>
-                    <div class="option-card" onclick="toggleDownloadType('audio')">
-                        <input type="checkbox" name="downloadType" id="audio" value="audio" />
+                    <div class="option-card" onclick="selectDownloadType('audio')">
+                        <input type="radio" name="downloadType" id="audio" value="audio" />
                         <span class="icon">🎵</span>
                         <div class="title">音频</div>
                     </div>
-                    <div class="option-card" onclick="toggleDownloadType('subtitle')">
-                        <input type="checkbox" name="downloadType" id="subtitle" value="subtitle" />
+                    <div class="option-card" onclick="selectDownloadType('subtitle')">
+                        <input type="radio" name="downloadType" id="subtitle" value="subtitle" />
                         <span class="icon">📄</span>
                         <div class="title">字幕</div>
                     </div>
@@ -493,10 +432,6 @@
             <div class="form-group">
                 <label for="outputPath">输出路径</label>
                 <input type="text" id="outputPath" value="~/Movies/YouTube DL/%(title)s.%(ext)s" />
-                <div class="path-hint">
-                    💡 默认保存到影片文件夹下的YouTube DL目录，%(title)s为视频标题，%(ext)s为文件扩展名<br>
-                    📂 播放列表会自动创建以播放列表名称命名的文件夹
-                </div>
             </div>
 
             <div class="output-section">
@@ -510,23 +445,28 @@
     </div>
 
     <script>
-        function toggleDownloadType(type) {
-            const card = event.currentTarget;
-            const checkbox = document.getElementById(type);
-            
-            checkbox.checked = !checkbox.checked;
-            
-            if (checkbox.checked) {
-                card.classList.add('selected');
-            } else {
+        function selectDownloadType(type) {
+            // 取消所有选中状态
+            document.querySelectorAll('.option-card').forEach(card => {
                 card.classList.remove('selected');
-            }
+            });
+            
+            // 取消所有radio选中
+            document.querySelectorAll('input[name="downloadType"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // 设置当前选中
+            const selectedCard = event.currentTarget;
+            const selectedRadio = document.getElementById(type);
+            
+            selectedCard.classList.add('selected');
+            selectedRadio.checked = true;
             
             generateCommand();
         }
 
         function extractVideoInfo(url) {
-            // 提取URL中的基本信息
             if (url.includes('playlist?list=') || url.includes('&list=')) {
                 return { type: 'playlist', platform: 'youtube' };
             } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -553,13 +493,12 @@
             const urlInfoText = urlInfo.querySelector('.url-info-text');
             
             if (!url) {
-                // 隐藏信息窗口 - 宽度归零
                 urlInfo.className = 'url-info';
                 urlInfoText.textContent = '';
                 return;
             }
             
-            // 显示窗口并显示解析中状态
+            // 显示解析中状态
             urlInfo.className = 'url-info loading visible';
             urlInfoText.textContent = '🔄 识别链接类型';
             
@@ -570,28 +509,28 @@
             
             // 根据平台和类型显示信息
             if (info.type === 'playlist') {
-                urlInfo.className = 'url-info playlist expanded visible';
-                urlInfoText.textContent = '📂 YouTube播放列表';
+                urlInfo.className = 'url-info playlist visible';
+                urlInfoText.textContent = '📂 YouTube播放列表 - 下载全部视频';
             } else {
                 switch (info.platform) {
                     case 'youtube':
-                        urlInfo.className = 'url-info has-content expanded visible';
-                        urlInfoText.textContent = `🎬 YouTube视频${info.id ? ` (${info.id})` : ''}`;
+                        urlInfo.className = 'url-info has-content visible';
+                        urlInfoText.textContent = '🎬 YouTube视频';
                         break;
                     case 'bilibili':
-                        urlInfo.className = 'url-info has-content expanded visible';
+                        urlInfo.className = 'url-info has-content visible';
                         urlInfoText.textContent = '📺 哔哩哔哩视频';
                         break;
                     case 'twitter':
-                        urlInfo.className = 'url-info has-content expanded visible';
+                        urlInfo.className = 'url-info has-content visible';
                         urlInfoText.textContent = '🐦 Twitter/X视频';
                         break;
                     case 'instagram':
-                        urlInfo.className = 'url-info has-content expanded visible';
+                        urlInfo.className = 'url-info has-content visible';
                         urlInfoText.textContent = '📷 Instagram视频';
                         break;
                     case 'tiktok':
-                        urlInfo.className = 'url-info has-content expanded visible';
+                        urlInfo.className = 'url-info has-content visible';
                         urlInfoText.textContent = '🎵 TikTok视频';
                         break;
                     default:
@@ -605,81 +544,57 @@
             let command = 'yt-dlp';
             const url = document.getElementById('url').value.trim();
             
-            // 下载类型
-            const videoChecked = document.getElementById('video').checked;
-            const audioChecked = document.getElementById('audio').checked;
-            const subtitleChecked = document.getElementById('subtitle').checked;
+            const selectedType = document.querySelector('input[name="downloadType"]:checked')?.value || 'video';
             
-            // 检测是否为播放列表 - 更完善的检测逻辑
+            // 检测是否为播放列表
             const isPlaylist = url && (
                 url.includes('playlist?list=') || 
-                url.includes('&list=') && !url.includes('&list=RD') // 排除自动播放列表
+                url.includes('&list=') && !url.includes('&list=RD')
             );
             
-            // 格式选择 - 不限制质量，确保音频不丢失
-            if (videoChecked && !audioChecked) {
-                // 仅视频但必须包含音频 - 选择最佳质量
-                command += ' -f "bestvideo+bestaudio/best" --merge-output-format mp4';
-                // 仅视频时，合并成功后删除中间文件
-            } else if (!videoChecked && audioChecked) {
-                // 仅音频
-                command += ' -x --audio-format mp3 --audio-quality 0';
-            } else if (videoChecked && audioChecked) {
-                // 视频和音频都要 - 下载视频并同时提取音频
-                command += ' -f "bestvideo+bestaudio/best" --merge-output-format mp4';
-                // 同时提取音频文件
-                command += ' -x --audio-format mp3 --audio-quality 0';
-                // 不保留中间文件，只保留最终的MP4和MP3
-            } else if (videoChecked) {
-                // 默认视频选项（包含音频）- 选择最佳质量
-                command += ' -f "bestvideo+bestaudio/best" --merge-output-format mp4';
-                // 合并成功后删除中间文件
-            } else if (!videoChecked && !audioChecked && subtitleChecked) {
-                // 仅字幕
-                command += ' --skip-download';
-            }
-            
-            // 添加音频相关的安全选项
-            if (videoChecked) {
-                // 确保音频编码正确和元数据嵌入
-                command += ' --embed-metadata --embed-chapters';
-            }
-            
-            // 字幕处理
-            if (subtitleChecked) {
-                command += ' --write-subs --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en" --sub-format srt --write-auto-subs';
-                if (videoChecked) {
-                    command += ' --embed-subs';
-                }
+            // 处理下载选项
+            switch(selectedType) {
+                case 'video':
+                    // 视频选项：下载最佳质量视频和音频，用ffmpeg合并为mkv，并嵌入字幕
+                    command += ' -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best"';
+                    command += ' --merge-output-format mkv';
+                    command += ' --embed-metadata --embed-chapters';
+                    // 下载并嵌入srt格式字幕到视频文件中，跳过vtt格式
+                    command += ' --write-subs --write-auto-subs --embed-subs';
+                    command += ' --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en"';
+                    command += ' --sub-format srt --convert-subs srt';
+                    // 下载后删除单独的音频和字幕文件，只保留合并后的视频
+                    command += ' --clean-info-json';
+                    break;
+                case 'audio':
+                    // 仅音频：提取音频并转换为MP3
+                    command += ' -x --audio-format mp3 --audio-quality 0';
+                    break;
+                case 'subtitle':
+                    // 仅字幕：只下载字幕文件
+                    command += ' --skip-download --write-subs --write-auto-subs';
+                    command += ' --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en"';
+                    command += ' --sub-format srt';
+                    break;
             }
             
             // 输出路径处理
             let outputPath = document.getElementById('outputPath').value.trim();
             if (outputPath) {
-                // 如果是播放列表，修改输出路径以创建文件夹
                 if (isPlaylist) {
-                    // 检查路径是否已经包含播放列表文件夹结构
-                    if (!outputPath.includes('%(playlist)s') && !outputPath.includes('%(playlist_title)s')) {
-                        // 在文件名前添加播放列表文件夹
-                        const pathParts = outputPath.split('/');
-                        const fileName = pathParts.pop();
-                        const basePath = pathParts.join('/');
-                        outputPath = `${basePath}/%(playlist_title)s/%(playlist_index)02d - ${fileName}`;
-                    }
+                    // 播放列表：创建文件夹结构
+                    const pathParts = outputPath.split('/');
+                    const fileName = pathParts.pop();
+                    const basePath = pathParts.join('/');
+                    outputPath = `${basePath}/%(playlist_title)s/%(playlist_index)02d - ${fileName}`;
                 }
                 command += ` -o "${outputPath}"`;
             }
             
-            // 播放列表特殊选项
-            if (isPlaylist) {
-                // 忽略播放列表中的错误，继续下载其他视频
-                command += ' --ignore-errors --no-abort-on-error';
-            } else {
-                // 单个视频的错误处理
-                command += ' --ignore-errors --no-abort-on-error';
-            }
+            // 错误处理
+            command += ' --ignore-errors --no-abort-on-error';
             
-            // URL
+            // 添加URL
             if (url) {
                 command += ` "${url}"`;
             }
@@ -703,6 +618,25 @@
         document.getElementById('url').addEventListener('input', async function() {
             await analyzeUrl(this.value);
             generateCommand();
+        });
+        
+        // URL输入框点击时全选内容
+        let urlClickCount = 0;
+        document.getElementById('url').addEventListener('click', function() {
+            urlClickCount++;
+            if (urlClickCount >= 2) {
+                this.select();
+                urlClickCount = 0; // 重置计数
+            }
+            // 2秒后重置计数，避免长时间累积
+            setTimeout(() => {
+                urlClickCount = 0;
+            }, 2000);
+        });
+        
+        // URL输入框焦点时重置点击计数
+        document.getElementById('url').addEventListener('focus', function() {
+            urlClickCount = 1; // 第一次点击获得焦点
         });
         
         document.getElementById('outputPath').addEventListener('input', generateCommand);
