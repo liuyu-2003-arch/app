@@ -13,9 +13,52 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 30%);
+            animation: backgroundFloat 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+                opacity: 1;
+            }
+            25% { 
+                transform: translateY(-20px) rotate(1deg);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translateY(-10px) rotate(-0.5deg);
+                opacity: 0.9;
+            }
+            75% { 
+                transform: translateY(-30px) rotate(0.8deg);
+                opacity: 0.7;
+            }
         }
 
         .container {
@@ -299,8 +342,15 @@
             100% { transform: translateX(100%); }
         }
 
-        .output-section h3 {
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
+        }
+
+        .output-section h3 {
+            margin: 0;
             font-size: 1.3rem;
             color: #ecf0f1;
         }
@@ -322,19 +372,19 @@
         }
 
         .copy-button {
-            margin-top: 15px;
-            padding: 12px 25px;
+            padding: 8px 20px;
             background: linear-gradient(45deg, #00c851, #007e33);
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(0, 200, 81, 0.3);
+            box-shadow: 0 3px 15px rgba(0, 200, 81, 0.3);
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
         }
 
         .copy-button::before {
@@ -356,8 +406,8 @@
         }
 
         .copy-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 200, 81, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 200, 81, 0.4);
         }
 
         .copy-button:active {
@@ -385,6 +435,16 @@
             
             .option-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .output-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .copy-button {
+                align-self: flex-end;
             }
         }
     </style>
@@ -435,11 +495,13 @@
             </div>
 
             <div class="output-section">
-                <h3>🚀 生成的命令</h3>
+                <div class="output-header">
+                    <h3>🚀 生成的命令</h3>
+                    <button class="copy-button" onclick="copyCommand()">
+                        <span>📋 复制命令</span>
+                    </button>
+                </div>
                 <div class="command-output" id="commandOutput">yt-dlp</div>
-                <button class="copy-button" onclick="copyCommand()">
-                    <span>📋 复制命令</span>
-                </button>
             </div>
         </div>
     </div>
