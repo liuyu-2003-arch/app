@@ -499,7 +499,6 @@
             let isEditing = false;
             let bookmarksData = {}; // Stores all bookmark data
             let currentDraggedItem = null; // Reference to the currently dragged bookmark item
-            let longPressTimer = null; // Timer for long press detection
             const LONG_PRESS_DURATION = 500; // 500ms for long press
 
             // Initial bookmark data parsed from the provided HTML
@@ -712,7 +711,7 @@
                 bookmarkItem.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
                         pressTimer = setTimeout(() => {
-                            if (!isEditing) {
+                            if (!isEditing) { // Only enter edit mode if not already in it
                                 toggleEditMode();
                             }
                         }, LONG_PRESS_DURATION);
