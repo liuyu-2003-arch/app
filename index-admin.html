@@ -363,11 +363,35 @@
         // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase (provided by Canvas environment)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        let firebaseConfig = {};
+        try {
+            // Attempt to parse the provided firebase config
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        } catch (e) {
+            console.error("Failed to parse __firebase_config. Falling back to default config.", e);
+            // If parsing fails, firebaseConfig remains an empty object, which will trigger the default below.
+        }
+
+        // Ensure projectId and apiKey are present. If not, provide placeholder values and warn.
+        // This is crucial for `initializeApp` to not throw an error and for basic functionality.
+        if (!firebaseConfig.projectId || !firebaseConfig.apiKey) {
+            console.warn("Firebase 'projectId' or 'apiKey' not found in __firebase_config. Using placeholder values. Please configure your Firebase project correctly in the Canvas environment for data persistence.");
+            // Provide a minimal valid config structure to prevent app crash.
+            // These placeholders MUST be replaced by the user's actual Firebase project details.
+            firebaseConfig = {
+                apiKey: firebaseConfig.apiKey || "YOUR_FIREBASE_API_KEY", // Placeholder
+                authDomain: firebaseConfig.authDomain || "your-project-id.firebaseapp.com", // Placeholder
+                projectId: firebaseConfig.projectId || "your-project-id", // Placeholder
+                storageBucket: firebaseConfig.storageBucket || "your-project-id.appspot.com", // Placeholder
+                messagingSenderId: firebaseConfig.messagingSenderId || "YOUR_MESSAGING_SENDER_ID", // Placeholder
+                appId: firebaseConfig.appId || "YOUR_APP_ID_FROM_FIREBASE_CONSOLE" // Placeholder
+            };
+        }
+
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let app;
@@ -375,6 +399,7 @@
         let auth;
         let userId = null;
         let isAuthReady = false;
+        let firebaseGroupsData = []; // Store the latest groups data from Firestore
 
         const groupListElement = document.getElementById('group-list');
         const addGroupBtn = document.getElementById('add-group-btn');
@@ -497,12 +522,12 @@
 
             // Listen for real-time updates to groups
             onSnapshot(query(groupsRef), (snapshot) => {
-                const groups = [];
+                firebaseGroupsData = []; // Clear previous data
                 snapshot.forEach(doc => {
-                    groups.push({ id: doc.id, ...doc.data() });
+                    firebaseGroupsData.push({ id: doc.id, ...doc.data() });
                 });
-                renderGroups(groups);
-                updateBookmarkGroupSelect(groups); // Update select options for adding bookmarks
+                renderGroups(firebaseGroupsData); // Pass the latest data to render
+                updateBookmarkGroupSelect(firebaseGroupsData); // Update select options for adding bookmarks
             }, (error) => {
                 console.error("监听分组数据失败:", error);
                 showConfirmDialog("加载分组数据失败: " + error.message);
@@ -526,6 +551,7 @@
                     const exists = existingGroupsSnapshot.docs.some(d => d.data().name === groupName);
                     if (exists) {
                         showConfirmDialog('该分组名称已存在！').then(() => {});
+                        hideLoading(); // Hide loading if we return early
                         return;
                     }
                     await setDoc(doc(groupsRef), { name: groupName, items: [] }); // Add with empty items array
@@ -564,31 +590,35 @@
             if (!isAuthReady || !userId) return;
             showLoading();
             try {
-                const groupRef = doc(getGroupsCollectionRef(), groupDocId);
-                const groupSnapshot = await getDocs(query(collection(db, `artifacts/${appId}/users/${userId}/bookmarks`), where("name", "==", bookmarkData.groupName)));
-                if (groupSnapshot.empty) {
+                const groupRef = doc(getGroupsCollectionRef(), groupDocId); // Correctly reference the group document by its ID
+                const groupDoc = await getDoc(groupRef); // Get the group document snapshot
+
+                if (!groupDoc.exists()) {
                     showConfirmDialog("找不到目标分组。").then(() => {});
+                    hideLoading(); // Hide loading if we return early
                     return;
                 }
-                const docId = groupSnapshot.docs[0].id; // Get the actual document ID for the group
-                const currentGroupData = groupSnapshot.docs[0].data();
+                const currentGroupData = groupDoc.data();
                 let items = currentGroupData.items || [];
+
+                // Remove groupName from bookmarkData as it's not stored within the item itself
+                const { groupName, ...itemToStore } = bookmarkData;
 
                 if (bookmarkId) {
                     // Update existing bookmark
                     const itemIndex = items.findIndex(item => item.id === bookmarkId);
                     if (itemIndex > -1) {
-                        items[itemIndex] = { ...items[itemIndex], ...bookmarkData };
+                        items[itemIndex] = { ...items[itemIndex], ...itemToStore };
                     } else {
-                        // Should not happen if bookmarkId is valid, but as a fallback
-                        items.push({ id: crypto.randomUUID(), ...bookmarkData });
+                        // This case should ideally not happen if bookmarkId is valid
+                        items.push({ id: crypto.randomUUID(), ...itemToStore });
                     }
                 } else {
                     // Add new bookmark
-                    items.push({ id: crypto.randomUUID(), ...bookmarkData });
+                    items.push({ id: crypto.randomUUID(), ...itemToStore });
                 }
 
-                await setDoc(doc(getGroupsCollectionRef(), docId), { items: items }, { merge: true });
+                await setDoc(groupRef, { items: items }, { merge: true }); // Update the group document
                 console.log("书签添加/更新成功:", bookmarkData.name);
                 bookmarkModal.style.display = 'none';
             } catch (error) {
@@ -607,19 +637,20 @@
 
             showLoading();
             try {
-                const groupRef = doc(getGroupsCollectionRef(), groupDocId);
-                const groupSnapshot = await getDocs(query(collection(db, `artifacts/${appId}/users/${userId}/bookmarks`), where("name", "==", groupDocId)));
-                if (groupSnapshot.empty) {
+                const groupRef = doc(getGroupsCollectionRef(), groupDocId); // Correctly reference the group document by its ID
+                const groupDoc = await getDoc(groupRef); // Get the group document snapshot
+
+                if (!groupDoc.exists()) {
                     showConfirmDialog("找不到目标分组。").then(() => {});
+                    hideLoading(); // Hide loading if we return early
                     return;
                 }
-                const docId = groupSnapshot.docs[0].id; // Get the actual document ID for the group
-                const currentGroupData = groupSnapshot.docs[0].data();
+                const currentGroupData = groupDoc.data();
                 let items = currentGroupData.items || [];
 
                 items = items.filter(item => item.id !== bookmarkId);
 
-                await setDoc(doc(getGroupsCollectionRef(), docId), { items: items }, { merge: true });
+                await setDoc(groupRef, { items: items }, { merge: true }); // Update the group document
                 console.log("书签删除成功:", bookmarkName);
             } catch (error) {
                 console.error("删除书签失败:", error);
@@ -643,6 +674,7 @@
             groups.forEach(group => {
                 const groupItemDiv = document.createElement('div');
                 groupItemDiv.classList.add('group-item');
+                groupItemDiv.dataset.groupDocId = group.id; // Store Firestore doc ID on the element
 
                 const groupHeaderDiv = document.createElement('div');
                 groupHeaderDiv.classList.add('group-header');
@@ -719,13 +751,13 @@
             document.querySelectorAll('.edit-bookmark-btn').forEach(button => {
                 const groupDocId = button.dataset.groupDocId;
                 const bookmarkId = button.dataset.bookmarkId;
-                const group = getGroupsCollectionRef().docs.find(g => g.id === groupDocId); // This needs to be improved, getDocs is async
-                // For simplicity, re-fetch group data or pass it down
-                // For now, I'll assume `groups` is available from the last `onSnapshot`
-                const groupData = groups.find(g => g.id === groupDocId);
-                const bookmark = groupData ? groupData.items.find(item => item.id === bookmarkId) : null;
+                // Use the globally available firebaseGroupsData which is updated by onSnapshot
+                const groupData = firebaseGroupsData.find(g => g.id === groupDocId);
+                const bookmark = groupData ? (groupData.items || []).find(item => item.id === bookmarkId) : null;
                 if (bookmark) {
                     button.onclick = () => openBookmarkModal('edit', groupDocId, groupData.name, bookmark);
+                } else {
+                    console.warn(`Bookmark or group not found for editing: groupDocId=${groupDocId}, bookmarkId=${bookmarkId}`);
                 }
             });
             document.querySelectorAll('.delete-bookmark-btn').forEach(button => {
@@ -762,12 +794,8 @@
             bookmarkModal.style.display = 'flex';
             currentEditingBookmark = bookmark ? { groupDocId, bookmarkId: bookmark.id, data: bookmark } : null;
 
-            // Populate group select
-            const allGroups = Array.from(groupListElement.querySelectorAll('.group-item')).map(item => ({
-                id: item.dataset.groupDocId, // This needs to be set correctly in renderGroups
-                name: item.querySelector('.group-header span').textContent
-            }));
-            updateBookmarkGroupSelect(allGroups);
+            // Populate group select using the latest data from Firestore (firebaseGroupsData is already updated by onSnapshot)
+            updateBookmarkGroupSelect(firebaseGroupsData);
 
             if (mode === 'add') {
                 bookmarkModalTitle.textContent = '添加新书签';
@@ -825,6 +853,7 @@
                 iconData = currentEditingBookmark.data.icon;
             }
 
+            // Pass the groupDocId and other bookmark data
             const bookmarkData = { name, url, icon: iconData };
 
             if (currentEditingBookmark) {
