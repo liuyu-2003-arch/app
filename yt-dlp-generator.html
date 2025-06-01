@@ -469,7 +469,7 @@
         function extractVideoInfo(url) {
             if (url.includes('playlist?list=') || url.includes('&list=')) {
                 return { type: 'playlist', platform: 'youtube' };
-            } else if (url.includes('youtube.com/') || url.includes('youtu.be/')) { // Changed to be more general for YouTube
+            } else if (url.includes('youtube.com/') || url.includes('youtu.be/')) { // Simplified YouTube check
                 const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
                 return { 
                     type: 'video', 
@@ -555,30 +555,24 @@
             // 处理下载选项
             switch(selectedType) {
                 case 'video':
-                    // 视频选项：下载最佳质量视频和音频，用ffmpeg合并为mkv，并嵌入字幕
+                    // 视频选项：下载最佳质量视频和音频，用ffmpeg合并为mkv，并嵌入字幕、元数据、章节和封面
                     command += ' -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best"';
                     command += ' --merge-output-format mkv';
                     command += ' --embed-metadata --embed-chapters';
-                    // 仅嵌入字幕，不单独写入文件（yt-dlp内部会处理临时文件）
-                    // IMPORTANT: This relies on yt-dlp's internal cleanup. 
-                    // If SRTs are still left, the video source likely doesn't offer
-                    // distinct zh-Hans/zh-Hant, or a post-processing script is needed.
                     command += ' --embed-subs'; 
-                    // 优先选择简体中文和繁体中文，然后是其他中文和英文
-                    // The order here indicates preference if multiple are available.
                     command += ' --sub-langs "zh-Hans,zh-CN,zh-Hant,zh-TW,zh,en"'; 
                     command += ' --sub-format srt --convert-subs srt';
-                    // 下载后删除info.json文件
                     command += ' --clean-info-json';
+                    command += ' --embed-thumbnail'; // Added for video
                     break;
                 case 'audio':
-                    // 仅音频：提取音频并转换为MP3
+                    // 仅音频：提取音频并转换为MP3，并嵌入封面
                     command += ' -x --audio-format mp3 --audio-quality 0';
+                    command += ' --embed-thumbnail'; // Added for audio
                     break;
                 case 'subtitle':
                     // 仅字幕：只下载字幕文件
                     command += ' --skip-download';
-                    // 写入字幕文件，并优先选择简体中文和繁体中文
                     command += ' --write-subs --write-auto-subs'; 
                     command += ' --sub-langs "zh-Hans,zh-CN,zh-Hant,zh-TW,zh,en"';
                     command += ' --sub-format srt';
