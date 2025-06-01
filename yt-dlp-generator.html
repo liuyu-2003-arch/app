@@ -469,7 +469,7 @@
         function extractVideoInfo(url) {
             if (url.includes('playlist?list=') || url.includes('&list=')) {
                 return { type: 'playlist', platform: 'youtube' };
-            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            } else if (url.includes('youtube.com/') || url.includes('youtu.be/')) { // Changed to be more general for YouTube
                 const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
                 return { 
                     type: 'video', 
@@ -559,11 +559,16 @@
                     command += ' -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best"';
                     command += ' --merge-output-format mkv';
                     command += ' --embed-metadata --embed-chapters';
-                    // 下载并嵌入srt格式字幕到视频文件中，跳过vtt格式
-                    command += ' --write-subs --write-auto-subs --embed-subs';
-                    command += ' --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en"';
+                    // 仅嵌入字幕，不单独写入文件（yt-dlp内部会处理临时文件）
+                    // IMPORTANT: This relies on yt-dlp's internal cleanup. 
+                    // If SRTs are still left, the video source likely doesn't offer
+                    // distinct zh-Hans/zh-Hant, or a post-processing script is needed.
+                    command += ' --embed-subs'; 
+                    // 优先选择简体中文和繁体中文，然后是其他中文和英文
+                    // The order here indicates preference if multiple are available.
+                    command += ' --sub-langs "zh-Hans,zh-CN,zh-Hant,zh-TW,zh,en"'; 
                     command += ' --sub-format srt --convert-subs srt';
-                    // 下载后删除单独的音频和字幕文件，只保留合并后的视频
+                    // 下载后删除info.json文件
                     command += ' --clean-info-json';
                     break;
                 case 'audio':
@@ -572,8 +577,10 @@
                     break;
                 case 'subtitle':
                     // 仅字幕：只下载字幕文件
-                    command += ' --skip-download --write-subs --write-auto-subs';
-                    command += ' --sub-langs "zh,zh-CN,zh-Hans,zh-Hant,en"';
+                    command += ' --skip-download';
+                    // 写入字幕文件，并优先选择简体中文和繁体中文
+                    command += ' --write-subs --write-auto-subs'; 
+                    command += ' --sub-langs "zh-Hans,zh-CN,zh-Hant,zh-TW,zh,en"';
                     command += ' --sub-format srt';
                     break;
             }
