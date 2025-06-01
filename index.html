@@ -242,9 +242,9 @@
             left: 0;
             top: 0;
             width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -339,6 +339,22 @@
         #confirm-dialog-message {
             font-size: 1.1em;
             margin-bottom: 25px;
+            color: #343a40;
+        }
+
+        /* Loading Indicator */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
             color: #333;
         }
 
@@ -397,17 +413,8 @@
         </header>
 
         <main id="bookmark-container">
-            <section class="bookmark-group" data-group-name="个人收藏">
-                <h2 class="group-title">
-                    <span class="group-name-text">个人收藏</span>
-                    <div class="group-actions hidden">
-                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                        <button class="delete-group-btn" title="删除分组">🗑</button>
-                    </div>
-                </h2>
-                <div class="bookmarks" id="group-个人收藏">
-                    </div>
-            </section>
+            <p id="loading-message" class="text-center text-gray-500 hidden">加载书签中...</p>
+            <p id="no-groups-message" class="text-center text-gray-500 hidden">暂无分组，请在编辑模式下添加一个新分组。</p>
         </main>
 
         <div id="add-link-modal" class="modal">
@@ -417,6 +424,8 @@
                 <input type="text" id="link-name" placeholder="例如：Google">
                 <label for="link-url">URL:</label>
                 <input type="url" id="link-url" placeholder="例如：https://www.google.com/">
+                <label for="link-group-select">选择分组:</label>
+                <select id="link-group-select" class="w-full p-2 border border-gray-300 rounded-md mb-4"></select>
                 <label for="link-icon-upload">上传图标 (可选):</label>
                 <input type="file" id="link-icon-upload" accept="image/*">
                 <div class="modal-buttons">
@@ -447,232 +456,513 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const bookmarkContainer = document.getElementById('bookmark-container');
-            const addLinkBtn = document.getElementById('add-link-btn');
-            const addGroupBtn = document.getElementById('add-group-btn');
-            const saveBtn = document.getElementById('save-btn');
-            const editModeToggle = document.getElementById('edit-mode-toggle'); // Corrected ID reference
-            const headerActionButtons = document.getElementById('header-action-buttons'); // Get the action buttons container
+    <div id="loading-overlay">
+        <p>加载中...</p>
+    </div>
 
-            const addLinkModal = document.getElementById('add-link-modal');
-            const addGroupModal = document.getElementById('add-group-modal');
-            const confirmDialog = document.getElementById('confirm-dialog');
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, query, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            const saveNewLinkBtn = document.getElementById('save-new-link');
-            const saveNewGroupBtn = document.getElementById('save-new-group');
-            const closeModals = document.querySelectorAll('.close-modal');
-            const confirmDialogOkBtn = document.getElementById('confirm-dialog-ok');
-            const confirmDialogCancelBtn = document.getElementById('confirm-dialog-cancel');
-            const confirmDialogMessage = document.getElementById('confirm-dialog-message');
+        // Global variables for Firebase (provided by Canvas environment)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        } catch (e) {
+            console.error("Failed to parse __firebase_config. Falling back to default config.", e);
+        }
 
-            let isEditing = false;
-            let bookmarksData = {}; // Stores all bookmark data
-            let currentDraggedItem = null; // Reference to the currently dragged bookmark item
-            const LONG_PRESS_DURATION = 500; // 500ms for long press
-
-            // Initial bookmark data parsed from the provided HTML
-            const initialBookmarks = {
-                "个人收藏": [
-                    { name: "Jemch", url: "https://www.jemch.com/" },
-                    { name: "网站收藏", url: "https://jemch.notion.site/11582912d2b280588005fa9a24637dc0?v=11582912d2b280b397fb000cb13e17e7" },
-                    { name: "YouTube", url: "https://www.youtube.com/" },
-                    { name: "SubEasy", url: "https://www.subeasy.ai/workspace" },
-                    { name: "哔哩哔哩", url: "https://www.bilibili.com/" },
-                    { name: "Notion", url: "https://www.notion.so/jemch" },
-                    { name: "Grok", url: "https://grok.com/" },
-                    { name: "Claude", url: "https://claude.ai/new" },
-                    { name: "ChatGPT", url: "https://chatgpt.com/" },
-                    { name: "Gemini", url: "https://gemini.google.com/app" },
-                    { name: "阿里云盘", url: "https://www.aliyundrive.com/drive" },
-                    { name: "Gmail", url: "https://mail.google.com/mail/u/0/#inbox" },
-                    { name: "Google 艺术", url: "https://artsandculture.google.com/?hl=zh-CN" },
-                    { name: "维基百科", url: "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5" },
-                    { name: "Google", url: "https://www.google.com/" },
-                    { name: "纽约时报", url: "https://m.cn.nytimes.com/" },
-                    { name: "BBC News 中文", url: "https://www.bbc.com/zhongwen/simp" },
-                    { name: "豆瓣电影", url: "https://movie.douban.com/" },
-                    { name: "猫狸盘搜", url: "https://www.alipansou.com/" },
-                    { name: "UP云搜", url: "https://www.upyunso.com/" },
-                    { name: "磁力熊", url: "https://www.cilixiong.com/movie/" },
-                    { name: "得到", url: "https://www.dedao.cn/" },
-                    { name: "Shadowsocks", url: "https://portal.shadowsocks.au/clientarea.php?action=productdetails&id=1760452" },
-                    { name: "Internet Archive", url: "https://archive.org/" },
-                    { name: "yt-dlp命令", url: "https://liuyu-2003-arch.github.io/jemch/yt-dlp-generator.html" },
-                    { name: "FFmpeg命令生成器", url: "https://liuyu-2003-arch.github.io/jemch/ffmpeg_generator.html" },
-                    { name: "Whisper 命令生成器", url: "https://liuyu-2003-arch.github.io/jemch/Whisper.html" },
-                    { name: "Claude-JX", url: "https://claude6.claudechat.pro/" }
-                ]
+        if (!firebaseConfig.projectId || !firebaseConfig.apiKey) {
+            console.warn("Firebase 'projectId' or 'apiKey' not found in __firebase_config. Using placeholder values. Please configure your Firebase project correctly in the Canvas environment for data persistence.");
+            firebaseConfig = {
+                apiKey: firebaseConfig.apiKey || "YOUR_FIREBASE_API_KEY",
+                authDomain: firebaseConfig.authDomain || "your-project-id.firebaseapp.com",
+                projectId: firebaseConfig.projectId || "your-project-id",
+                storageBucket: firebaseConfig.storageBucket || "your-project-id.appspot.com",
+                messagingSenderId: firebaseConfig.messagingSenderId || "YOUR_MESSAGING_SENDER_ID",
+                appId: firebaseConfig.appId || "YOUR_APP_ID_FROM_FIREBASE_CONSOLE"
             };
+        }
 
-            /**
-             * Shows a custom confirmation dialog.
-             * @param {string} message - The message to display.
-             * @returns {Promise<boolean>} - Resolves true if confirmed, false if cancelled.
-             */
-            function showConfirmDialog(message) {
-                return new Promise((resolve) => {
-                    confirmDialogMessage.textContent = message;
-                    confirmDialog.style.display = 'flex';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-                    const onConfirm = () => {
-                        confirmDialog.style.display = 'none';
-                        confirmDialogOkBtn.removeEventListener('click', onConfirm);
-                        confirmDialogCancelBtn.removeEventListener('click', onCancel);
-                        resolve(true);
-                    };
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+        let firebaseGroupsData = []; // Stores the latest groups data from Firestore, including their doc IDs
 
-                    const onCancel = () => {
-                        confirmDialog.style.display = 'none';
-                        confirmDialogOkBtn.removeEventListener('click', onConfirm);
-                        confirmDialogCancelBtn.removeEventListener('click', onCancel);
-                        resolve(false);
-                    };
+        const bookmarkContainer = document.getElementById('bookmark-container');
+        const addLinkBtn = document.getElementById('add-link-btn');
+        const addGroupBtn = document.getElementById('add-group-btn');
+        const saveBtn = document.getElementById('save-btn'); // This button's role will be re-evaluated
+        const editModeToggle = document.getElementById('edit-mode-toggle');
+        const headerActionButtons = document.getElementById('header-action-buttons');
+        const loadingMessage = document.getElementById('loading-message');
+        const noGroupsMessage = document.getElementById('no-groups-message');
 
-                    confirmDialogOkBtn.addEventListener('click', onConfirm);
-                    confirmDialogCancelBtn.addEventListener('click', onCancel);
-                });
-            }
+        const addLinkModal = document.getElementById('add-link-modal');
+        const addGroupModal = document.getElementById('add-group-modal');
+        const confirmDialog = document.getElementById('confirm-dialog');
 
-            /**
-             * Loads bookmarks from localStorage or uses initial data if none found.
-             */
-            function loadBookmarks() {
-                try {
-                    const savedBookmarks = localStorage.getItem('personalBookmarks');
-                    if (savedBookmarks) {
-                        bookmarksData = JSON.parse(savedBookmarks);
+        const saveNewLinkBtn = document.getElementById('save-new-link');
+        const saveNewGroupBtn = document.getElementById('save-new-group');
+        const closeModals = document.querySelectorAll('.close-modal');
+        const confirmDialogOkBtn = document.getElementById('confirm-dialog-ok');
+        const confirmDialogCancelBtn = document.getElementById('confirm-dialog-cancel');
+        const confirmDialogMessage = document.getElementById('confirm-dialog-message');
+
+        const linkNameInput = document.getElementById('link-name');
+        const linkUrlInput = document.getElementById('link-url');
+        const linkGroupSelect = document.getElementById('link-group-select');
+        const linkIconUpload = document.getElementById('link-icon-upload');
+        const groupNameInput = document.getElementById('group-name');
+
+        let isEditing = false;
+        let longPressTimer = null;
+        const LONG_PRESS_DURATION = 500; // 500ms for long press
+
+        // --- Utility Functions ---
+
+        /**
+         * Shows a custom confirmation dialog.
+         * @param {string} message - The message to display.
+         * @returns {Promise<boolean>} - Resolves true if confirmed, false if cancelled.
+         */
+        function showConfirmDialog(message) {
+            return new Promise((resolve) => {
+                confirmDialogMessage.textContent = message;
+                confirmDialog.style.display = 'flex';
+
+                const onConfirm = () => {
+                    confirmDialog.style.display = 'none';
+                    confirmDialogOkBtn.removeEventListener('click', onConfirm);
+                    confirmDialogCancelBtn.removeEventListener('click', onCancel);
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    confirmDialog.style.display = 'none';
+                    confirmDialogOkBtn.removeEventListener('click', onConfirm);
+                    confirmDialogCancelBtn.removeEventListener('click', onCancel);
+                    resolve(false);
+                };
+
+                confirmDialogOkBtn.addEventListener('click', onConfirm);
+                confirmDialogCancelBtn.addEventListener('click', onCancel);
+            });
+        }
+
+        function showLoadingOverlay() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoadingOverlay() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        // --- Firebase Initialization and Authentication ---
+
+        async function initializeFirebase() {
+            showLoadingOverlay();
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase authenticated. User ID:", userId);
+                        isAuthReady = true;
+                        setupRealtimeListeners();
                     } else {
-                        bookmarksData = initialBookmarks; // Use initial data if no saved data
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                            console.log("Signed in with custom token.");
+                        } else {
+                            await signInAnonymously(auth);
+                            console.log("Signed in anonymously.");
+                        }
                     }
-                } catch (e) {
-                    console.error("从 localStorage 加载书签失败:", e);
-                    bookmarksData = initialBookmarks; // Fallback to initial data on error
-                }
+                    hideLoadingOverlay();
+                });
+            } catch (error) {
+                console.error("Firebase 初始化失败:", error);
+                showConfirmDialog("Firebase 初始化失败: " + error.message);
+                hideLoadingOverlay();
             }
+        }
 
-            /**
-             * Saves current bookmarks data to localStorage.
-             */
-            function saveBookmarks() {
-                try {
-                    localStorage.setItem('personalBookmarks', JSON.stringify(bookmarksData));
-                    showConfirmDialog('书签已保存！').then(() => {}); // Use custom dialog for feedback
-                } catch (e) {
-                    console.error("保存书签到 localStorage 失败:", e);
-                    showConfirmDialog('保存失败！').then(() => {});
-                }
+        // --- Firestore Operations ---
+
+        function getGroupsCollectionRef() {
+            if (!userId) {
+                console.error("User ID is not available.");
+                return null;
             }
+            // Private data path: /artifacts/{appId}/users/{userId}/bookmarks
+            return collection(db, `artifacts/${appId}/users/${userId}/bookmarks`);
+        }
 
-            /**
-             * Renders all bookmark groups and items based on bookmarksData.
-             */
-            function renderBookmarks() {
-                // Clear existing groups and items
-                bookmarkContainer.innerHTML = '';
+        function setupRealtimeListeners() {
+            if (!isAuthReady || !userId) return;
 
-                for (const groupName in bookmarksData) {
-                    const groupSection = document.createElement('section');
-                    groupSection.classList.add('bookmark-group');
-                    groupSection.dataset.groupName = groupName;
+            const groupsRef = getGroupsCollectionRef();
+            if (!groupsRef) return;
 
-                    const groupTitle = document.createElement('h2');
-                    groupTitle.classList.add('group-title');
-                    groupTitle.innerHTML = `
-                        <span class="group-name-text">${groupName}</span>
-                        <div class="group-actions ${isEditing ? '' : 'hidden'}">
-                            <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                            <button class="delete-group-btn" title="删除分组">🗑</button>
-                        </div>
-                    `;
-                    groupSection.appendChild(groupTitle);
+            loadingMessage.classList.remove('hidden'); // Show loading message for data
+            noGroupsMessage.classList.add('hidden'); // Hide no groups message initially
 
-                    const bookmarksDiv = document.createElement('div');
-                    bookmarksDiv.classList.add('bookmarks');
-                    bookmarksDiv.id = `group-${groupName.replace(/\s+/g, '-')}`; // Create a valid ID
-
-                    bookmarksData[groupName].forEach((bookmark, index) => {
-                        const bookmarkItem = createBookmarkItem(bookmark, groupName, index);
-                        bookmarksDiv.appendChild(bookmarkItem);
-                    });
-
-                    groupSection.appendChild(bookmarksDiv);
-                    bookmarkContainer.appendChild(groupSection);
-
-                    // Add event listeners for group actions
-                    const editGroupBtn = groupTitle.querySelector('.edit-group-name-btn');
-                    const deleteGroupBtn = groupTitle.querySelector('.delete-group-btn');
-                    const groupNameText = groupTitle.querySelector('.group-name-text');
-
-                    if (editGroupBtn) {
-                        editGroupBtn.addEventListener('click', (e) => {
-                            e.stopPropagation(); // Prevent other group title events
-                            editGroupName(groupNameText, groupName);
-                        });
-                    }
-                    if (deleteGroupBtn) {
-                        deleteGroupBtn.addEventListener('click', (e) => {
-                            e.stopPropagation(); // Prevent other group title events
-                            deleteGroup(groupName);
-                        });
-                    }
-                }
-                updateEditModeVisuals(); // Apply editing visuals after rendering
-            }
-
-            /**
-             * Creates a single bookmark item DOM element.
-             * @param {object} bookmark - The bookmark object.
-             * @param {string} groupName - The name of the group the bookmark belongs to.
-             * @param {number} index - The index of the bookmark within its group.
-             * @returns {HTMLElement} The created bookmark item element.
-             */
-            function createBookmarkItem(bookmark, groupName, index) {
-                const bookmarkItem = document.createElement('div');
-                bookmarkItem.classList.add('bookmark-item');
-                bookmarkItem.setAttribute('draggable', true);
-                bookmarkItem.dataset.group = groupName;
-                bookmarkItem.dataset.index = index;
-
-                let iconHtml = '';
-                if (bookmark.icon) {
-                    iconHtml = `<img src="${bookmark.icon}" alt="${bookmark.name}图标">`;
+            onSnapshot(query(groupsRef), (snapshot) => {
+                firebaseGroupsData = [];
+                if (snapshot.empty) {
+                    noGroupsMessage.classList.remove('hidden');
+                    loadingMessage.classList.add('hidden');
                 } else {
-                    // Attempt to use favicon from Google's service
-                    // Fallback to a text-based icon if favicon fails or is not available
-                    const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=64`;
-                    iconHtml = `
-                        <img src="${faviconUrl}" alt="${bookmark.name}图标" 
-                             onerror="this.onerror=null; this.outerHTML='<div class=\\'default-icon-text\\'>${bookmark.name.charAt(0).toUpperCase()}</div>';"/>
-                    `;
+                    noGroupsMessage.classList.add('hidden');
+                    loadingMessage.classList.add('hidden');
+                    snapshot.forEach(doc => {
+                        firebaseGroupsData.push({ id: doc.id, ...doc.data() });
+                    });
+                }
+                renderBookmarks(firebaseGroupsData);
+                updateLinkGroupSelect(firebaseGroupsData);
+            }, (error) => {
+                console.error("监听分组数据失败:", error);
+                showConfirmDialog("加载书签数据失败: " + error.message);
+                loadingMessage.classList.add('hidden');
+                noGroupsMessage.classList.remove('hidden'); // Show no groups message on error
+            });
+        }
+
+        async function addGroupToFirestore(groupName) {
+            if (!isAuthReady || !userId) return;
+            showLoadingOverlay();
+            try {
+                const groupsRef = getGroupsCollectionRef();
+                if (!groupsRef) return;
+
+                // Check if group name already exists
+                const existingGroups = firebaseGroupsData.some(g => g.name === groupName);
+                if (existingGroups) {
+                    showConfirmDialog('该分组名称已存在！').then(() => {});
+                    return;
                 }
 
-                bookmarkItem.innerHTML = `
-                    <div class="bookmark-icon">
-                        ${iconHtml}
+                await addDoc(groupsRef, { name: groupName, items: [] });
+                console.log("分组添加成功:", groupName);
+                addGroupModal.style.display = 'none';
+            } catch (error) {
+                console.error("添加分组失败:", error);
+                showConfirmDialog("添加分组失败: " + error.message);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+        async function updateGroupInFirestore(groupDocId, newName) {
+            if (!isAuthReady || !userId) return;
+            showLoadingOverlay();
+            try {
+                const groupRef = doc(getGroupsCollectionRef(), groupDocId);
+
+                // Check if new group name already exists for another group
+                const existingGroupWithNewName = firebaseGroupsData.find(g => g.name === newName && g.id !== groupDocId);
+                if (existingGroupWithNewName) {
+                    showConfirmDialog('该分组名称已存在！').then(() => {});
+                    return;
+                }
+
+                await setDoc(groupRef, { name: newName }, { merge: true });
+                console.log("分组更新成功:", newName);
+            } catch (error) {
+                console.error("更新分组失败:", error);
+                showConfirmDialog("更新分组失败: " + error.message);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+        async function deleteGroupFromFirestore(groupDocId, groupName) {
+            if (!isAuthReady || !userId) return;
+
+            const confirmed = await showConfirmDialog(`确定要删除分组 "${groupName}" 及其所有书签吗？`);
+            if (!confirmed) return;
+
+            showLoadingOverlay();
+            try {
+                const groupRef = doc(getGroupsCollectionRef(), groupDocId);
+                await deleteDoc(groupRef);
+                console.log("分组删除成功:", groupName);
+            } catch (error) {
+                console.error("删除分组失败:", error);
+                showConfirmDialog("删除失败: " + error.message);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+        async function addOrUpdateBookmarkInFirestore(groupDocId, bookmarkData, bookmarkId = null) {
+            if (!isAuthReady || !userId) return;
+            showLoadingOverlay();
+            try {
+                const groupRef = doc(getGroupsCollectionRef(), groupDocId);
+                const groupDoc = await getDoc(groupRef);
+
+                if (!groupDoc.exists()) {
+                    showConfirmDialog("找不到目标分组。").then(() => {});
+                    return;
+                }
+                const currentGroupData = groupDoc.data();
+                let items = currentGroupData.items || [];
+
+                const itemToStore = {
+                    id: bookmarkId || crypto.randomUUID(), // Use existing ID or generate new
+                    name: bookmarkData.name,
+                    url: bookmarkData.url,
+                    icon: bookmarkData.icon || null
+                };
+
+                if (bookmarkId) {
+                    const itemIndex = items.findIndex(item => item.id === bookmarkId);
+                    if (itemIndex > -1) {
+                        items[itemIndex] = itemToStore;
+                    } else {
+                        items.push(itemToStore); // Should not happen if ID is valid
+                    }
+                } else {
+                    items.push(itemToStore);
+                }
+
+                await setDoc(groupRef, { items: items }, { merge: true });
+                console.log("书签添加/更新成功:", bookmarkData.name);
+                addLinkModal.style.display = 'none';
+            } catch (error) {
+                console.error("添加/更新书签失败:", error);
+                showConfirmDialog("操作失败: " + error.message);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+        async function deleteBookmarkFromFirestore(groupDocId, bookmarkId, bookmarkName) {
+            if (!isAuthReady || !userId) return;
+
+            const confirmed = await showConfirmDialog(`确定要删除书签 "${bookmarkName}" 吗？`);
+            if (!confirmed) return;
+
+            showLoadingOverlay();
+            try {
+                const groupRef = doc(getGroupsCollectionRef(), groupDocId);
+                const groupDoc = await getDoc(groupRef);
+
+                if (!groupDoc.exists()) {
+                    showConfirmDialog("找不到目标分组。").then(() => {});
+                    return;
+                }
+                const currentGroupData = groupDoc.data();
+                let items = currentGroupData.items || [];
+
+                items = items.filter(item => item.id !== bookmarkId);
+
+                await setDoc(groupRef, { items: items }, { merge: true });
+                console.log("书签删除成功:", bookmarkName);
+            } catch (error) {
+                console.error("删除书签失败:", error);
+                showConfirmDialog("删除失败: " + error.message);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+        async function updateBookmarkOrderInFirestore(sourceGroupDocId, targetGroupDocId, draggedBookmarkId, newOrderItems) {
+            if (!isAuthReady || !userId) return;
+            showLoadingOverlay();
+            try {
+                // Find the bookmark being moved
+                let draggedBookmark = null;
+                const sourceGroupData = firebaseGroupsData.find(g => g.id === sourceGroupDocId);
+                if (sourceGroupData) {
+                    draggedBookmark = (sourceGroupData.items || []).find(item => item.id === draggedBookmarkId);
+                }
+
+                if (!draggedBookmark) {
+                    console.error("Dragged bookmark not found in source group.");
+                    return;
+                }
+
+                if (sourceGroupDocId === targetGroupDocId) {
+                    // Reordering within the same group
+                    const groupRef = doc(getGroupsCollectionRef(), sourceGroupDocId);
+                    await setDoc(groupRef, { items: newOrderItems }, { merge: true });
+                    console.log(`书签在分组 ${sourceGroupDocId} 内重新排序成功。`);
+                } else {
+                    // Moving to a different group
+                    const sourceGroupRef = doc(getGroupsCollectionRef(), sourceGroupDocId);
+                    const targetGroupRef = doc(getGroupsCollectionRef(), targetGroupDocId);
+
+                    // Remove from source group
+                    const updatedSourceItems = (sourceGroupData.items || []).filter(item => item.id !== draggedBookmarkId);
+                    await setDoc(sourceGroupRef, { items: updatedSourceItems }, { merge: true });
+
+                    // Add to target group (assuming newOrderItems already contains the dragged item at the correct position for the target group)
+                    const targetGroupData = firebaseGroupsData.find(g => g.id === targetGroupDocId);
+                    let updatedTargetItems = targetGroupData ? [...(targetGroupData.items || [])] : [];
+                    // Ensure the dragged item is added if it's not already in the newOrderItems for the target group
+                    if (!updatedTargetItems.some(item => item.id === draggedBookmarkId)) {
+                        updatedTargetItems.push(draggedBookmark); // Add it if it's a true move
+                    }
+                    // Reorder based on newOrderItems if provided, otherwise just append
+                    const finalTargetItems = newOrderItems.length > 0 ? newOrderItems : updatedTargetItems;
+
+
+                    await setDoc(targetGroupRef, { items: finalTargetItems }, { merge: true });
+
+                    console.log(`书签从分组 ${sourceGroupDocId} 移动到分组 ${targetGroupDocId} 成功。`);
+                }
+            } catch (error) {
+                console.error("更新书签顺序失败:", error);
+                showConfirmDialog("更新书签顺序失败: " + error.message);
+            } finally {
+                hideLoadingOverlay();
+            }
+        }
+
+
+        // --- Rendering Functions ---
+
+        function renderBookmarks(groups) {
+            bookmarkContainer.innerHTML = ''; // Clear existing content
+            if (groups.length === 0) {
+                noGroupsMessage.classList.remove('hidden');
+                return;
+            } else {
+                noGroupsMessage.classList.add('hidden');
+            }
+
+            groups.forEach(group => {
+                const groupSection = document.createElement('section');
+                groupSection.classList.add('bookmark-group');
+                groupSection.dataset.groupDocId = group.id; // Store Firestore doc ID
+                groupSection.dataset.groupName = group.name;
+
+                const groupTitle = document.createElement('h2');
+                groupTitle.classList.add('group-title');
+                groupTitle.innerHTML = `
+                    <span class="group-name-text">${group.name}</span>
+                    <div class="group-actions ${isEditing ? '' : 'hidden'}">
+                        <button class="edit-group-name-btn" data-group-doc-id="${group.id}" data-group-name="${group.name}" title="编辑分组名称">✎</button>
+                        <button class="delete-group-btn" data-group-doc-id="${group.id}" data-group-name="${group.name}" title="删除分组">🗑</button>
                     </div>
-                    <div class="bookmark-name">${bookmark.name}</div>
-                    <div class="delete-button">×</div>
                 `;
+                groupSection.appendChild(groupTitle);
+
+                const bookmarksDiv = document.createElement('div');
+                bookmarksDiv.classList.add('bookmarks');
+                bookmarksDiv.id = `group-div-${group.id}`; // Unique ID for drag/drop target
+
+                const items = group.items || [];
+                items.forEach(bookmark => {
+                    const bookmarkItem = createBookmarkItem(bookmark, group.id);
+                    bookmarksDiv.appendChild(bookmarkItem);
+                });
+
+                groupSection.appendChild(bookmarksDiv);
+                bookmarkContainer.appendChild(groupSection);
+            });
+            updateEditModeVisuals(); // Apply editing visuals after rendering
+            attachEventListenersToRenderedElements(); // Re-attach event listeners
+        }
+
+        /**
+         * Creates a single bookmark item DOM element.
+         * @param {object} bookmark - The bookmark object from Firestore.
+         * @param {string} groupDocId - The Firestore document ID of the group.
+         * @returns {HTMLElement} The created bookmark item element.
+         */
+        function createBookmarkItem(bookmark, groupDocId) {
+            const bookmarkItem = document.createElement('div');
+            bookmarkItem.classList.add('bookmark-item');
+            bookmarkItem.setAttribute('draggable', true);
+            bookmarkItem.dataset.groupDocId = groupDocId;
+            bookmarkItem.dataset.bookmarkId = bookmark.id; // Use the unique ID from Firestore
+            bookmarkItem.dataset.bookmarkName = bookmark.name; // For delete confirmation
+
+            let iconHtml = '';
+            if (bookmark.icon) {
+                iconHtml = `<img src="${bookmark.icon}" alt="${bookmark.name}图标">`;
+            } else {
+                const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(bookmark.url).hostname}&sz=64`;
+                iconHtml = `
+                    <img src="${faviconUrl}" alt="${bookmark.name}图标" 
+                         onerror="this.onerror=null; this.outerHTML='<div class=\\'default-icon-text\\'>${bookmark.name.charAt(0).toUpperCase()}</div>';"/>
+                `;
+            }
+
+            bookmarkItem.innerHTML = `
+                <div class="bookmark-icon">
+                    ${iconHtml}
+                </div>
+                <div class="bookmark-name">${bookmark.name}</div>
+                <div class="delete-button">×</div>
+            `;
+
+            return bookmarkItem;
+        }
+
+        function attachEventListenersToRenderedElements() {
+            // Clear previous listeners to prevent duplicates
+            // This is a common pattern to avoid multiple event listeners on re-renders
+            document.querySelectorAll('.bookmark-icon').forEach(icon => {
+                const newIcon = icon.cloneNode(true);
+                icon.parentNode.replaceChild(newIcon, icon);
+            });
+            document.querySelectorAll('.delete-button').forEach(btn => {
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+            });
+            document.querySelectorAll('.edit-group-name-btn').forEach(btn => {
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+            });
+            document.querySelectorAll('.delete-group-btn').forEach(btn => {
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+            });
+            // No need to clone bookmark-item itself as drag/drop listeners are on container
+
+
+            // Re-attach listeners to the new elements
+            document.querySelectorAll('.bookmark-item').forEach(bookmarkItem => {
+                const bookmarkIcon = bookmarkItem.querySelector('.bookmark-icon');
+                const deleteButton = bookmarkItem.querySelector('.delete-button');
+                const groupDocId = bookmarkItem.dataset.groupDocId;
+                const bookmarkId = bookmarkItem.dataset.bookmarkId;
+                const bookmarkName = bookmarkItem.dataset.bookmarkName;
 
                 // Click to open link (only if not in editing mode)
-                bookmarkItem.querySelector('.bookmark-icon').addEventListener('click', (e) => {
+                bookmarkIcon.addEventListener('click', (e) => {
                     if (!isEditing) {
-                        window.open(bookmark.url, '_blank');
+                        const currentBookmark = firebaseGroupsData
+                            .find(g => g.id === groupDocId)?.items
+                            .find(item => item.id === bookmarkId);
+                        if (currentBookmark) {
+                            window.open(currentBookmark.url, '_blank');
+                        }
                     }
                 });
 
                 // Delete button click
-                bookmarkItem.querySelector('.delete-button').addEventListener('click', async (e) => {
-                    e.stopPropagation(); // Prevent opening the link or triggering drag
-                    const confirmed = await showConfirmDialog(`确定要删除 "${bookmark.name}" 吗？`);
-                    if (confirmed) {
-                        deleteBookmark(groupName, index);
-                    }
+                deleteButton.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await deleteBookmarkFromFirestore(groupDocId, bookmarkId, bookmarkName);
                 });
 
                 // Long press for touch devices to enter edit mode
@@ -680,12 +970,12 @@
                 bookmarkItem.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
                         pressTimer = setTimeout(() => {
-                            if (!isEditing) { // Only enter edit mode if not already in it
+                            if (!isEditing) {
                                 toggleEditMode();
                             }
                         }, LONG_PRESS_DURATION);
                     }
-                }, { passive: true }); // Use passive to avoid blocking scroll
+                }, { passive: true });
 
                 bookmarkItem.addEventListener('touchend', () => {
                     clearTimeout(pressTimer);
@@ -694,370 +984,283 @@
                 bookmarkItem.addEventListener('touchmove', () => {
                     clearTimeout(pressTimer);
                 });
-
-
-                return bookmarkItem;
-            }
-
-            /**
-             * Deletes a bookmark from the data and re-renders.
-             * @param {string} groupName - The group name of the bookmark.
-             * @param {number} index - The index of the bookmark in its group.
-             */
-            function deleteBookmark(groupName, index) {
-                if (bookmarksData[groupName] && bookmarksData[groupName][index]) {
-                    bookmarksData[groupName].splice(index, 1);
-                    renderBookmarks();
-                    saveBookmarks();
-                }
-            }
-
-            /**
-             * Handles adding a new link via the modal.
-             */
-            async function addLink() {
-                const nameInput = document.getElementById('link-name');
-                const urlInput = document.getElementById('link-url');
-                const iconFileInput = document.getElementById('link-icon-upload');
-
-                const name = nameInput.value.trim();
-                const url = urlInput.value.trim();
-                const iconFile = iconFileInput.files[0];
-
-                if (!name || !url) {
-                    showConfirmDialog('名称和URL不能为空！').then(() => {});
-                    return;
-                }
-
-                if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                    showConfirmDialog('URL必须以 http:// 或 https:// 开头！').then(() => {});
-                    return;
-                }
-
-                let iconData = null;
-                if (iconFile) {
-                    // Read file as Data URL
-                    iconData = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(iconFile);
-                    });
-                }
-
-                // Add to the first existing group, or create a default one if none exists
-                let targetGroup = Object.keys(bookmarksData)[0];
-                if (!targetGroup) {
-                    const confirmed = await showConfirmDialog('没有可用的分组，是否创建默认分组 "我的书签"？');
-                    if (confirmed) {
-                        bookmarksData["我的书签"] = [];
-                        targetGroup = "我的书签";
-                        // Dynamically add the new group section to HTML
-                        const newGroupSection = document.createElement('section');
-                        newGroupSection.classList.add('bookmark-group');
-                        newGroupSection.dataset.groupName = targetGroup;
-                        newGroupSection.innerHTML = `
-                            <h2 class="group-title">
-                                <span class="group-name-text">${targetGroup}</span>
-                                <div class="group-actions ${isEditing ? '' : 'hidden'}">
-                                    <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                                    <button class="delete-group-btn" title="删除分组">🗑</button>
-                                </div>
-                            </h2>
-                            <div class="bookmarks" id="group-${targetGroup.replace(/\s+/g, '-')}"></div>
-                        `;
-                        bookmarkContainer.appendChild(newGroupSection);
-                    } else {
-                        return; // User cancelled creating default group
-                    }
-                }
-
-                if (targetGroup) {
-                    bookmarksData[targetGroup].push({ name, url, icon: iconData });
-                    renderBookmarks();
-                    saveBookmarks();
-                    addLinkModal.style.display = 'none';
-                    nameInput.value = '';
-                    urlInput.value = '';
-                    iconFileInput.value = ''; // Clear file input
-                }
-            }
-
-            /**
-             * Handles adding a new group via the modal.
-             */
-            async function addGroup() {
-                const groupNameInput = document.getElementById('group-name');
-                const groupName = groupNameInput.value.trim();
-
-                if (!groupName) {
-                    showConfirmDialog('分组名称不能为空！').then(() => {});
-                    return;
-                }
-                if (bookmarksData[groupName]) {
-                    showConfirmDialog('分组已存在！').then(() => {});
-                    return;
-                }
-
-                bookmarksData[groupName] = [];
-                // Dynamically add new group section to HTML
-                const newGroupSection = document.createElement('section');
-                newGroupSection.classList.add('bookmark-group');
-                newGroupSection.dataset.groupName = groupName;
-                newGroupSection.innerHTML = `
-                    <h2 class="group-title">
-                        <span class="group-name-text">${groupName}</span>
-                        <div class="group-actions ${isEditing ? '' : 'hidden'}">
-                            <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                            <button class="delete-group-btn" title="删除分组">🗑</button>
-                        </div>
-                    </h2>
-                    <div class="bookmarks" id="group-${groupName.replace(/\s+/g, '-')}"></div>
-                `;
-                bookmarkContainer.appendChild(newGroupSection);
-                renderBookmarks(); // Re-render to attach event listeners to new group
-                saveBookmarks();
-                addGroupModal.style.display = 'none';
-                groupNameInput.value = '';
-            }
-
-            /**
-             * Edits the name of a group.
-             * @param {HTMLElement} groupNameTextElement - The span element displaying the group name.
-             * @param {string} oldGroupName - The current name of the group.
-             */
-            async function editGroupName(groupNameTextElement, oldGroupName) {
-                if (!isEditing) return;
-
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.classList.add('group-title-input');
-                input.value = oldGroupName;
-
-                groupNameTextElement.replaceWith(input);
-                input.focus();
-
-                const saveEdit = async () => {
-                    const newGroupName = input.value.trim();
-                    if (newGroupName === oldGroupName) {
-                        input.replaceWith(groupNameTextElement);
-                        groupNameTextElement.textContent = oldGroupName;
-                        return;
-                    }
-                    if (!newGroupName) {
-                        showConfirmDialog('分组名称不能为空！').then(() => {
-                            input.focus(); // Keep focus if empty
-                        });
-                        return;
-                    }
-                    if (bookmarksData[newGroupName]) {
-                        showConfirmDialog('该分组名称已存在！').then(() => {
-                            input.focus(); // Keep focus if exists
-                        });
-                        return;
-                    }
-
-                    const confirmed = await showConfirmDialog(`确定将分组 "${oldGroupName}" 重命名为 "${newGroupName}" 吗？`);
-                    if (confirmed) {
-                        const groupData = bookmarksData[oldGroupName];
-                        delete bookmarksData[oldGroupName];
-                        bookmarksData[newGroupName] = groupData;
-                        renderBookmarks();
-                        saveBookmarks();
-                    } else {
-                        input.replaceWith(groupNameTextElement);
-                        groupNameTextElement.textContent = oldGroupName;
-                    }
-                };
-
-                input.addEventListener('blur', saveEdit);
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        input.blur(); // Trigger blur to save
-                    }
-                });
-            }
-
-
-            /**
-             * Deletes an entire group.
-             * @param {string} groupName - The name of the group to delete.
-             */
-            async function deleteGroup(groupName) {
-                if (!isEditing) return;
-
-                const confirmed = await showConfirmDialog(`确定要删除分组 "${groupName}" 及所有书签吗？`);
-                if (confirmed) {
-                    delete bookmarksData[groupName];
-                    renderBookmarks();
-                    saveBookmarks();
-                }
-            }
-
-
-            /**
-             * Toggles the editing mode for the page.
-             */
-            function toggleEditMode() {
-                isEditing = !isEditing;
-                editModeToggle.textContent = isEditing ? '完成编辑' : '编辑模式';
-                updateEditModeVisuals();
-
-                // Toggle visibility of header action buttons
-                if (isEditing) {
-                    headerActionButtons.classList.add('visible');
-                } else {
-                    headerActionButtons.classList.remove('visible');
-                }
-            }
-
-            /**
-             * Applies or removes editing mode visuals across all elements.
-             */
-            function updateEditModeVisuals() {
-                document.querySelectorAll('.bookmark-item').forEach(item => {
-                    if (isEditing) {
-                        item.classList.add('editing');
-                    } else {
-                        item.classList.remove('editing');
-                        item.style.animation = ''; // Stop shaking animation
-                    }
-                });
-                document.querySelectorAll('.group-actions').forEach(actionsDiv => {
-                    if (isEditing) {
-                        actionsDiv.classList.remove('hidden');
-                    } else {
-                        actionsDiv.classList.add('hidden');
-                    }
-                });
-            }
-
-            // --- Drag and Drop Logic ---
-            let dragSrcEl = null; // The element being dragged
-
-            bookmarkContainer.addEventListener('dragstart', (e) => {
-                if (!isEditing) {
-                    e.preventDefault(); // Only allow dragging in edit mode
-                    return;
-                }
-                const targetItem = e.target.closest('.bookmark-item');
-                if (targetItem) {
-                    dragSrcEl = targetItem;
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', ''); // Required for Firefox to enable dragging
-                    setTimeout(() => {
-                        targetItem.classList.add('dragging');
-                    }, 0); // Add class after dragstart event finishes
-                }
             });
 
-            bookmarkContainer.addEventListener('dragover', (e) => {
-                e.preventDefault(); // Allow drop
-                if (isEditing && dragSrcEl) {
-                    const targetItem = e.target.closest('.bookmark-item');
-                    const targetBookmarksDiv = e.target.closest('.bookmarks');
+            document.querySelectorAll('.edit-group-name-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const groupDocId = button.dataset.groupDocId;
+                    const oldGroupName = button.dataset.groupName;
+                    const groupNameTextElement = button.closest('.group-title').querySelector('.group-name-text');
 
-                    if (targetItem && targetItem !== dragSrcEl) {
-                        // Dragging over another bookmark item
-                        const rect = targetItem.getBoundingClientRect();
-                        const next = (e.clientX - rect.left) / (rect.right - rect.left) > 0.5;
-                        targetItem.parentNode.insertBefore(dragSrcEl, next ? targetItem.nextSibling : targetItem);
-                    } else if (targetBookmarksDiv && !targetItem && targetBookmarksDiv !== dragSrcEl.parentNode) {
-                        // Dragging over an empty group's bookmark area
-                        targetBookmarksDiv.appendChild(dragSrcEl);
-                    }
-                }
-            });
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.classList.add('group-title-input');
+                    input.value = oldGroupName;
 
-            bookmarkContainer.addEventListener('drop', (e) => {
-                e.preventDefault();
-                if (isEditing && dragSrcEl) {
-                    dragSrcEl.classList.remove('dragging');
-                    updateBookmarkOrder(); // Update data based on new DOM order
-                    saveBookmarks();
-                    dragSrcEl = null;
-                }
-            });
+                    groupNameTextElement.replaceWith(input);
+                    input.focus();
 
-            bookmarkContainer.addEventListener('dragend', (e) => {
-                if (dragSrcEl) {
-                    dragSrcEl.classList.remove('dragging');
-                    dragSrcEl = null;
-                }
-            });
+                    const saveEdit = async () => {
+                        const newGroupName = input.value.trim();
+                        if (newGroupName === oldGroupName) {
+                            input.replaceWith(groupNameTextElement);
+                            groupNameTextElement.textContent = oldGroupName;
+                            return;
+                        }
+                        if (!newGroupName) {
+                            showConfirmDialog('分组名称不能为空！').then(() => { input.focus(); });
+                            return;
+                        }
 
-            /**
-             * Updates the bookmarksData object to reflect the current DOM order of bookmarks.
-             */
-            function updateBookmarkOrder() {
-                const newBookmarksData = {};
-                document.querySelectorAll('.bookmark-group').forEach(groupElement => {
-                    const groupName = groupElement.dataset.groupName;
-                    const bookmarksInGroup = [];
-                    groupElement.querySelectorAll('.bookmark-item').forEach(itemElement => {
-                        const originalGroup = itemElement.dataset.group;
-                        const originalIndex = parseInt(itemElement.dataset.index);
-                        // Find the original bookmark object using its original group and index
-                        // This prevents issues if bookmarks have identical names/URLs
-                        const bookmark = bookmarksData[originalGroup][originalIndex];
-                        if (bookmark) {
-                            bookmarksInGroup.push(bookmark);
+                        const confirmed = await showConfirmDialog(`确定将分组 "${oldGroupName}" 重命名为 "${newGroupName}" 吗？`);
+                        if (confirmed) {
+                            await updateGroupInFirestore(groupDocId, newGroupName);
+                        } else {
+                            input.replaceWith(groupNameTextElement);
+                            groupNameTextElement.textContent = oldGroupName;
+                        }
+                    };
+
+                    input.addEventListener('blur', saveEdit);
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            input.blur();
                         }
                     });
-                    newBookmarksData[groupName] = bookmarksInGroup;
                 });
-                bookmarksData = newBookmarksData;
+            });
 
-                // Re-assign data-group and data-index after reordering to ensure correct deletion/updates
-                document.querySelectorAll('.bookmark-group').forEach(groupElement => {
-                    const groupName = groupElement.dataset.groupName;
-                    groupElement.querySelectorAll('.bookmark-item').forEach((itemElement, index) => {
-                        itemElement.dataset.group = groupName;
-                        itemElement.dataset.index = index;
-                    });
+            document.querySelectorAll('.delete-group-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const groupDocId = button.dataset.groupDocId;
+                    const groupName = button.dataset.groupName;
+                    await deleteGroupFromFirestore(groupDocId, groupName);
                 });
+            });
+
+            // Drag and Drop listeners (re-attached to the main container and group divs)
+            setupDragAndDropListeners();
+        }
+
+        function updateLinkGroupSelect(groups) {
+            linkGroupSelect.innerHTML = '';
+            if (groups.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '暂无分组';
+                option.disabled = true;
+                option.selected = true;
+                linkGroupSelect.appendChild(option);
+                return;
+            }
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id; // Use Firestore doc ID
+                option.textContent = group.name;
+                linkGroupSelect.appendChild(option);
+            });
+        }
+
+        // --- Modal Control Functions ---
+
+        addLinkBtn.addEventListener('click', () => {
+            if (firebaseGroupsData.length === 0) {
+                showConfirmDialog('请先添加一个分组！').then(() => {});
+                return;
+            }
+            addLinkModal.style.display = 'flex';
+            linkNameInput.value = '';
+            linkUrlInput.value = '';
+            linkIconUpload.value = '';
+            linkGroupSelect.value = firebaseGroupsData[0]?.id || ''; // Select first group by default
+            linkNameInput.focus();
+        });
+
+        addGroupBtn.addEventListener('click', () => {
+            addGroupModal.style.display = 'flex';
+            groupNameInput.value = '';
+            groupNameInput.focus();
+        });
+
+        saveNewLinkBtn.addEventListener('click', async () => {
+            const selectedGroupDocId = linkGroupSelect.value;
+            const name = linkNameInput.value.trim();
+            const url = linkUrlInput.value.trim();
+            const iconFile = linkIconUpload.files[0];
+
+            if (!name || !url) {
+                showConfirmDialog('名称和URL不能为空！').then(() => {});
+                return;
+            }
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                showConfirmDialog('URL必须以 http:// 或 https:// 开头！').then(() => {});
+                return;
+            }
+            if (!selectedGroupDocId) {
+                showConfirmDialog('请选择一个分组！').then(() => {});
+                return;
             }
 
-
-            // --- Event Listeners ---
-            addLinkBtn.addEventListener('click', () => {
-                addLinkModal.style.display = 'flex';
-                document.getElementById('link-name').focus();
-            });
-
-            addGroupBtn.addEventListener('click', () => {
-                addGroupModal.style.display = 'flex';
-                document.getElementById('group-name').focus();
-            });
-
-            saveBtn.addEventListener('click', saveBookmarks);
-            editModeToggle.addEventListener('click', toggleEditMode);
-
-            saveNewLinkBtn.addEventListener('click', addLink);
-            saveNewGroupBtn.addEventListener('click', addGroup);
-
-            // Close modals when clicking on the close button or outside
-            closeModals.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.target.closest('.modal').style.display = 'none';
+            let iconData = null;
+            if (iconFile) {
+                iconData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(iconFile);
                 });
-            });
-
-            window.addEventListener('click', (event) => {
-                if (event.target === addLinkModal) {
-                    addLinkModal.style.display = "none";
-                }
-                if (event.target === addGroupModal) {
-                    addGroupModal.style.display = "none";
-                }
-                if (event.target === confirmDialog) {
-                    // Prevent closing confirm dialog by clicking outside, it needs explicit action
-                }
-            });
-
-            // Initial load and render
-            loadBookmarks();
-            renderBookmarks();
+            }
+            await addOrUpdateBookmarkInFirestore(selectedGroupDocId, { name, url, icon: iconData });
         });
+
+        saveNewGroupBtn.addEventListener('click', async () => {
+            const groupName = groupNameInput.value.trim();
+            if (groupName) {
+                await addGroupToFirestore(groupName);
+            } else {
+                showConfirmDialog('分组名称不能为空！').then(() => {});
+            }
+        });
+
+        // The "保存" button is less critical with real-time listeners, but can be kept for explicit save
+        saveBtn.addEventListener('click', () => {
+            showConfirmDialog('数据已通过实时同步自动保存到云端。').then(() => {});
+        });
+
+        editModeToggle.addEventListener('click', toggleEditMode);
+
+        closeModals.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.target.closest('.modal').style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === addLinkModal) {
+                addLinkModal.style.display = "none";
+            }
+            if (event.target === addGroupModal) {
+                addGroupModal.style.display = "none";
+            }
+        });
+
+        // --- Edit Mode Toggle ---
+        function toggleEditMode() {
+            isEditing = !isEditing;
+            editModeToggle.textContent = isEditing ? '完成编辑' : '编辑模式';
+            updateEditModeVisuals();
+
+            // Toggle visibility of header action buttons
+            if (isEditing) {
+                headerActionButtons.classList.add('visible');
+            } else {
+                headerActionButtons.classList.remove('visible');
+            }
+        }
+
+        function updateEditModeVisuals() {
+            document.querySelectorAll('.bookmark-item').forEach(item => {
+                if (isEditing) {
+                    item.classList.add('editing');
+                } else {
+                    item.classList.remove('editing');
+                    item.style.animation = ''; // Stop shaking animation
+                }
+            });
+            document.querySelectorAll('.group-actions').forEach(actionsDiv => {
+                if (isEditing) {
+                    actionsDiv.classList.remove('hidden');
+                } else {
+                    actionsDiv.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- Drag and Drop Logic ---
+        let dragSrcEl = null; // The element being dragged
+        let dragSrcGroupDocId = null; // The Firestore doc ID of the source group
+
+        function setupDragAndDropListeners() {
+            // Remove existing listeners to prevent duplicates
+            bookmarkContainer.removeEventListener('dragstart', handleDragStart);
+            bookmarkContainer.removeEventListener('dragover', handleDragOver);
+            bookmarkContainer.removeEventListener('drop', handleDrop);
+            bookmarkContainer.removeEventListener('dragend', handleDragEnd);
+
+            // Add new listeners
+            bookmarkContainer.addEventListener('dragstart', handleDragStart);
+            bookmarkContainer.addEventListener('dragover', handleDragOver);
+            bookmarkContainer.addEventListener('drop', handleDrop);
+            bookmarkContainer.addEventListener('dragend', handleDragEnd);
+        }
+
+        function handleDragStart(e) {
+            if (!isEditing) {
+                e.preventDefault();
+                return;
+            }
+            const targetItem = e.target.closest('.bookmark-item');
+            if (targetItem) {
+                dragSrcEl = targetItem;
+                dragSrcGroupDocId = targetItem.dataset.groupDocId;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
+                setTimeout(() => {
+                    targetItem.classList.add('dragging');
+                }, 0);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            if (isEditing && dragSrcEl) {
+                const targetItem = e.target.closest('.bookmark-item');
+                const targetBookmarksDiv = e.target.closest('.bookmarks');
+
+                if (targetItem && targetItem !== dragSrcEl) {
+                    const rect = targetItem.getBoundingClientRect();
+                    const next = (e.clientX - rect.left) / (rect.right - rect.left) > 0.5;
+                    targetItem.parentNode.insertBefore(dragSrcEl, next ? targetItem.nextSibling : targetItem);
+                } else if (targetBookmarksDiv && !targetItem && targetBookmarksDiv !== dragSrcEl.parentNode) {
+                    targetBookmarksDiv.appendChild(dragSrcEl);
+                }
+            }
+        }
+
+        async function handleDrop(e) {
+            e.preventDefault();
+            if (isEditing && dragSrcEl) {
+                dragSrcEl.classList.remove('dragging');
+
+                const targetGroupDiv = dragSrcEl.closest('.bookmarks');
+                const targetGroupDocId = targetGroupDiv.closest('.bookmark-group').dataset.groupDocId;
+                const draggedBookmarkId = dragSrcEl.dataset.bookmarkId;
+
+                // Get the current order of items in the target group from the DOM
+                // This array will contain the actual bookmark objects
+                const newOrderItems = Array.from(targetGroupDiv.children).map(itemEl => {
+                    const groupData = firebaseGroupsData.find(g => g.id === itemEl.dataset.groupDocId);
+                    return (groupData.items || []).find(item => item.id === itemEl.dataset.bookmarkId);
+                }).filter(Boolean); // Filter out any nulls if item not found
+
+                await updateBookmarkOrderInFirestore(dragSrcGroupDocId, targetGroupDocId, draggedBookmarkId, newOrderItems);
+
+                dragSrcEl = null;
+                dragSrcGroupDocId = null;
+            }
+        }
+
+        function handleDragEnd(e) {
+            if (dragSrcEl) {
+                dragSrcEl.classList.remove('dragging');
+                dragSrcEl = null;
+                dragSrcGroupDocId = null;
+            }
+        }
+
+        // Initial Firebase setup
+        initializeFirebase();
     </script>
 </body>
 </html>
