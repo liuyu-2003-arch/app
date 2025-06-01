@@ -10,461 +10,499 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
-        
+
         .container {
-            max-width: 700px;
-            margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 25px;
+            padding: 40px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            animation: slideIn 0.6s ease-out;
         }
-        
-        h1 {
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .title {
             text-align: center;
             color: #333;
-            margin-bottom: 25px;
-            font-size: 2.2em;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
+
+        .section {
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .form-group:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+        .section:first-of-type {
+            background: rgba(255, 255, 255, 0.8);
         }
-        
-        label {
-            display: block;
-            margin-bottom: 10px;
+
+        .section:last-of-type {
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+        }
+
+        .section:last-of-type .section-title {
+            color: #00ff00;
+        }
+
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.2s; }
+        .section:nth-child(4) { animation-delay: 0.3s; }
+        .section:nth-child(5) { animation-delay: 0.4s; }
+        .section:nth-child(6) { animation-delay: 0.5s; }
+        .section:nth-child(7) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        .section-title {
+            font-size: 1.2rem;
             font-weight: 600;
-            color: #555;
-            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 15px;
         }
-        
-        input[type="file"], select, input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
+
+        .file-drop-zone {
+            border-radius: 15px;
+            padding: 20px;
+            background: linear-gradient(45deg, #f8f9ff, #fff);
             transition: all 0.3s ease;
-            background: white;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            text-align: left;
         }
-        
-        input[type="file"]:focus, select:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+
+        .file-drop-zone.has-file {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
         }
-        
+
+        .file-drop-zone.has-file .upload-text {
+            display: none;
+        }
+
+        .file-selected {
+            display: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            align-items: center;
+        }
+
+        .file-drop-zone.has-file .file-selected {
+            display: flex;
+        }
+
+        .upload-text {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .upload-text-content {
+            margin-left: 15px;
+        }
+
+        .file-drop-zone:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .file-drop-zone.dragover {
+            background: linear-gradient(45deg, #f0f2ff, #f8f9ff);
+            transform: scale(1.02);
+        }
+
+        .file-info {
+            display: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-group {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .option-group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
         .radio-group {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 10px;
+            flex-direction: column;
+            gap: 10px;
         }
-        
+
         .radio-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
-            background: white;
-            border-radius: 25px;
-            border: 2px solid #eee;
+            padding: 10px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
         }
-        
+
         .radio-item:hover {
-            border-color: #667eea;
-            transform: scale(1.05);
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
         }
-        
+
         .radio-item input[type="radio"] {
-            margin: 0;
-            width: auto;
-        }
-        
-        .radio-item input[type="radio"]:checked + label {
-            color: #667eea;
-            font-weight: bold;
-        }
-        
-        .radio-item input[type="radio"]:checked {
-            accent-color: #667eea;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
-            background: white;
-            border-radius: 25px;
-            border: 2px solid #eee;
-            cursor: pointer;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            margin-right: 12px;
+            position: relative;
             transition: all 0.3s ease;
         }
-        
-        .checkbox-item:hover {
-            border-color: #667eea;
-            transform: scale(1.05);
+
+        .radio-item input[type="radio"]:checked {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, #667eea, #764ba2);
         }
-        
-        .checkbox-item input[type="checkbox"] {
-            margin: 0;
-            width: auto;
-            accent-color: #667eea;
+
+        .radio-item input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: checkPulse 0.3s ease-out;
         }
-        
-        .checkbox-item input[type="checkbox"]:checked + label {
-            color: #667eea;
-            font-weight: bold;
+
+        @keyframes checkPulse {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
-        
+
+        .radio-item label {
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+        }
+
         .command-output {
-            background: #1e1e1e;
+            background: #1a1a1a;
             color: #00ff00;
-            padding: 20px;
+            padding: 25px;
             border-radius: 15px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Monaco', 'Menlo', monospace;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-top: 30px;
-            border: 2px solid #333;
             position: relative;
             overflow-x: auto;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
         }
-        
+
         .command-output::before {
-            content: "生成的命令";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: #1e1e1e;
-            color: #00ff00;
-            padding: 0 10px;
-            font-size: 12px;
+            content: '$ ';
+            color: #ffff00;
             font-weight: bold;
         }
-        
+
         .copy-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            background: #667eea;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 12px;
             transition: all 0.3s ease;
+            opacity: 0.8;
         }
-        
+
         .copy-btn:hover {
-            background: #764ba2;
-            transform: scale(1.1);
+            opacity: 1;
+            transform: scale(1.05);
         }
-        
-        .help-text {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
-            font-style: italic;
+
+        .file-input {
+            display: none;
         }
-        
-        .file-info {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 8px;
-            font-size: 0.9em;
-            color: #555;
-        }
-        
-        .generate-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
+
+        .upload-icon {
+            font-size: 2rem;
+            color: #667eea;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            flex-shrink: 0;
         }
-        
-        .generate-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+
+        .file-drop-zone:hover .upload-icon {
+            transform: scale(1.1);
+            color: #764ba2;
         }
-        
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .radio-group, .checkbox-group {
-                flex-direction: column;
-            }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎤 Whisper命令生成器</h1>
+        <h1 class="title">Whisper命令生成器</h1>
         
-        <div class="form-group">
-            <label for="fileInput">📁 选择音频/视频文件</label>
-            <input type="file" id="fileInput" accept="audio/*,video/*">
-            <div class="help-text">支持的格式：mp3, wav, mp4, avi, mov 等</div>
-            <div id="fileInfo" class="file-info" style="display: none;"></div>
+        <div class="section">
+            <div class="section-title">选择文件</div>
+            <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-text">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text-content">
+                        <p>点击选择文件或拖拽文件到此处</p>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 5px;">支持音频和视频文件</p>
+                    </div>
+                </div>
+                <div class="file-selected" id="fileSelected">
+                    <div style="font-size: 1.5rem; margin-right: 12px;">✅</div>
+                    <span id="fileName"></span>
+                </div>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept="audio/*,video/*">
         </div>
-        
-        <div class="form-group">
-            <label>🎯 选择模型精度</label>
-            <div class="radio-group">
-                <div class="radio-item">
-                    <input type="radio" id="base" name="model" value="base">
-                    <label for="base">Base (快速)</label>
+
+        <div class="options-grid section">
+            <div class="option-group">
+                <div class="section-title">转换精度</div>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="small" name="model" value="small">
+                        <label for="small">Small</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="medium" name="model" value="medium" checked>
+                        <label for="medium">Medium</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="large" name="model" value="large">
+                        <label for="large">Large</label>
+                    </div>
                 </div>
-                <div class="radio-item">
-                    <input type="radio" id="medium" name="model" value="medium" checked>
-                    <label for="medium">Medium (推荐)</label>
+            </div>
+
+            <div class="option-group">
+                <div class="section-title">语言</div>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="auto" name="language" value="auto" checked>
+                        <label for="auto">自动识别</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="chinese" name="language" value="zh">
+                        <label for="chinese">中文</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="english" name="language" value="en">
+                        <label for="english">英文</label>
+                    </div>
                 </div>
-                <div class="radio-item">
-                    <input type="radio" id="large" name="model" value="large">
-                    <label for="large">Large (最佳)</label>
+            </div>
+
+            <div class="option-group">
+                <div class="section-title">输出格式</div>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="text" name="format" value="txt" checked>
+                        <label for="text">文本</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="subtitle" name="format" value="srt">
+                        <label for="subtitle">字幕(SRT)</label>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="form-group">
-            <label>🌍 选择语言</label>
-            <select id="language">
-                <option value="auto">自动检测</option>
-                <option value="zh">中文</option>
-                <option value="en">英语</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>📝 输出格式</label>
-            <div class="checkbox-group">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="txt" name="format" value="txt" checked>
-                    <label for="txt">文本 (.txt)</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="srt" name="format" value="srt">
-                    <label for="srt">字幕 (.srt)</label>
-                </div>
+
+        <div class="section">
+            <div class="section-title">生成的命令</div>
+            <div class="command-output" id="commandOutput">
+                <button class="copy-btn" onclick="copyCommand()">复制</button>
+                whisper --model medium --output_dir "/Users/yuliu/Movies/YouTube DL" --output_format txt "选择文件..."
             </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="outputDir">📂 输出目录 (可选)</label>
-            <input type="text" id="outputDir" placeholder="例如: ./output">
-        </div>
-        
-        <button class="generate-btn" onclick="generateCommand()">🚀 生成命令</button>
-        
-        <div class="command-output" id="commandOutput" style="display: none;">
-            <button class="copy-btn" onclick="copyCommand()">复制</button>
-            <div id="command"></div>
         </div>
     </div>
 
     <script>
         let selectedFile = null;
-        
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            selectedFile = e.target.files[0];
-            if (selectedFile) {
-                const fileInfo = document.getElementById('fileInfo');
-                fileInfo.style.display = 'block';
-                fileInfo.innerHTML = `
-                    <strong>文件名:</strong> ${selectedFile.name}<br>
-                    <strong>大小:</strong> ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB<br>
-                    <strong>类型:</strong> ${selectedFile.type}
-                `;
+
+        // 文件选择处理
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const dropZone = document.getElementById('dropZone');
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                fileName.textContent = file.name;
+                dropZone.classList.add('has-file');
+                updateCommand();
+            }
+        }
+
+        // 拖拽功能
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                fileName.textContent = files[0].name;
+                dropZone.classList.add('has-file');
+                updateCommand();
             }
         });
-        
-        function generateCommand() {
-            if (!selectedFile) {
-                alert('请先选择一个文件！');
-                return;
-            }
-            
+
+        // 监听选项变化
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', updateCommand);
+        });
+
+        function updateCommand() {
             const model = document.querySelector('input[name="model"]:checked').value;
-            const language = document.getElementById('language').value;
-            const outputDir = document.getElementById('outputDir').value.trim();
+            const language = document.querySelector('input[name="language"]:checked').value;
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const basePath = '/Users/yuliu/Movies/YouTube DL';
             
-            // 获取选中的输出格式
-            const formats = [];
-            document.querySelectorAll('input[name="format"]:checked').forEach(cb => {
-                formats.push(cb.value);
-            });
+            let command = `whisper --model ${model} --output_dir "${basePath}" --output_format ${format}`;
             
-            if (formats.length === 0) {
-                alert('请至少选择一种输出格式！');
-                return;
-            }
-            
-            // 获取高级选项
-            const options = [];
-            document.querySelectorAll('input[name="options"]:checked').forEach(cb => {
-                options.push(cb.value);
-            });
-            
-            // 构建命令
-            let command = `whisper "${selectedFile.name}"`;
-            
-            // 添加模型
-            command += ` --model ${model}`;
-            
-            // 添加语言
             if (language !== 'auto') {
                 command += ` --language ${language}`;
             }
             
-            // 添加输出格式
-            formats.forEach(format => {
-                command += ` --output_format ${format}`;
-            });
+            const filePath = selectedFile ? `"${basePath}/${selectedFile.name}"` : `"${basePath}/选择文件..."`;
+            command += ` ${filePath}`;
             
-            // 添加输出目录
-            if (outputDir) {
-                command += ` --output_dir "${outputDir}"`;
-            }
-            
-            // 添加高级选项
-            options.forEach(option => {
-                if (option === 'verbose') {
-                    command += ' --verbose True';
-                } else if (option === 'translate') {
-                    command += ' --task translate';
-                } else if (option === 'fp16') {
-                    command += ' --fp16 True';
-                }
-            });
-            
-            // 显示命令
-            document.getElementById('command').textContent = command;
-            document.getElementById('commandOutput').style.display = 'block';
-            
-            // 滚动到命令输出区域
-            document.getElementById('commandOutput').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('commandOutput').innerHTML = `
+                <button class="copy-btn" onclick="copyCommand()">复制</button>
+                ${command}
+            `;
         }
-        
+
         function copyCommand() {
-            const command = document.getElementById('command').textContent;
-            navigator.clipboard.writeText(command).then(function() {
+            const commandText = document.getElementById('commandOutput').textContent.replace('复制', '').trim();
+            navigator.clipboard.writeText(commandText).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 const originalText = btn.textContent;
                 btn.textContent = '已复制!';
                 btn.style.background = '#28a745';
-                setTimeout(function() {
+                setTimeout(() => {
                     btn.textContent = originalText;
-                    btn.style.background = '#667eea';
+                    btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
                 }, 2000);
-            }).catch(function(err) {
-                console.error('复制失败: ', err);
-                alert('复制失败，请手动复制命令');
             });
         }
-        
-        // 添加拖拽功能
-        const container = document.querySelector('.container');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            container.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            container.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            container.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight(e) {
-            container.style.border = '3px dashed #667eea';
-            container.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
-        }
-        
-        function unhighlight(e) {
-            container.style.border = 'none';
-            container.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-        }
-        
-        container.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length > 0) {
-                const file = files[0];
-                const fileInput = document.getElementById('fileInput');
-                
-                // 检查文件类型
-                if (file.type.startsWith('audio/') || file.type.startsWith('video/')) {
-                    // 创建新的文件列表
-                    Object.defineProperty(fileInput, 'files', {
-                        value: files,
-                        writable: false,
-                    });
-                    
-                    // 触发change事件
-                    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-                } else {
-                    alert('请拖拽音频或视频文件！');
-                }
-            }
-        }
+
+        // 初始化命令
+        updateCommand();
     </script>
 </body>
 </html>
