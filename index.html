@@ -47,6 +47,15 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px; /* Spacing between buttons */
+            /* Initially hidden */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .action-buttons.visible {
+            opacity: 1;
+            pointer-events: all;
         }
 
         .action-buttons button {
@@ -379,7 +388,7 @@
     <div id="app-container">
         <header>
             <h1>我的书签</h1>
-            <div class="action-buttons">
+            <div class="action-buttons" id="header-action-buttons">
                 <button id="add-link-btn">添加链接</button>
                 <button id="add-group-btn">添加分组</button>
                 <button id="save-btn">保存</button>
@@ -397,42 +406,6 @@
                     </div>
                 </h2>
                 <div class="bookmarks" id="group-个人收藏">
-                    </div>
-            </section>
-
-            <section class="bookmark-group" data-group-name="书签菜单">
-                <h2 class="group-title">
-                    <span class="group-name-text">书签菜单</span>
-                    <div class="group-actions hidden">
-                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                        <button class="delete-group-btn" title="删除分组">🗑</button>
-                    </div>
-                </h2>
-                <div class="bookmarks" id="group-书签菜单">
-                    </div>
-            </section>
-
-            <section class="bookmark-group" data-group-name="标签页组个人收藏">
-                <h2 class="group-title">
-                    <span class="group-name-text">标签页组个人收藏</span>
-                    <div class="group-actions hidden">
-                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                        <button class="delete-group-btn" title="删除分组">🗑</button>
-                    </div>
-                </h2>
-                <div class="bookmarks" id="group-标签页组个人收藏">
-                    </div>
-            </section>
-
-            <section class="bookmark-group" data-group-name="阅读列表">
-                <h2 class="group-title">
-                    <span class="group-name-text">阅读列表</span>
-                    <div class="group-actions hidden">
-                        <button class="edit-group-name-btn" title="编辑分组名称">✎</button>
-                        <button class="delete-group-btn" title="删除分组">🗑</button>
-                    </div>
-                </h2>
-                <div class="bookmarks" id="group-阅读列表">
                     </div>
             </section>
         </main>
@@ -483,7 +456,8 @@
             const addLinkBtn = document.getElementById('add-link-btn');
             const addGroupBtn = document.getElementById('add-group-btn');
             const saveBtn = document.getElementById('save-btn');
-            const editModeToggle = document.getElementById('edit-mode-toggle');
+            const editModeToggle = document.getElementById('edit-mode-toggle'); // Corrected ID reference
+            const headerActionButtons = document.getElementById('header-action-buttons'); // Get the action buttons container
 
             const addLinkModal = document.getElementById('add-link-modal');
             const addGroupModal = document.getElementById('add-group-modal');
@@ -532,11 +506,6 @@
                     { name: "FFmpeg命令生成器", url: "https://liuyu-2003-arch.github.io/jemch/ffmpeg_generator.html" },
                     { name: "Whisper 命令生成器", url: "https://liuyu-2003-arch.github.io/jemch/Whisper.html" },
                     { name: "Claude-JX", url: "https://claude6.claudechat.pro/" }
-                ],
-                "书签菜单": [],
-                "标签页组个人收藏": [],
-                "阅读列表": [
-                    { name: "纽约时报中文网", url: "https://m.cn.nytimes.com/" }
                 ]
             };
 
@@ -916,7 +885,7 @@
             async function deleteGroup(groupName) {
                 if (!isEditing) return;
 
-                const confirmed = await showConfirmDialog(`确定要删除分组 "${groupName}" 及其所有书签吗？`);
+                const confirmed = await showConfirmDialog(`确定要删除分组 "${groupName}" 及所有书签吗？`);
                 if (confirmed) {
                     delete bookmarksData[groupName];
                     renderBookmarks();
@@ -932,6 +901,13 @@
                 isEditing = !isEditing;
                 editModeToggle.textContent = isEditing ? '完成编辑' : '编辑模式';
                 updateEditModeVisuals();
+
+                // Toggle visibility of header action buttons
+                if (isEditing) {
+                    headerActionButtons.classList.add('visible');
+                } else {
+                    headerActionButtons.classList.remove('visible');
+                }
             }
 
             /**
