@@ -1,95 +1,154 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Safari 起始页仿制</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
-      background-image:
-        repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 40px),
-        repeating-radial-gradient(circle at 100% 100%, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 40px);
-      background-size: 80px 80px;
-    }
-    .icon-box {
-      width: 100px;
-      height: 100px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .icon-box:hover {
-      transform: scale(1.1);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-    img.icon-img {
-      width: 80%;
-      height: 80%;
-      object-fit: contain;
-    }
-    a:hover {
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人收藏</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="text-white min-h-screen p-10">
-  <div class="max-w-7xl mx-auto">
-    <h1 class="text-3xl font-semibold mb-8 text-white/90">个人收藏</h1>
+<body>
+    <div class="container">
+        <h1 class="section-title">个人收藏</h1>
 
-    <div class="grid grid-cols-8 gap-8">
-      <!-- 示例图标块 -->
-      <a href="https://jemch.com" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-gray-400 text-3xl font-bold shadow-md">
-          J
+        <div class="app-grid">
+            <a href="https://www.jina.ai/" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #6a5acd;">J</div>
+                <span class="app-name">Jina AI</span>
+            </a>
+            <a href="https://www.notion.so/" target="_blank" class="app-item">
+                <div class="app-icon notion-icon">N</div>
+                <span class="app-name">Notion</span>
+            </a>
+            <a href="https://www.youtube.com/" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #ff0000;"><i class="fab fa-youtube"></i></div>
+                <span class="app-name">YouTube</span>
+            </a>
+            <a href="https://sub.link/" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #4CAF50;">S</div>
+                <span class="app-name">SubEasy</span>
+            </a>
+            <a href="https://www.bilibili.com/" target="_blank" class="app-item">
+                <div class="app-icon bilibili-icon">
+                    <img src="https://www.bilibili.com/favicon.ico" alt="Bilibili">
+                </div>
+                <span class="app-name">哔哩哔哩</span>
+            </a>
+            <a href="https://www.notion.so/" target="_blank" class="app-item">
+                <div class="app-icon notion-icon">N</div>
+                <span class="app-name">Notion</span>
+            </a>
+            <a href="https://grok.ai/" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #800080;">G</div>
+                <span class="app-name">Grok</span>
+            </a>
+            <a href="https://claude.ai/" target="_blank" class="app-item">
+                <div class="app-icon claude-icon"></div>
+                <span class="app-name">Claude</span>
+            </a>
+            <a href="https://chat.openai.com/" target="_blank" class="app-item">
+                <div class="app-icon chatgpt-icon"></div>
+                <span class="app-name">ChatGPT</span>
+            </a>
+            <a href="https://gemini.google.com/" target="_blank" class="app-item">
+                <div class="app-icon gemini-icon"></div>
+                <span class="app-name">Gemini</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #4169E1;">C</div>
+                <span class="app-name">环望公益</span>
+            </a>
+            <a href="https://mail.google.com/" target="_blank" class="app-item">
+                <div class="app-icon gmail-icon">G</div>
+                <span class="app-name">Gmail</span>
+            </a>
+
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #FFD700;">&</div>
+                <span class="app-name">Google 艺术</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #FF69B4;">W</div>
+                <span class="app-name">维基百科</span>
+            </a>
+            <a href="https://www.google.com/" target="_blank" class="app-item">
+                <div class="app-icon google-icon">G</div>
+                <span class="app-name">Google</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #20B2AA;">T</div>
+                <span class="app-name">纽约时报</span>
+            </a>
+            <a href="https://www.bbc.com/news" target="_blank" class="app-item">
+                <div class="app-icon bbc-news-icon"></div>
+                <span class="app-name">BBC News</span>
+            </a>
+            <a href="https://movie.douban.com/" target="_blank" class="app-item">
+                <div class="app-icon douban-movie-icon"></div>
+                <span class="app-name">豆瓣电影</span>
+            </a>
+            <a href="https://www.maoyan.com/" target="_blank" class="app-item">
+                <div class="app-icon maoyan-icon"></div>
+                <span class="app-name">猫眼电影</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #9370DB;">Q</div>
+                <span class="app-name">微信搜狗</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #ADD8E6;">&</div>
+                <span class="app-name">UPI 兵库</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #FFC0CB;">P</div>
+                <span class="app-name">剪力板</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #90EE90;">O</div>
+                <span class="app-name">搜到</span>
+            </a>
+            <a href="https://shadowsocks.org/" target="_blank" class="app-item">
+                <div class="app-icon shadowsocks-icon">S</div>
+                <span class="app-name">Shadowsocks</span>
+            </a>
+            <a href="https://archive.org/" target="_blank" class="app-item">
+                <div class="app-icon internet-archive-icon"></div>
+                <span class="app-name">Internet Archive</span>
+            </a>
+
+            <a href="https://claude.ai/" target="_blank" class="app-item">
+                <div class="app-icon claude-icon"></div>
+                <span class="app-name">Claude-JX</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #87CEEB;">Y</div>
+                <span class="app-name">yt-dlp</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #DDA0DD;">W</div>
+                <span class="app-name">Whisper</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #F08080;">F</div>
+                <span class="app-name">ffmpeg</span>
+            </a>
+            <a href="https://github.com/" target="_blank" class="app-item">
+                <div class="app-icon github-icon"></div>
+                <span class="app-name">GitHub</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #4682B4;">單</div>
+                <span class="app-name">单元 D1 LED...</span>
+            </a>
+            <a href="#" target="_blank" class="app-item">
+                <div class="app-icon" style="background-color: #FFDAB9;">新</div>
+                <span class="app-name">新刻智能...</span>
+            </a>
         </div>
-        <span class="mt-2 text-sm text-white/90">Jemch</span>
-      </a>
-      <a href="https://www.notion.so/" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-white shadow-md">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" class="icon-img" alt="Notion" />
-        </div>
-        <span class="mt-2 text-sm text-white/90">Notion</span>
-      </a>
-      <a href="https://www.youtube.com" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-red-500 text-3xl font-bold shadow-md">
-          Y
-        </div>
-        <span class="mt-2 text-sm text-white/90">YouTube</span>
-      </a>
-      <a href="https://subeasy.net" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-purple-500 text-3xl font-bold shadow-md">
-          S
-        </div>
-        <span class="mt-2 text-sm text-white/90">SubEasy</span>
-      </a>
-      <a href="https://www.bilibili.com" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-pink-500 text-xs font-bold shadow-md">
-          哔哩哔哩
-        </div>
-        <span class="mt-2 text-sm text-white/90">哔哩哔哩</span>
-      </a>
-      <a href="https://chat.openai.com" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-white shadow-md">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" class="icon-img" alt="ChatGPT" />
-        </div>
-        <span class="mt-2 text-sm text-white/90">ChatGPT</span>
-      </a>
-      <a href="https://gemini.google.com" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-white shadow-md">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Gemini_logo_icon.svg" class="icon-img" alt="Gemini" />
-        </div>
-        <span class="mt-2 text-sm text-white/90">Gemini</span>
-      </a>
-      <a href="https://www.wikipedia.org" class="flex flex-col items-center group">
-        <div class="icon-box rounded-2xl bg-white shadow-md">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png" class="icon-img" alt="Wikipedia" />
-        </div>
-        <span class="mt-2 text-sm text-white/90">维基百科</span>
-      </a>
     </div>
-  </div>
+
+    <button class="edit-button" id="editButton">编辑</button>
+
+    <script src="script.js"></script>
 </body>
 </html>
