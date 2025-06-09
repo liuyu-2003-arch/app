@@ -7,11 +7,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background: linear-gradient(145deg, #cbd5e1, #93c5fd, #60a5fa);
-      background-image: 
-        radial-gradient(rgba(255,255,255,0.08) 1px, transparent 0),
-        radial-gradient(rgba(255,255,255,0.06) 1px, transparent 0);
-      background-position: 0 0, 40px 40px;
+      background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+      background-image:
+        repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 40px),
+        repeating-radial-gradient(circle at 100% 100%, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 40px);
       background-size: 80px 80px;
     }
     .icon-box {
@@ -27,9 +26,12 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
     img.icon-img {
-      width: 60%;
-      height: 60%;
+      width: 80%;
+      height: 80%;
       object-fit: contain;
+    }
+    a:hover {
+      text-decoration: none;
     }
   </style>
 </head>
