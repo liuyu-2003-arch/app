@@ -1,0 +1,158 @@
+/* ========== 基础样式 ========== */
+body {
+  margin: 0;
+  font-family: "Helvetica Neue", "PingFang SC", sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+  line-height: 1.7;
+  scroll-behavior: smooth;
+}
+
+/* ========== 导航栏 ========== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #003d3b;
+  color: #fff;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.logo {
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 400;
+  transition: opacity 0.3s;
+}
+.nav-links a:hover {
+  opacity: 0.7;
+}
+.menu-btn {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* ========== 横幅区 ========== */
+.hero {
+  background: linear-gradient(to bottom right, #00695c, #004d40);
+  color: white;
+  text-align: center;
+  padding: 6rem 1rem;
+}
+.hero h1 {
+  font-size: 2.6rem;
+  margin-bottom: 0.5rem;
+}
+.hero p {
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+}
+.btn {
+  display: inline-block;
+  background-color: #ffc107;
+  color: #000;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.btn:hover {
+  background-color: #ffb300;
+}
+
+/* ========== 内容区 ========== */
+.content {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+.content h2 {
+  color: #004d40;
+  border-left: 4px solid #004d40;
+  padding-left: 0.6rem;
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+.card {
+  background-color: #e0f2f1;
+  padding: 1.5rem;
+  border-radius: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 页脚 ========== */
+.footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  background-color: #003d3b;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* ========== 动画效果 ========== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+.fade-in.appear {
+  opacity: 1;
+  transform: translateY(0);
+}
+.delay {
+  transition-delay: 0.3s;
+}
+.delay-2 {
+  transition-delay: 0.6s;
+}
+
+/* ========== 响应式设计 ========== */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    background: #004d40;
+    position: absolute;
+    top: 70px;
+    right: 0;
+    width: 60%;
+    padding: 1rem;
+  }
+  .nav-links.active {
+    display: flex;
+  }
+  .menu-btn {
+    display: block;
+  }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .hero p {
+    font-size: 1.1rem;
+  }
+}
