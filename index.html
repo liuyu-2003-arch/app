@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>慈力熊计划 | 文明与野蛮的分界</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header class="navbar">
+    <div class="logo">慈力熊计划</div>
+    <nav class="nav-links">
+      <a href="#home">首页</a>
+      <a href="#mission">使命</a>
+      <a href="#projects">项目</a>
+      <a href="#about">关于</a>
+      <a href="#contact">联系</a>
+    </nav>
+    <button class="menu-btn">☰</button>
+  </header>
+
+  <!-- 英雄横幅 -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <h1 class="fade-in">文明与文明没有冲突</h1>
+      <p class="fade-in delay">文明与野蛮才会冲突。</p>
+      <a class="btn fade-in delay-2" href="#mission">了解更多</a>
+    </div>
+  </section>
+
+  <!-- 内容 -->
+  <main>
+    <section id="mission" class="content fade-in">
+      <h2>我们的使命</h2>
+      <p>
+        慈力熊计划致力于通过文化与教育项目，促进不同文明之间的理解与尊重。
+        我们相信，文明间的差异不应成为对立的理由，而应成为合作的契机。
+      </p>
+    </section>
+
+    <section id="projects" class="content fade-in">
+      <h2>主要项目</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>文明共创</h3>
+          <p>跨文化的艺术与教育合作，推动社会创新与文化融合。</p>
+        </div>
+        <div class="card">
+          <h3>教育计划</h3>
+          <p>通过课程与出版物，推动“理解的教育”。</p>
+        </div>
+        <div class="card">
+          <h3>艺术倡议</h3>
+          <p>支持青年艺术家以多元视角探索文明主题。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="content fade-in">
+      <h2>关于我们</h2>
+      <p>
+        我们的团队由来自不同文化背景的成员组成，他们相信“共存比征服更强大”。  
+        慈力熊计划的名字寓意“以慈力抗野蛮”，用温柔的方式推动社会进步。
+      </p>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <p>© 2025 Jemch | 慈力熊计划</p>
+    <p>文明与文明没有冲突，文明与野蛮才会冲突。</p>
+  </footer>
+
+  <script>
+    // 移动端菜单
+    const menuBtn = document.querySelector(".menu-btn");
+    const nav = document.querySelector(".nav-links");
+    menuBtn.addEventListener("click", () => nav.classList.toggle("active"));
+
+    // 滚动出现动画
+    const faders = document.querySelectorAll(".fade-in");
+    const appearOptions = { threshold: 0.2 };
+    const appearOnScroll = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("appear");
+        observer.unobserve(entry.target);
+      });
+    }, appearOptions);
+    faders.forEach(fader => appearOnScroll.observe(fader));
+  </script>
+</body>
+</html>
