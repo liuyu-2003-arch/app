@@ -8,14 +8,31 @@
 </head>
 <body>
     <script>
-        // 压缩成一行的 Bookmarklet
         (function(){
             const url = window.location.href;
             const cmd = `yt-dlp -f bestvideo+bestaudio/best --merge-output-format mp4 --write-subs --write-auto-sub --sub-lang en,zh-Hans -o "$HOME/Downloads/%(title)s.%(ext)s" "${url}"`;
             // 复制到剪贴板
             navigator.clipboard.writeText(cmd).then(()=>{
-                alert('yt-dlp 命令已复制到剪贴板！');
-            }).catch(()=>alert('复制失败，请手动复制命令！'));
+                // 创建浮动提示
+                const toast = document.createElement('div');
+                toast.textContent = 'yt-dlp 命令已复制到剪贴板！';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.backgroundColor = 'rgba(0,128,0,0.9)';
+                toast.style.color = 'white';
+                toast.style.padding = '10px 20px';
+                toast.style.borderRadius = '8px';
+                toast.style.fontSize = '14px';
+                toast.style.zIndex = '99999';
+                toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+                document.body.appendChild(toast);
+                // 5秒后自动移除
+                setTimeout(()=>{document.body.removeChild(toast);},5000);
+            }).catch(()=>{
+                alert('复制失败，请手动复制命令！');
+            });
         })();
     </script>
 </body>
