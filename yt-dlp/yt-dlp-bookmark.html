@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>YT 下载命令</title>
+    <!-- 使用 YouTube favicon 作为书签图标 -->
+    <link rel="icon" href="https://www.youtube.com/s/desktop/6f9a9c6d/img/favicon.ico">
+</head>
+<body>
+    <script>
+        // 压缩成一行的 Bookmarklet
+        (function(){
+            const url = window.location.href;
+            const cmd = `yt-dlp -f bestvideo+bestaudio/best --merge-output-format mp4 --write-subs --write-auto-sub --sub-lang en,zh-Hans -o "$HOME/Downloads/%(title)s.%(ext)s" "${url}"`;
+            // 复制到剪贴板
+            navigator.clipboard.writeText(cmd).then(()=>{
+                alert('yt-dlp 命令已复制到剪贴板！');
+            }).catch(()=>alert('复制失败，请手动复制命令！'));
+        })();
+    </script>
+</body>
+</html>
