@@ -1,0 +1,208 @@
+[
+  {
+    "name": "Jemch",
+    "url": "https://www.jemch.com",
+    "domain": "www.jemch.com",
+    "fallback": "J",
+    "iconType": "auto",
+    "customIcon": ""
+  },
+  {
+    "name": "网站收藏",
+    "url": "#",
+    "domain": "",
+    "fallback": "📑",
+    "iconType": "emoji"
+  },
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com",
+    "domain": "youtube.com",
+    "fallback": "Y",
+    "iconType": "auto"
+  },
+  {
+    "name": "SubEasy",
+    "url": "https://www.subeasy.ai",
+    "domain": "subeasy.ai",
+    "fallback": "S",
+    "iconType": "auto"
+  },
+  {
+    "name": "哔哩哔哩",
+    "url": "https://www.bilibili.com",
+    "domain": "bilibili.com",
+    "fallback": "B",
+    "badge": "NEW",
+    "iconType": "auto"
+  },
+  {
+    "name": "Notion",
+    "url": "https://www.notion.so",
+    "domain": "notion.so",
+    "fallback": "N",
+    "iconType": "auto"
+  },
+  {
+    "name": "Grok",
+    "url": "https://grok.x.ai",
+    "domain": "x.ai",
+    "fallback": "G",
+    "iconType": "auto"
+  },
+  {
+    "name": "Claude",
+    "url": "https://claude.ai",
+    "domain": "claude.ai",
+    "fallback": "C",
+    "iconType": "auto"
+  },
+  {
+    "name": "ChatGPT",
+    "url": "https://chat.openai.com",
+    "domain": "openai.com",
+    "fallback": "C",
+    "iconType": "auto"
+  },
+  {
+    "name": "Gemini",
+    "url": "https://gemini.google.com",
+    "domain": "gemini.google.com",
+    "fallback": "G",
+    "iconType": "auto"
+  },
+  {
+    "name": "阿里云盘",
+    "url": "https://www.alipan.com",
+    "domain": "alipan.com",
+    "fallback": "云",
+    "iconType": "auto"
+  },
+  {
+    "name": "Gmail",
+    "url": "https://mail.google.com",
+    "domain": "gmail.com",
+    "fallback": "G",
+    "iconType": "auto"
+  },
+  {
+    "name": "Google 艺术",
+    "url": "https://artsandculture.google.com",
+    "domain": "artsandculture.google.com",
+    "fallback": "🎨",
+    "iconType": "auto"
+  },
+  {
+    "name": "维基百科",
+    "url": "https://zh.wikipedia.org",
+    "domain": "wikipedia.org",
+    "fallback": "W",
+    "iconType": "auto"
+  },
+  {
+    "name": "Google",
+    "url": "https://www.google.com",
+    "domain": "google.com",
+    "fallback": "G",
+    "iconType": "auto"
+  },
+  {
+    "name": "纽约时报",
+    "url": "https://www.nytimes.com",
+    "domain": "nytimes.com",
+    "fallback": "T",
+    "iconType": "auto"
+  },
+  {
+    "name": "BBC News 中文",
+    "url": "https://www.bbc.com/zhongwen/simp",
+    "domain": "bbc.com",
+    "fallback": "BBC",
+    "iconType": "auto"
+  },
+  {
+    "name": "豆瓣电影",
+    "url": "https://movie.douban.com",
+    "domain": "douban.com",
+    "fallback": "豆",
+    "iconType": "auto"
+  },
+  {
+    "name": "猫跳盘搜",
+    "url": "https://www.maopan.top",
+    "domain": "maopan.top",
+    "fallback": "🐱",
+    "iconType": "auto"
+  },
+  {
+    "name": "UP云搜",
+    "url": "https://www.upyunso.com",
+    "domain": "upyunso.com",
+    "fallback": "🔍",
+    "iconType": "auto"
+  },
+  {
+    "name": "磁力熊",
+    "url": "https://www.cilixiong.com",
+    "domain": "cilixiong.com",
+    "fallback": "🐼",
+    "iconType": "auto"
+  },
+  {
+    "name": "得到",
+    "url": "https://www.dedao.cn",
+    "domain": "dedao.cn",
+    "fallback": "得",
+    "iconType": "auto"
+  },
+  {
+    "name": "Shadowsocks",
+    "url": "https://shadowsocks.org",
+    "domain": "shadowsocks.org",
+    "fallback": "S",
+    "iconType": "auto"
+  },
+  {
+    "name": "Internet Archive",
+    "url": "https://archive.org",
+    "domain": "archive.org",
+    "fallback": "🏛️",
+    "iconType": "auto"
+  },
+  {
+    "name": "GitHub",
+    "url": "https://github.com",
+    "domain": "github.com",
+    "fallback": "GH",
+    "iconType": "auto"
+  },
+  {
+    "name": "单元 01 LED 元件的基础...",
+    "url": "#",
+    "domain": "",
+    "fallback": "单",
+    "iconType": "text"
+  },
+  {
+    "name": "新疆智慧赋示教投...",
+    "url": "#",
+    "domain": "",
+    "fallback": "新",
+    "iconType": "text"
+  },
+  {
+    "name": "Sora",
+    "url": "https://sora.com",
+    "domain": "sora.com",
+    "fallback": "S",
+    "iconType": "auto"
+  },
+  {
+    "name": "淘宝",
+    "url": "https://www.taobao.com",
+    "iconType": "auto",
+    "customIcon": "",
+    "domain": "www.taobao.com",
+    "fallback": "淘"
+  }
+]
