@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人收藏 - 网址导航</title>
+    <title>我的网址导航</title>
     <style>
         * {
             margin: 0;
@@ -11,1325 +11,308 @@
             box-sizing: border-box;
         }
 
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #ffd4e5 0%, #e5d4ff 50%, #d4e5ff 100%);
-            position: relative;
-        }
-
-        /* 流动线条背景 */
-        .wave {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .wave-path {
-            fill: none;
-            stroke-width: 2;
-            opacity: 0.15;
-            animation: drift 20s ease-in-out infinite;
-        }
-
-        .wave-path-1 {
-            stroke: #ff6b9d;
-            animation-duration: 25s;
-            animation-delay: 0s;
-        }
-
-        .wave-path-2 {
-            stroke: #a855f7;
-            animation-duration: 30s;
-            animation-delay: -5s;
-        }
-
-        .wave-path-3 {
-            stroke: #4285f4;
-            animation-duration: 35s;
-            animation-delay: -10s;
-        }
-
-        @keyframes drift {
-            0%, 100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            25% {
-                transform: translate(5%, 5%) rotate(5deg);
-            }
-            50% {
-                transform: translate(-3%, 8%) rotate(-3deg);
-            }
-            75% {
-                transform: translate(8%, -5%) rotate(8deg);
-            }
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
         }
 
         .container {
-            height: 100vh;
-            padding: 60px 80px 60px 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .bookmark-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 30px;
-            max-width: 1300px;
-            width: 100%;
-            max-height: 100%;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .bookmark-grid::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .bookmark-grid::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .bookmark-grid::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-
-        .bookmark-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            transition: transform 0.2s;
-            cursor: grab;
-            user-select: none;
-        }
-
-        .bookmark-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .bookmark-item.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-        }
-
-        .bookmark-item.drag-over {
-            transform: scale(1.1);
-        }
-
-        .icon-wrapper {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            background: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .icon-wrapper img {
-            width: 48px;
-            height: 48px;
-            object-fit: contain;
-        }
-
-        .icon-wrapper .fallback {
-            font-size: 36px;
-            font-weight: bold;
-            color: #666;
-        }
-
-        .bookmark-name {
-            font-size: 13px;
-            color: #333;
+        header {
             text-align: center;
-            max-width: 100px;
-            line-height: 1.3;
-        }
-
-        .badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #4285f4;
             color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-            z-index: 2;
+            margin-bottom: 15px;
+            padding: 10px 0;
         }
 
-        /* 编辑按钮 */
-        .edit-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.5);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        body.edit-mode .bookmark-item:hover .edit-btn {
-            opacity: 1;
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
         }
 
-        .edit-btn:hover {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        /* 全局编辑按钮 */
-        .global-edit-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(100, 100, 100, 0.7);
-            color: white;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-        }
-
-        .global-edit-btn:hover,
-        .show-edit-btn .global-edit-btn {
-            opacity: 1;
-        }
-
-        .global-edit-btn:hover {
-            background: rgba(80, 80, 80, 0.9);
-            transform: scale(1.1);
-        }
-
-        body.edit-mode .global-edit-btn {
-            background: rgba(66, 133, 244, 0.9);
-            opacity: 1;
-        }
-
-        body.edit-mode .global-edit-btn:hover {
-            background: rgba(53, 122, 232, 1);
-        }
-
-        /* 添加按钮 */
-        .add-bookmark-btn {
-            position: fixed;
-            bottom: 110px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(76, 175, 80, 0.9);
-            color: white;
-            border: none;
-            font-size: 32px;
-            line-height: 1;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s;
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        body.edit-mode .add-bookmark-btn {
-            display: flex;
-            animation: fadeInScale 0.3s ease forwards;
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .add-bookmark-btn:hover {
-            background: rgba(67, 160, 71, 1);
-            transform: scale(1.1) !important;
-        }
-
-        /* 导入导出按钮 */
-        .import-export-btns {
-            position: fixed;
-            bottom: 190px;
-            right: 30px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 100;
-        }
-
-        body.edit-mode .import-export-btns {
-            display: flex;
-            animation: fadeInScale 0.3s ease forwards;
-            animation-delay: 0.1s;
-            opacity: 0;
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .import-export-btns button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .export-btn {
-            background: rgba(255, 152, 0, 0.9);
-        }
-
-        .export-btn:hover {
-            background: rgba(245, 124, 0, 1);
-            transform: scale(1.1);
-        }
-
-        .import-btn {
-            background: rgba(33, 150, 243, 0.9);
-        }
-
-        .import-btn:hover {
-            background: rgba(25, 118, 210, 1);
-            transform: scale(1.1);
-        }
-
-        .import-file-input {
-            display: none;
-        }
-
-        /* 设置按钮 */
-        .settings-btn {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(100, 100, 100, 0.3);
-            color: white;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-        }
-
-        .settings-btn:hover,
-        .show-edit-btn .settings-btn {
-            opacity: 1;
-        }
-
-        .settings-btn:hover {
-            background: rgba(80, 80, 80, 0.7);
-            transform: scale(1.1);
-        }
-
-        /* 设置弹窗 */
-        .settings-modal .modal-content {
-            max-width: 600px;
-        }
-
-        .settings-group {
-            margin-bottom: 25px;
-        }
-
-        .settings-group h3 {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .settings-group p {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-
-        .github-url-input {
-            width: 100%;
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: monospace;
-        }
-
-        .github-url-input:focus {
-            outline: none;
-            border-color: #4285f4;
-        }
-
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .sync-status.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .sync-status.error {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .sync-status.info {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        /* 右下角触发区域 */
-        .edit-trigger-area {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 120px;
-            height: 120px;
-            z-index: 99;
-        }
-
-        /* 编辑弹窗 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
+        .search-box {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #4285f4;
-        }
-
-        .icon-preview {
+            border-radius: 50px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-top: 10px;
         }
 
-        .icon-preview-box {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-        }
-
-        .icon-preview-box img {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
-        }
-
-        .btn {
+        .search-box input {
             flex: 1;
-            padding: 12px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            outline: none;
+            font-size: 0.95rem;
+            padding: 5px;
+        }
+
+        .search-box button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .search-box button:hover {
+            transform: scale(1.05);
+        }
+
+        .category {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .category h2 {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #667eea;
+            display: inline-block;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .link-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .link-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .link-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 4px;
+        }
+
+        .link-name {
+            font-size: 0.8rem;
             font-weight: 500;
+            color: #333;
+            margin-top: 2px;
+            line-height: 1.2;
         }
 
-        .btn-primary {
-            background: #4285f4;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #357ae8;
-        }
-
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #666;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-
-        .btn-delete {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background: #da190b;
-        }
-
-        .help-text {
-            font-size: 12px;
+        .link-desc {
+            font-size: 0.75rem;
             color: #999;
-            margin-top: 5px;
+            margin-top: -5px;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 15px 0;
+            margin-top: 15px;
+            opacity: 0.9;
+            font-size: 0.85rem;
+        }
+
+        /* 加载动画样式 */
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            padding: 50px;
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 40px 20px;
+            header h1 {
+                font-size: 2rem;
             }
             
-            .bookmark-grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-                gap: 20px;
-            }
-            
-            .icon-wrapper {
-                width: 70px;
-                height: 70px;
+            .links-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 15px;
             }
 
-            .icon-wrapper img {
-                width: 40px;
-                height: 40px;
+            .category {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 流动线条背景 -->
-    <svg class="wave" xmlns="http://www.w3.org/2000/svg">
-        <path class="wave-path wave-path-1" d="M0,100 Q250,50 500,100 T1000,100 T1500,100 T2000,100" />
-        <path class="wave-path wave-path-2" d="M0,200 Q300,150 600,200 T1200,200 T1800,200 T2400,200" />
-        <path class="wave-path wave-path-3" d="M0,300 Q200,250 400,300 T800,300 T1200,300 T1600,300" />
-        <path class="wave-path wave-path-1" d="M0,400 Q350,350 700,400 T1400,400 T2100,400" />
-        <path class="wave-path wave-path-2" d="M0,500 Q280,480 560,500 T1120,500 T1680,500" />
-        <path class="wave-path wave-path-3" d="M100,150 Q400,100 700,150 T1300,150 T1900,150" />
-    </svg>
-
     <div class="container">
-        <div class="bookmark-grid" id="bookmarkGrid">
-            <!-- 书签项将通过 JavaScript 动态生成 -->
+        <header>
+            <h1>🚀 我的网址导航</h1>
+            <p>收藏你最喜欢的网站，快速访问常用服务</p>
+        </header>
+
+        <div class="search-box">
+            <input type="text" placeholder="搜索网站或输入网址..." id="searchInput">
+            <button onclick="search()">搜索</button>
         </div>
-    </div>
 
-    <!-- 右下角触发区域 -->
-    <div class="edit-trigger-area" id="editTriggerArea"></div>
-
-    <!-- 设置按钮 -->
-    <button class="settings-btn" id="settingsBtn" title="设置">⚙️</button>
-
-    <!-- 导入导出按钮 -->
-    <div class="import-export-btns">
-        <button class="export-btn" id="exportBtn" title="导出书签">📤</button>
-        <button class="import-btn" id="importBtn" title="导入书签">📥</button>
-    </div>
-    <input type="file" class="import-file-input" id="importFileInput" accept=".json">
-
-    <!-- 添加书签按钮 -->
-    <button class="add-bookmark-btn" id="addBookmarkBtn" title="添加书签">
-        +
-    </button>
-
-    <!-- 全局编辑按钮 -->
-    <button class="global-edit-btn" id="globalEditBtn" title="编辑模式">
-        ✏️
-    </button>
-
-    <!-- 编辑弹窗 -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">编辑书签</div>
-            <form id="editForm">
-                <div class="form-group">
-                    <label>名称</label>
-                    <input type="text" id="editName" required>
-                </div>
-                <div class="form-group">
-                    <label>网址</label>
-                    <input type="url" id="editUrl" required>
-                    <div class="help-text">输入完整的网址，如: https://www.example.com</div>
-                </div>
-                <div class="form-group">
-                    <label>图标类型</label>
-                    <select id="iconType">
-                        <option value="auto">自动获取网站图标</option>
-                        <option value="emoji">使用表情符号</option>
-                        <option value="text">使用文字</option>
-                        <option value="custom">自定义图片链接</option>
-                    </select>
-                </div>
-                <div class="form-group" id="iconCustomGroup" style="display: none;">
-                    <label>图标内容</label>
-                    <input type="text" id="iconCustom" placeholder="输入表情符号、文字或图片链接">
-                    <div class="help-text">表情如: 🎨 / 文字如: A / 图片链接如: https://...</div>
-                </div>
-                <div class="form-group">
-                    <label>预览</label>
-                    <div class="icon-preview">
-                        <div class="icon-preview-box" id="iconPreview">
-                            <span>📌</span>
-                        </div>
-                        <span id="namePreview">书签名称</span>
-                    </div>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="btn btn-delete" id="deleteBtn">删除</button>
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
-                </div>
-            </form>
+        <div id="linksContainer">
+            <p class="loading">正在加载网址信息...</p>
         </div>
-    </div>
-
-    <!-- 设置弹窗 -->
-    <div class="modal settings-modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">设置</div>
-            <div class="settings-group">
-                <h3>GitHub 同步</h3>
-                <p>设置 GitHub Raw URL 后，每次打开页面会自动从 GitHub 拉取最新的书签数据。</p>
-                <input type="text" 
-                       class="github-url-input" 
-                       id="githubUrlInput" 
-                       placeholder="https://raw.githubusercontent.com/用户名/仓库名/main/bookmarks.json">
-                <div class="help-text" style="margin-top: 8px;">
-                    如何获取 Raw URL：<br>
-                    1. 在 GitHub 仓库中打开你的 bookmarks.json 文件<br>
-                    2. 点击 "Raw" 按钮<br>
-                    3. 复制浏览器地址栏的 URL
-                </div>
-                <div id="syncStatus" style="display: none;"></div>
-            </div>
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" id="settingsCancelBtn">取消</button>
-                <button type="button" class="btn btn-primary" id="settingsSaveBtn">保存</button>
-            </div>
-        </div>
+        
+        <footer>
+            <p>💡 提示：按 Ctrl+D 收藏本页，随时快速访问</p>
+            <p style="margin-top: 10px;">Made with ❤️ | 欢迎添加更多网站</p>
+        </footer>
     </div>
 
     <script>
-        // 书签数据
-        const bookmarks = [
-            { name: 'Jemch', url: 'https://www.jemch.com', domain: 'jemch.com', fallback: 'J', iconType: 'auto' },
-            { name: '网站收藏', url: '#', domain: '', fallback: '📑', iconType: 'emoji' },
-            { name: 'YouTube', url: 'https://www.youtube.com', domain: 'youtube.com', fallback: 'Y', iconType: 'auto' },
-            { name: 'SubEasy', url: 'https://www.subeasy.ai', domain: 'subeasy.ai', fallback: 'S', iconType: 'auto' },
-            { name: '哔哩哔哩', url: 'https://www.bilibili.com', domain: 'bilibili.com', fallback: 'B', badge: 'NEW', iconType: 'auto' },
-            { name: 'Notion', url: 'https://www.notion.so', domain: 'notion.so', fallback: 'N', iconType: 'auto' },
-            { name: 'Grok', url: 'https://grok.x.ai', domain: 'x.ai', fallback: 'G', iconType: 'auto' },
-            { name: 'Claude', url: 'https://claude.ai', domain: 'claude.ai', fallback: 'C', iconType: 'auto' },
-            { name: 'ChatGPT', url: 'https://chat.openai.com', domain: 'openai.com', fallback: 'C', iconType: 'auto' },
-            { name: 'Gemini', url: 'https://gemini.google.com', domain: 'gemini.google.com', fallback: 'G', iconType: 'auto' },
-            { name: '阿里云盘', url: 'https://www.alipan.com', domain: 'alipan.com', fallback: '云', iconType: 'auto' },
-            { name: 'Gmail', url: 'https://mail.google.com', domain: 'gmail.com', fallback: 'G', iconType: 'auto' },
-            { name: 'Google 艺术', url: 'https://artsandculture.google.com', domain: 'artsandculture.google.com', fallback: '🎨', iconType: 'auto' },
-            { name: '维基百科', url: 'https://zh.wikipedia.org', domain: 'wikipedia.org', fallback: 'W', iconType: 'auto' },
-            { name: 'Google', url: 'https://www.google.com', domain: 'google.com', fallback: 'G', iconType: 'auto' },
-            { name: '纽约时报', url: 'https://www.nytimes.com', domain: 'nytimes.com', fallback: 'T', iconType: 'auto' },
-            { name: 'BBC News 中文', url: 'https://www.bbc.com/zhongwen/simp', domain: 'bbc.com', fallback: 'BBC', iconType: 'auto' },
-            { name: '豆瓣电影', url: 'https://movie.douban.com', domain: 'douban.com', fallback: '豆', iconType: 'auto' },
-            { name: '猫跳盘搜', url: 'https://www.maopan.top', domain: 'maopan.top', fallback: '🐱', iconType: 'auto' },
-            { name: 'UP云搜', url: 'https://www.upyunso.com', domain: 'upyunso.com', fallback: '🔍', iconType: 'auto' },
-            { name: '磁力熊', url: 'https://www.cilixiong.com', domain: 'cilixiong.com', fallback: '🐼', iconType: 'auto' },
-            { name: '得到', url: 'https://www.dedao.cn', domain: 'dedao.cn', fallback: '得', iconType: 'auto' },
-            { name: 'Shadowsocks', url: 'https://shadowsocks.org', domain: 'shadowsocks.org', fallback: 'S', iconType: 'auto' },
-            { name: 'Internet Archive', url: 'https://archive.org', domain: 'archive.org', fallback: '🏛️', iconType: 'auto' },
-            { name: 'GitHub', url: 'https://github.com', domain: 'github.com', fallback: 'GH', iconType: 'auto' },
-            { name: '单元 01 LED 元件的基础...', url: '#', domain: '', fallback: '单', iconType: 'text' },
-            { name: '新疆智慧赋示教投...', url: '#', domain: '', fallback: '新', iconType: 'text' },
-            { name: 'Sora', url: 'https://sora.com', domain: 'sora.com', fallback: 'S', iconType: 'auto' }
-        ];
+        // 搜索功能
+        function search() {
+            const input = document.getElementById('searchInput').value.trim();
+            if (!input) return;
 
-        // 从 localStorage 加载书签数据
-        function loadBookmarks() {
-            const saved = localStorage.getItem('bookmarksData');
-            if (saved) {
-                try {
-                    return JSON.parse(saved);
-                } catch (e) {
-                    return bookmarks;
+            // 检查是否包含协议头，如果不包含，默认使用 Google 搜索
+            if (input.startsWith('http://') || input.startsWith('https://')) {
+                // 如果用户输入了协议头，直接打开链接
+                window.open(input, '_blank');
+            } else if (input.includes('.')) {
+                // 如果包含点号，也认为是网址，自动添加 https://
+                let url = input;
+                if (!url.startsWith('https://') && !url.startsWith('http://')) {
+                    url = 'https://' + url;
                 }
+                window.open(url, '_blank');
+            } else {
+                // 否则，使用 Google 搜索
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(input)}`, '_blank');
             }
-            return bookmarks;
         }
 
-        // 保存书签数据
-        function saveBookmarks(data) {
-            localStorage.setItem('bookmarksData', JSON.stringify(data));
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+
+        // 动态加载网址功能
+        const BOOKMARKS_URL = 'https://324893.xyz/bookmarks.json';
+        const linksContainer = document.getElementById('linksContainer');
+
+        // 检查URL是否包含协议头
+        function checkProtocol(url) {
+            return url.startsWith('http://') || url.startsWith('https://');
         }
 
-        // 从 GitHub 加载书签
-        async function loadFromGitHub() {
-            const githubUrl = localStorage.getItem('githubSyncUrl');
-            if (!githubUrl) return false;
+        // 创建单个链接元素的函数
+        function createLinkItem(link) {
+            // 自动添加 https://，除非网址已包含 http:// 或 https://
+            const finalUrl = checkProtocol(link.url) ? link.url : 'https://' + link.url;
 
+            const linkItem = document.createElement('a');
+            linkItem.href = finalUrl;
+            linkItem.className = 'link-item';
+            linkItem.target = '_blank';
+
+            // 图标
+            const linkIcon = document.createElement('div');
+            linkIcon.className = 'link-icon';
+            linkIcon.innerHTML = link.icon || '🔗'; // 使用 JSON 中的 icon 或默认图标
+
+            // 名称
+            const linkName = document.createElement('div');
+            linkName.className = 'link-name';
+            linkName.textContent = link.name;
+
+            linkItem.appendChild(linkIcon);
+            linkItem.appendChild(linkName);
+
+            return linkItem;
+        }
+
+        // 创建分类元素的函数
+        function createCategory(categoryData) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.textContent = categoryData.category;
+
+            const linksGrid = document.createElement('div');
+            linksGrid.className = 'links-grid';
+
+            categoryData.links.forEach(link => {
+                linksGrid.appendChild(createLinkItem(link));
+            });
+
+            categoryDiv.appendChild(categoryTitle);
+            categoryDiv.appendChild(linksGrid);
+
+            return categoryDiv;
+        }
+
+        // 加载并渲染书签
+        async function loadBookmarks() {
             try {
-                const response = await fetch(githubUrl);
+                const response = await fetch(BOOKMARKS_URL);
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const data = await response.json();
+                const bookmarks = await response.json();
                 
-                if (!Array.isArray(data)) {
-                    throw new Error('数据格式错误');
-                }
+                // 清空加载提示
+                linksContainer.innerHTML = ''; 
 
-                // 保存到本地
-                saveBookmarks(data);
-                return true;
-            } catch (error) {
-                console.error('从 GitHub 加载失败:', error);
-                return false;
-            }
-        }
-
-        // 渲染书签
-        function renderBookmarks() {
-            const grid = document.getElementById('bookmarkGrid');
-            const bookmarksData = loadBookmarks();
-            
-            grid.innerHTML = bookmarksData.map((bookmark, index) => {
-                let iconHtml = '';
-                
-                if (bookmark.iconType === 'auto' && bookmark.domain) {
-                    iconHtml = `
-                        <img src="https://www.google.com/s2/favicons?domain=${bookmark.domain}&sz=128" 
-                             alt="${bookmark.name}" 
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="fallback" style="display:none;">${bookmark.fallback}</span>
-                    `;
-                } else if (bookmark.iconType === 'custom' && bookmark.customIcon && bookmark.customIcon.startsWith('http')) {
-                    iconHtml = `
-                        <img src="${bookmark.customIcon}" 
-                             alt="${bookmark.name}" 
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="fallback" style="display:none;">${bookmark.fallback}</span>
-                    `;
-                } else {
-                    iconHtml = `<span class="fallback">${bookmark.customIcon || bookmark.fallback}</span>`;
-                }
-                
-                return `
-                    <a href="${bookmark.url}" 
-                       class="bookmark-item" 
-                       target="_blank" 
-                       data-name="${bookmark.name}"
-                       data-index="${index}"
-                       draggable="true">
-                        <div class="icon-wrapper">
-                            ${iconHtml}
-                            ${bookmark.badge ? `<span class="badge">${bookmark.badge}</span>` : ''}
-                        </div>
-                        <div class="bookmark-name">${bookmark.name}</div>
-                        <button class="edit-btn" onclick="event.preventDefault(); event.stopPropagation(); openEditModal(${index})">✏️</button>
-                    </a>
-                `;
-            }).join('');
-
-            // 添加拖拽事件监听
-            initDragAndDrop();
-        }
-
-        // 拖拽功能
-        let draggedElement = null;
-        let draggedIndex = null;
-
-        function initDragAndDrop() {
-            const items = document.querySelectorAll('.bookmark-item');
-
-            items.forEach((item, index) => {
-                item.addEventListener('dragstart', handleDragStart);
-                item.addEventListener('dragend', handleDragEnd);
-                item.addEventListener('dragover', handleDragOver);
-                item.addEventListener('drop', handleDrop);
-                item.addEventListener('dragenter', handleDragEnter);
-                item.addEventListener('dragleave', handleDragLeave);
-            });
-        }
-
-        function handleDragStart(e) {
-            draggedElement = this;
-            draggedIndex = parseInt(this.dataset.index);
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
-        }
-
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            
-            // 移除所有高亮
-            document.querySelectorAll('.bookmark-item').forEach(item => {
-                item.classList.remove('drag-over');
-            });
-        }
-
-        function handleDragOver(e) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
-
-        function handleDragEnter(e) {
-            if (this !== draggedElement) {
-                this.classList.add('drag-over');
-            }
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            if (e.stopPropagation) {
-                e.stopPropagation();
-            }
-
-            if (draggedElement !== this) {
-                const dropIndex = parseInt(this.dataset.index);
-                const grid = document.getElementById('bookmarkGrid');
-                const items = Array.from(grid.children);
-
-                // 重新排列元素
-                if (draggedIndex < dropIndex) {
-                    grid.insertBefore(draggedElement, this.nextSibling);
-                } else {
-                    grid.insertBefore(draggedElement, this);
-                }
-
-                // 更新索引
-                Array.from(grid.children).forEach((item, idx) => {
-                    item.dataset.index = idx;
+                // 遍历 JSON 数据，创建并添加分类
+                bookmarks.forEach(categoryData => {
+                    linksContainer.appendChild(createCategory(categoryData));
                 });
 
-                // 保存新顺序
-                saveBookmarkOrder();
-            }
-
-            this.classList.remove('drag-over');
-            return false;
-        }
-
-        // 保存书签顺序
-        function saveBookmarkOrder() {
-            const items = document.querySelectorAll('.bookmark-item');
-            const bookmarksData = loadBookmarks();
-            const newOrder = [];
-            
-            items.forEach(item => {
-                const name = item.dataset.name;
-                const bookmark = bookmarksData.find(b => b.name === name);
-                if (bookmark) {
-                    newOrder.push(bookmark);
-                }
-            });
-            
-            saveBookmarks(newOrder);
-        }
-
-        // 编辑功能
-        let currentEditIndex = null;
-
-        function openEditModal(index) {
-            currentEditIndex = index;
-            const bookmarksData = loadBookmarks();
-            const bookmark = bookmarksData[index];
-            
-            document.getElementById('editName').value = bookmark.name;
-            document.getElementById('editUrl').value = bookmark.url;
-            document.getElementById('iconType').value = bookmark.iconType || 'auto';
-            document.getElementById('iconCustom').value = bookmark.customIcon || '';
-            
-            // 显示删除按钮
-            document.getElementById('deleteBtn').style.display = 'block';
-            
-            updateIconCustomGroup();
-            updatePreview();
-            
-            document.getElementById('editModal').classList.add('show');
-        }
-
-        function openAddModal() {
-            currentEditIndex = null;
-            
-            // 清空表单
-            document.getElementById('editName').value = '';
-            document.getElementById('editUrl').value = '';
-            document.getElementById('iconType').value = 'auto';
-            document.getElementById('iconCustom').value = '';
-            
-            // 隐藏删除按钮
-            document.getElementById('deleteBtn').style.display = 'none';
-            
-            // 更新标题
-            document.querySelector('.modal-header').textContent = '添加书签';
-            
-            updateIconCustomGroup();
-            updatePreview();
-            
-            document.getElementById('editModal').classList.add('show');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('show');
-            document.querySelector('.modal-header').textContent = '编辑书签';
-            currentEditIndex = null;
-        }
-
-        function updateIconCustomGroup() {
-            const iconType = document.getElementById('iconType').value;
-            const customGroup = document.getElementById('iconCustomGroup');
-            const customInput = document.getElementById('iconCustom');
-            
-            if (iconType === 'auto') {
-                customGroup.style.display = 'none';
-            } else {
-                customGroup.style.display = 'block';
-                if (iconType === 'emoji') {
-                    customInput.placeholder = '输入表情符号，如: 🎨';
-                } else if (iconType === 'text') {
-                    customInput.placeholder = '输入文字，如: A';
-                } else if (iconType === 'custom') {
-                    customInput.placeholder = '输入图片链接，如: https://...';
-                }
-            }
-            updatePreview();
-        }
-
-        function updatePreview() {
-            const name = document.getElementById('editName').value || '书签名称';
-            const url = document.getElementById('editUrl').value;
-            const iconType = document.getElementById('iconType').value;
-            const customIcon = document.getElementById('iconCustom').value;
-            const preview = document.getElementById('iconPreview');
-            
-            document.getElementById('namePreview').textContent = name;
-            
-            if (iconType === 'auto' && url) {
-                try {
-                    const domain = new URL(url).hostname;
-                    preview.innerHTML = `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=128" alt="${name}" onerror="this.style.display='none';">`;
-                } catch {
-                    preview.innerHTML = '<span>🔗</span>';
-                }
-            } else if (iconType === 'custom' && customIcon && customIcon.startsWith('http')) {
-                preview.innerHTML = `<img src="${customIcon}" alt="${name}" onerror="this.parentElement.innerHTML='<span>❌</span>';">`;
-            } else {
-                preview.innerHTML = `<span>${customIcon || '📌'}</span>`;
+            } catch (error) {
+                console.error('Failed to fetch bookmarks:', error);
+                linksContainer.innerHTML = `<p class="loading" style="color: #ffcccc;">❌ 加载网址信息失败，请检查网络或 JSON 文件地址/格式。</p>`;
             }
         }
 
-        function saveEdit() {
-            const bookmarksData = loadBookmarks();
-            const name = document.getElementById('editName').value.trim();
-            const url = document.getElementById('editUrl').value.trim();
-            const iconType = document.getElementById('iconType').value;
-            const customIcon = document.getElementById('iconCustom').value.trim();
-            
-            if (!name || !url) {
-                alert('请填写名称和网址');
-                return;
-            }
-
-            // 验证 URL 格式
-            try {
-                new URL(url);
-            } catch {
-                alert('请输入有效的网址（需要包含 http:// 或 https://）');
-                return;
-            }
-            
-            // 创建书签对象
-            const bookmark = {
-                name,
-                url,
-                iconType,
-                customIcon,
-                domain: iconType === 'auto' ? new URL(url).hostname : '',
-                fallback: customIcon || name.charAt(0)
-            };
-
-            if (currentEditIndex === null) {
-                // 添加新书签
-                bookmarksData.push(bookmark);
-            } else {
-                // 更新现有书签
-                bookmarksData[currentEditIndex] = {
-                    ...bookmarksData[currentEditIndex],
-                    ...bookmark
-                };
-            }
-            
-            saveBookmarks(bookmarksData);
-            closeEditModal();
-            renderBookmarks();
-        }
-
-        function deleteBookmark() {
-            if (currentEditIndex === null) return;
-            
-            if (!confirm('确定要删除这个书签吗？')) return;
-            
-            const bookmarksData = loadBookmarks();
-            bookmarksData.splice(currentEditIndex, 1);
-            saveBookmarks(bookmarksData);
-            closeEditModal();
-            renderBookmarks();
-        }
-
-        // 阻止默认的点击行为（拖拽时）
-        document.addEventListener('DOMContentLoaded', async () => {
-            // 首先尝试从 GitHub 加载
-            const githubUrl = localStorage.getItem('githubSyncUrl');
-            if (githubUrl) {
-                const loaded = await loadFromGitHub();
-                if (loaded) {
-                    console.log('已从 GitHub 同步最新书签');
-                }
-            }
-
-            renderBookmarks();
-            
-            // 阻止拖拽时打开链接
-            document.addEventListener('click', (e) => {
-                const item = e.target.closest('.bookmark-item');
-                if (item && item.classList.contains('dragging')) {
-                    e.preventDefault();
-                }
-            });
-
-            // 右下角触发区域 - 鼠标移入显示编辑按钮
-            const triggerArea = document.getElementById('editTriggerArea');
-            triggerArea.addEventListener('mouseenter', () => {
-                document.body.classList.add('show-edit-btn');
-            });
-
-            triggerArea.addEventListener('mouseleave', () => {
-                // 如果不在编辑模式，则隐藏按钮
-                if (!document.body.classList.contains('edit-mode')) {
-                    document.body.classList.remove('show-edit-btn');
-                }
-            });
-
-            // 全局编辑按钮
-            document.getElementById('globalEditBtn').addEventListener('click', () => {
-                document.body.classList.toggle('edit-mode');
-                const btn = document.getElementById('globalEditBtn');
-                if (document.body.classList.contains('edit-mode')) {
-                    btn.textContent = '✓';
-                    btn.title = '完成编辑';
-                    document.body.classList.add('show-edit-btn');
-                } else {
-                    btn.textContent = '✏️';
-                    btn.title = '编辑模式';
-                }
-            });
-
-            // 添加书签按钮
-            document.getElementById('addBookmarkBtn').addEventListener('click', () => {
-                openAddModal();
-            });
-
-            // 导出书签
-            document.getElementById('exportBtn').addEventListener('click', () => {
-                const bookmarksData = loadBookmarks();
-                const dataStr = JSON.stringify(bookmarksData, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `bookmarks_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                alert('书签已导出！\n\n你可以将此文件上传到 GitHub 仓库作为备份。');
-            });
-
-            // 导入书签
-            document.getElementById('importBtn').addEventListener('click', () => {
-                document.getElementById('importFileInput').click();
-            });
-
-            document.getElementById('importFileInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const importedData = JSON.parse(event.target.result);
-                        
-                        if (!Array.isArray(importedData)) {
-                            throw new Error('无效的书签数据格式');
-                        }
-
-                        // 验证数据结构
-                        const isValid = importedData.every(item => 
-                            item.name && item.url && typeof item.name === 'string' && typeof item.url === 'string'
-                        );
-
-                        if (!isValid) {
-                            throw new Error('书签数据格式不正确');
-                        }
-
-                        // 询问是否覆盖
-                        const shouldMerge = confirm(
-                            `检测到 ${importedData.length} 个书签\n\n` +
-                            '确定：替换当前所有书签\n' +
-                            '取消：合并到现有书签'
-                        );
-
-                        if (shouldMerge) {
-                            // 替换
-                            saveBookmarks(importedData);
-                        } else {
-                            // 合并
-                            const currentData = loadBookmarks();
-                            const mergedData = [...currentData, ...importedData];
-                            saveBookmarks(mergedData);
-                        }
-
-                        renderBookmarks();
-                        alert('书签导入成功！');
-                        
-                    } catch (error) {
-                        alert('导入失败：' + error.message);
-                    }
-                };
-                reader.readAsText(file);
-                
-                // 重置文件输入
-                e.target.value = '';
-            });
-
-            // 编辑弹窗事件
-            document.getElementById('iconType').addEventListener('change', updateIconCustomGroup);
-            document.getElementById('editName').addEventListener('input', updatePreview);
-            document.getElementById('editUrl').addEventListener('input', updatePreview);
-            document.getElementById('iconCustom').addEventListener('input', updatePreview);
-            document.getElementById('cancelBtn').addEventListener('click', closeEditModal);
-            document.getElementById('deleteBtn').addEventListener('click', deleteBookmark);
-            
-            document.getElementById('editForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                saveEdit();
-            });
-
-            // 点击弹窗外部关闭
-            document.getElementById('editModal').addEventListener('click', (e) => {
-                if (e.target.id === 'editModal') {
-                    closeEditModal();
-                }
-            });
-
-            // 设置按钮
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                const currentUrl = localStorage.getItem('githubSyncUrl') || '';
-                document.getElementById('githubUrlInput').value = currentUrl;
-                document.getElementById('syncStatus').style.display = 'none';
-                document.getElementById('settingsModal').classList.add('show');
-            });
-
-            // 设置弹窗
-            document.getElementById('settingsCancelBtn').addEventListener('click', () => {
-                document.getElementById('settingsModal').classList.remove('show');
-            });
-
-            document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
-                const url = document.getElementById('githubUrlInput').value.trim();
-                const statusDiv = document.getElementById('syncStatus');
-                
-                if (!url) {
-                    // 清除设置
-                    localStorage.removeItem('githubSyncUrl');
-                    statusDiv.className = 'sync-status info';
-                    statusDiv.textContent = '✓ 已清除 GitHub 同步设置';
-                    statusDiv.style.display = 'flex';
-                    setTimeout(() => {
-                        document.getElementById('settingsModal').classList.remove('show');
-                    }, 1500);
-                    return;
-                }
-
-                // 验证 URL 格式
-                if (!url.startsWith('https://raw.githubusercontent.com/')) {
-                    statusDiv.className = 'sync-status error';
-                    statusDiv.textContent = '❌ 请输入有效的 GitHub Raw URL';
-                    statusDiv.style.display = 'flex';
-                    return;
-                }
-
-                // 测试 URL 是否可访问
-                statusDiv.className = 'sync-status info';
-                statusDiv.textContent = '⏳ 正在测试连接...';
-                statusDiv.style.display = 'flex';
-
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`无法访问 (${response.status})`);
-                    }
-                    const data = await response.json();
-                    
-                    if (!Array.isArray(data)) {
-                        throw new Error('文件格式不正确');
-                    }
-
-                    // 保存设置
-                    localStorage.setItem('githubSyncUrl', url);
-                    
-                    // 更新书签
-                    saveBookmarks(data);
-                    renderBookmarks();
-
-                    statusDiv.className = 'sync-status success';
-                    statusDiv.textContent = `✓ 连接成功！已同步 ${data.length} 个书签`;
-                    statusDiv.style.display = 'flex';
-
-                    setTimeout(() => {
-                        document.getElementById('settingsModal').classList.remove('show');
-                    }, 1500);
-
-                } catch (error) {
-                    statusDiv.className = 'sync-status error';
-                    statusDiv.textContent = `❌ 连接失败: ${error.message}`;
-                    statusDiv.style.display = 'flex';
-                }
-            });
-
-            // 点击设置弹窗外部关闭
-            document.getElementById('settingsModal').addEventListener('click', (e) => {
-                if (e.target.id === 'settingsModal') {
-                    document.getElementById('settingsModal').classList.remove('show');
-                }
-            });
-        });
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', loadBookmarks);
     </script>
 </body>
 </html>
