@@ -291,6 +291,164 @@
             transform: scale(1.1) !important;
         }
 
+        /* 导入导出按钮 */
+        .import-export-btns {
+            position: fixed;
+            bottom: 190px;
+            right: 30px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        body.edit-mode .import-export-btns {
+            display: flex;
+            animation: fadeInScale 0.3s ease forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .import-export-btns button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .export-btn {
+            background: rgba(255, 152, 0, 0.9);
+        }
+
+        .export-btn:hover {
+            background: rgba(245, 124, 0, 1);
+            transform: scale(1.1);
+        }
+
+        .import-btn {
+            background: rgba(33, 150, 243, 0.9);
+        }
+
+        .import-btn:hover {
+            background: rgba(25, 118, 210, 1);
+            transform: scale(1.1);
+        }
+
+        .import-file-input {
+            display: none;
+        }
+
+        /* 设置按钮 */
+        .settings-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(100, 100, 100, 0.3);
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .settings-btn:hover,
+        .show-edit-btn .settings-btn {
+            opacity: 1;
+        }
+
+        .settings-btn:hover {
+            background: rgba(80, 80, 80, 0.7);
+            transform: scale(1.1);
+        }
+
+        /* 设置弹窗 */
+        .settings-modal .modal-content {
+            max-width: 600px;
+        }
+
+        .settings-group {
+            margin-bottom: 25px;
+        }
+
+        .settings-group h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .settings-group p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .github-url-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .github-url-input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .sync-status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .sync-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .sync-status.info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
         /* 右下角触发区域 */
         .edit-trigger-area {
             position: fixed;
@@ -479,6 +637,16 @@
     <!-- 右下角触发区域 -->
     <div class="edit-trigger-area" id="editTriggerArea"></div>
 
+    <!-- 设置按钮 -->
+    <button class="settings-btn" id="settingsBtn" title="设置">⚙️</button>
+
+    <!-- 导入导出按钮 -->
+    <div class="import-export-btns">
+        <button class="export-btn" id="exportBtn" title="导出书签">📤</button>
+        <button class="import-btn" id="importBtn" title="导入书签">📥</button>
+    </div>
+    <input type="file" class="import-file-input" id="importFileInput" accept=".json">
+
     <!-- 添加书签按钮 -->
     <button class="add-bookmark-btn" id="addBookmarkBtn" title="添加书签">
         +
@@ -535,6 +703,32 @@
         </div>
     </div>
 
+    <!-- 设置弹窗 -->
+    <div class="modal settings-modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">设置</div>
+            <div class="settings-group">
+                <h3>GitHub 同步</h3>
+                <p>设置 GitHub Raw URL 后，每次打开页面会自动从 GitHub 拉取最新的书签数据。</p>
+                <input type="text" 
+                       class="github-url-input" 
+                       id="githubUrlInput" 
+                       placeholder="https://raw.githubusercontent.com/用户名/仓库名/main/bookmarks.json">
+                <div class="help-text" style="margin-top: 8px;">
+                    如何获取 Raw URL：<br>
+                    1. 在 GitHub 仓库中打开你的 bookmarks.json 文件<br>
+                    2. 点击 "Raw" 按钮<br>
+                    3. 复制浏览器地址栏的 URL
+                </div>
+                <div id="syncStatus" style="display: none;"></div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" id="settingsCancelBtn">取消</button>
+                <button type="button" class="btn btn-primary" id="settingsSaveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 书签数据
         const bookmarks = [
@@ -584,6 +778,31 @@
         // 保存书签数据
         function saveBookmarks(data) {
             localStorage.setItem('bookmarksData', JSON.stringify(data));
+        }
+
+        // 从 GitHub 加载书签
+        async function loadFromGitHub() {
+            const githubUrl = localStorage.getItem('githubSyncUrl');
+            if (!githubUrl) return false;
+
+            try {
+                const response = await fetch(githubUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (!Array.isArray(data)) {
+                    throw new Error('数据格式错误');
+                }
+
+                // 保存到本地
+                saveBookmarks(data);
+                return true;
+            } catch (error) {
+                console.error('从 GitHub 加载失败:', error);
+                return false;
+            }
         }
 
         // 渲染书签
@@ -883,7 +1102,16 @@
         }
 
         // 阻止默认的点击行为（拖拽时）
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 首先尝试从 GitHub 加载
+            const githubUrl = localStorage.getItem('githubSyncUrl');
+            if (githubUrl) {
+                const loaded = await loadFromGitHub();
+                if (loaded) {
+                    console.log('已从 GitHub 同步最新书签');
+                }
+            }
+
             renderBookmarks();
             
             // 阻止拖拽时打开链接
@@ -926,6 +1154,80 @@
                 openAddModal();
             });
 
+            // 导出书签
+            document.getElementById('exportBtn').addEventListener('click', () => {
+                const bookmarksData = loadBookmarks();
+                const dataStr = JSON.stringify(bookmarksData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `bookmarks_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert('书签已导出！\n\n你可以将此文件上传到 GitHub 仓库作为备份。');
+            });
+
+            // 导入书签
+            document.getElementById('importBtn').addEventListener('click', () => {
+                document.getElementById('importFileInput').click();
+            });
+
+            document.getElementById('importFileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        if (!Array.isArray(importedData)) {
+                            throw new Error('无效的书签数据格式');
+                        }
+
+                        // 验证数据结构
+                        const isValid = importedData.every(item => 
+                            item.name && item.url && typeof item.name === 'string' && typeof item.url === 'string'
+                        );
+
+                        if (!isValid) {
+                            throw new Error('书签数据格式不正确');
+                        }
+
+                        // 询问是否覆盖
+                        const shouldMerge = confirm(
+                            `检测到 ${importedData.length} 个书签\n\n` +
+                            '确定：替换当前所有书签\n' +
+                            '取消：合并到现有书签'
+                        );
+
+                        if (shouldMerge) {
+                            // 替换
+                            saveBookmarks(importedData);
+                        } else {
+                            // 合并
+                            const currentData = loadBookmarks();
+                            const mergedData = [...currentData, ...importedData];
+                            saveBookmarks(mergedData);
+                        }
+
+                        renderBookmarks();
+                        alert('书签导入成功！');
+                        
+                    } catch (error) {
+                        alert('导入失败：' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+                
+                // 重置文件输入
+                e.target.value = '';
+            });
+
             // 编辑弹窗事件
             document.getElementById('iconType').addEventListener('change', updateIconCustomGroup);
             document.getElementById('editName').addEventListener('input', updatePreview);
@@ -943,6 +1245,88 @@
             document.getElementById('editModal').addEventListener('click', (e) => {
                 if (e.target.id === 'editModal') {
                     closeEditModal();
+                }
+            });
+
+            // 设置按钮
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                const currentUrl = localStorage.getItem('githubSyncUrl') || '';
+                document.getElementById('githubUrlInput').value = currentUrl;
+                document.getElementById('syncStatus').style.display = 'none';
+                document.getElementById('settingsModal').classList.add('show');
+            });
+
+            // 设置弹窗
+            document.getElementById('settingsCancelBtn').addEventListener('click', () => {
+                document.getElementById('settingsModal').classList.remove('show');
+            });
+
+            document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
+                const url = document.getElementById('githubUrlInput').value.trim();
+                const statusDiv = document.getElementById('syncStatus');
+                
+                if (!url) {
+                    // 清除设置
+                    localStorage.removeItem('githubSyncUrl');
+                    statusDiv.className = 'sync-status info';
+                    statusDiv.textContent = '✓ 已清除 GitHub 同步设置';
+                    statusDiv.style.display = 'flex';
+                    setTimeout(() => {
+                        document.getElementById('settingsModal').classList.remove('show');
+                    }, 1500);
+                    return;
+                }
+
+                // 验证 URL 格式
+                if (!url.startsWith('https://raw.githubusercontent.com/')) {
+                    statusDiv.className = 'sync-status error';
+                    statusDiv.textContent = '❌ 请输入有效的 GitHub Raw URL';
+                    statusDiv.style.display = 'flex';
+                    return;
+                }
+
+                // 测试 URL 是否可访问
+                statusDiv.className = 'sync-status info';
+                statusDiv.textContent = '⏳ 正在测试连接...';
+                statusDiv.style.display = 'flex';
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`无法访问 (${response.status})`);
+                    }
+                    const data = await response.json();
+                    
+                    if (!Array.isArray(data)) {
+                        throw new Error('文件格式不正确');
+                    }
+
+                    // 保存设置
+                    localStorage.setItem('githubSyncUrl', url);
+                    
+                    // 更新书签
+                    saveBookmarks(data);
+                    renderBookmarks();
+
+                    statusDiv.className = 'sync-status success';
+                    statusDiv.textContent = `✓ 连接成功！已同步 ${data.length} 个书签`;
+                    statusDiv.style.display = 'flex';
+
+                    setTimeout(() => {
+                        document.getElementById('settingsModal').classList.remove('show');
+                    }, 1500);
+
+                } catch (error) {
+                    statusDiv.className = 'sync-status error';
+                    statusDiv.textContent = `❌ 连接失败: ${error.message}`;
+                    statusDiv.style.display = 'flex';
+                }
+            });
+
+            // 点击设置弹窗外部关闭
+            document.getElementById('settingsModal').addEventListener('click', (e) => {
+                if (e.target.id === 'settingsModal') {
+                    document.getElementById('settingsModal').classList.remove('show');
                 }
             });
         });
