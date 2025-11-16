@@ -248,6 +248,49 @@
             background: rgba(53, 122, 232, 1);
         }
 
+        /* 添加按钮 */
+        .add-bookmark-btn {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            border: none;
+            font-size: 32px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.edit-mode .add-bookmark-btn {
+            display: flex;
+            animation: fadeInScale 0.3s ease forwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .add-bookmark-btn:hover {
+            background: rgba(67, 160, 71, 1);
+            transform: scale(1.1) !important;
+        }
+
         /* 右下角触发区域 */
         .edit-trigger-area {
             position: fixed;
@@ -435,6 +478,11 @@
 
     <!-- 右下角触发区域 -->
     <div class="edit-trigger-area" id="editTriggerArea"></div>
+
+    <!-- 添加书签按钮 -->
+    <button class="add-bookmark-btn" id="addBookmarkBtn" title="添加书签">
+        +
+    </button>
 
     <!-- 全局编辑按钮 -->
     <button class="global-edit-btn" id="globalEditBtn" title="编辑模式">
@@ -697,6 +745,30 @@
             document.getElementById('iconType').value = bookmark.iconType || 'auto';
             document.getElementById('iconCustom').value = bookmark.customIcon || '';
             
+            // 显示删除按钮
+            document.getElementById('deleteBtn').style.display = 'block';
+            
+            updateIconCustomGroup();
+            updatePreview();
+            
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function openAddModal() {
+            currentEditIndex = null;
+            
+            // 清空表单
+            document.getElementById('editName').value = '';
+            document.getElementById('editUrl').value = '';
+            document.getElementById('iconType').value = 'auto';
+            document.getElementById('iconCustom').value = '';
+            
+            // 隐藏删除按钮
+            document.getElementById('deleteBtn').style.display = 'none';
+            
+            // 更新标题
+            document.querySelector('.modal-header').textContent = '添加书签';
+            
             updateIconCustomGroup();
             updatePreview();
             
@@ -705,6 +777,7 @@
 
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('show');
+            document.querySelector('.modal-header').textContent = '编辑书签';
             currentEditIndex = null;
         }
 
@@ -752,29 +825,45 @@
         }
 
         function saveEdit() {
-            if (currentEditIndex === null) return;
-            
             const bookmarksData = loadBookmarks();
-            const name = document.getElementById('editName').value;
-            const url = document.getElementById('editUrl').value;
+            const name = document.getElementById('editName').value.trim();
+            const url = document.getElementById('editUrl').value.trim();
             const iconType = document.getElementById('iconType').value;
-            const customIcon = document.getElementById('iconCustom').value;
+            const customIcon = document.getElementById('iconCustom').value.trim();
             
             if (!name || !url) {
                 alert('请填写名称和网址');
                 return;
             }
+
+            // 验证 URL 格式
+            try {
+                new URL(url);
+            } catch {
+                alert('请输入有效的网址（需要包含 http:// 或 https://）');
+                return;
+            }
             
-            // 更新书签数据
-            bookmarksData[currentEditIndex] = {
-                ...bookmarksData[currentEditIndex],
+            // 创建书签对象
+            const bookmark = {
                 name,
                 url,
                 iconType,
                 customIcon,
                 domain: iconType === 'auto' ? new URL(url).hostname : '',
-                fallback: customIcon || bookmarksData[currentEditIndex].fallback
+                fallback: customIcon || name.charAt(0)
             };
+
+            if (currentEditIndex === null) {
+                // 添加新书签
+                bookmarksData.push(bookmark);
+            } else {
+                // 更新现有书签
+                bookmarksData[currentEditIndex] = {
+                    ...bookmarksData[currentEditIndex],
+                    ...bookmark
+                };
+            }
             
             saveBookmarks(bookmarksData);
             closeEditModal();
@@ -830,6 +919,11 @@
                     btn.textContent = '✏️';
                     btn.title = '编辑模式';
                 }
+            });
+
+            // 添加书签按钮
+            document.getElementById('addBookmarkBtn').addEventListener('click', () => {
+                openAddModal();
             });
 
             // 编辑弹窗事件
