@@ -248,11 +248,12 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-            z-index: 100;
+            z-index: 102;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
+            pointer-events: auto;
         }
 
         .global-edit-btn:hover,
@@ -286,18 +287,17 @@
             color: white;
             border: none;
             font-size: 32px;
-            line-height: 1;
+            line-height: 60px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-            z-index: 100;
+            z-index: 101;
             display: none;
-            align-items: center;
-            justify-content: center;
+            pointer-events: auto;
         }
 
         body.edit-mode .add-bookmark-btn {
-            display: flex;
+            display: block;
             animation: fadeInScale 0.3s ease forwards;
             animation-delay: 0.15s;
             opacity: 0;
@@ -305,7 +305,7 @@
 
         .add-bookmark-btn:hover {
             background: rgba(67, 160, 71, 1);
-            transform: scale(1.1) !important;
+            transform: scale(1.1);
         }
 
         /* 导入导出按钮 */
@@ -351,10 +351,12 @@
             justify-content: center;
             color: white;
             position: relative;
+            pointer-events: auto;
         }
 
         .export-btn {
             background: rgba(255, 152, 0, 0.9);
+            z-index: 101;
         }
 
         .export-btn:hover {
