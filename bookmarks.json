@@ -8,13 +8,6 @@
     "customIcon": ""
   },
   {
-    "name": "网站收藏",
-    "url": "#",
-    "domain": "",
-    "fallback": "📑",
-    "iconType": "emoji"
-  },
-  {
     "name": "YouTube",
     "url": "https://www.youtube.com",
     "domain": "youtube.com",
@@ -31,16 +24,24 @@
   {
     "name": "哔哩哔哩",
     "url": "https://www.bilibili.com",
-    "domain": "bilibili.com",
-    "fallback": "B",
+    "domain": "",
+    "fallback": "哔",
     "badge": "NEW",
-    "iconType": "auto"
+    "iconType": "text",
+    "customIcon": ""
   },
   {
     "name": "Notion",
     "url": "https://www.notion.so",
     "domain": "notion.so",
     "fallback": "N",
+    "iconType": "auto"
+  },
+  {
+    "name": "得到",
+    "url": "https://www.dedao.cn",
+    "domain": "dedao.cn",
+    "fallback": "得",
     "iconType": "auto"
   },
   {
@@ -128,8 +129,15 @@
     "iconType": "auto"
   },
   {
+    "name": "磁力熊",
+    "url": "https://www.cilixiong.com",
+    "domain": "cilixiong.com",
+    "fallback": "🐼",
+    "iconType": "auto"
+  },
+  {
     "name": "猫跳盘搜",
-    "url": "https://www.maopan.top",
+    "url": "https://www.alipansou.com/",
     "domain": "",
     "fallback": "猫",
     "iconType": "emoji",
@@ -143,22 +151,16 @@
     "iconType": "auto"
   },
   {
-    "name": "磁力熊",
-    "url": "https://www.cilixiong.com",
-    "domain": "cilixiong.com",
-    "fallback": "🐼",
-    "iconType": "auto"
-  },
-  {
-    "name": "得到",
-    "url": "https://www.dedao.cn",
-    "domain": "dedao.cn",
-    "fallback": "得",
-    "iconType": "auto"
+    "name": "盘Ta",
+    "url": "https://www.91panta.cn/",
+    "iconType": "auto",
+    "customIcon": "",
+    "domain": "www.91panta.cn",
+    "fallback": "盘"
   },
   {
     "name": "Shadowsocks",
-    "url": "https://shadowsocks.org",
+    "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
     "domain": "",
     "fallback": "S",
     "iconType": "emoji",
@@ -168,8 +170,9 @@
     "name": "GitHub",
     "url": "https://github.com",
     "domain": "github.com",
-    "fallback": "GH",
-    "iconType": "auto"
+    "fallback": "G",
+    "iconType": "auto",
+    "customIcon": ""
   },
   {
     "name": "Sora",
