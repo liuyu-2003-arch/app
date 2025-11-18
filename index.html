@@ -128,7 +128,33 @@
         }
 
         .bookmark-item.drag-over {
-            transform: scale(1.1);
+            transform: scale(1.05);
+        }
+
+        /* 拖拽插入指示器 */
+        .drop-indicator {
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: #4285f4;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s;
+            box-shadow: 0 0 8px rgba(66, 133, 244, 0.5);
+        }
+
+        .drop-indicator.show {
+            opacity: 1;
+        }
+
+        .drop-indicator.left {
+            left: -15px;
+        }
+
+        .drop-indicator.right {
+            right: -15px;
         }
 
         .icon-wrapper {
@@ -810,9 +836,23 @@
         // 拖拽功能
         let draggedElement = null;
         let draggedIndex = null;
+        let dropIndicator = null;
+
+        // 创建插入指示器
+        function createDropIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator';
+            return indicator;
+        }
 
         function initDragAndDrop() {
             const items = document.querySelectorAll('.bookmark-item');
+
+            // 创建全局指示器
+            if (!dropIndicator) {
+                dropIndicator = createDropIndicator();
+                document.body.appendChild(dropIndicator);
+            }
 
             items.forEach((item, index) => {
                 item.addEventListener('dragstart', handleDragStart);
@@ -839,6 +879,11 @@
             document.querySelectorAll('.bookmark-item').forEach(item => {
                 item.classList.remove('drag-over');
             });
+
+            // 隐藏指示器
+            if (dropIndicator) {
+                dropIndicator.classList.remove('show');
+            }
         }
 
         function handleDragOver(e) {
@@ -846,6 +891,30 @@
                 e.preventDefault();
             }
             e.dataTransfer.dropEffect = 'move';
+
+            // 显示插入指示器
+            if (this !== draggedElement && dropIndicator) {
+                const rect = this.getBoundingClientRect();
+                const dropIndex = parseInt(this.dataset.index);
+                
+                // 判断插入位置（左侧或右侧）
+                const mouseX = e.clientX;
+                const itemCenterX = rect.left + rect.width / 2;
+                
+                if (draggedIndex < dropIndex) {
+                    // 从左往右拖，显示在右侧
+                    dropIndicator.className = 'drop-indicator show right';
+                    dropIndicator.style.left = rect.right + 'px';
+                } else {
+                    // 从右往左拖，显示在左侧
+                    dropIndicator.className = 'drop-indicator show left';
+                    dropIndicator.style.left = rect.left + 'px';
+                }
+                
+                dropIndicator.style.top = rect.top + 'px';
+                dropIndicator.style.height = rect.height + 'px';
+            }
+
             return false;
         }
 
@@ -886,6 +955,12 @@
             }
 
             this.classList.remove('drag-over');
+            
+            // 隐藏指示器
+            if (dropIndicator) {
+                dropIndicator.classList.remove('show');
+            }
+
             return false;
         }
 
