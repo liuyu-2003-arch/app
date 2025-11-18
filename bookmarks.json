@@ -130,9 +130,10 @@
   {
     "name": "猫跳盘搜",
     "url": "https://www.maopan.top",
-    "domain": "maopan.top",
-    "fallback": "🐱",
-    "iconType": "auto"
+    "domain": "",
+    "fallback": "猫",
+    "iconType": "emoji",
+    "customIcon": ""
   },
   {
     "name": "UP云搜",
@@ -158,16 +159,10 @@
   {
     "name": "Shadowsocks",
     "url": "https://shadowsocks.org",
-    "domain": "shadowsocks.org",
+    "domain": "",
     "fallback": "S",
-    "iconType": "auto"
-  },
-  {
-    "name": "Internet Archive",
-    "url": "https://archive.org",
-    "domain": "archive.org",
-    "fallback": "🏛️",
-    "iconType": "auto"
+    "iconType": "emoji",
+    "customIcon": ""
   },
   {
     "name": "GitHub",
@@ -177,32 +172,10 @@
     "iconType": "auto"
   },
   {
-    "name": "单元 01 LED 元件的基础...",
-    "url": "#",
-    "domain": "",
-    "fallback": "单",
-    "iconType": "text"
-  },
-  {
-    "name": "新疆智慧赋示教投...",
-    "url": "#",
-    "domain": "",
-    "fallback": "新",
-    "iconType": "text"
-  },
-  {
     "name": "Sora",
     "url": "https://sora.com",
     "domain": "sora.com",
     "fallback": "S",
     "iconType": "auto"
-  },
-  {
-    "name": "淘宝",
-    "url": "https://www.taobao.com",
-    "iconType": "auto",
-    "customIcon": "",
-    "domain": "www.taobao.com",
-    "fallback": "淘"
   }
 ]
