@@ -1187,21 +1187,27 @@
             });
 
             // 导出书签
-            document.getElementById('exportBtn').addEventListener('click', () => {
-                const bookmarksData = loadBookmarks();
-                const dataStr = JSON.stringify(bookmarksData, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `bookmarks.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                alert('书签已导出为 bookmarks.json！\n\n请将此文件上传到 https://324893.xyz/bookmarks.json 以更新在线数据。');
-            });
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const bookmarksData = loadBookmarks();
+                    const dataStr = JSON.stringify(bookmarksData, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'bookmarks.json';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    alert('书签已导出为 bookmarks.json！\n\n请将此文件上传到 https://324893.xyz/bookmarks.json 以更新在线数据。');
+                });
+            }
 
             // 编辑弹窗事件
             document.getElementById('iconType').addEventListener('change', updateIconCustomGroup);
