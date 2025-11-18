@@ -277,7 +277,7 @@
         /* 添加按钮 */
         .add-bookmark-btn {
             position: fixed;
-            bottom: 110px;
+            bottom: 190px;
             right: 30px;
             width: 60px;
             height: 60px;
@@ -299,17 +299,8 @@
         body.edit-mode .add-bookmark-btn {
             display: flex;
             animation: fadeInScale 0.3s ease forwards;
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            animation-delay: 0.15s;
+            opacity: 0;
         }
 
         .add-bookmark-btn:hover {
@@ -320,7 +311,7 @@
         /* 导入导出按钮 */
         .import-export-btns {
             position: fixed;
-            bottom: 190px;
+            bottom: 110px;
             right: 30px;
             display: none;
             flex-direction: column;
@@ -359,6 +350,7 @@
             align-items: center;
             justify-content: center;
             color: white;
+            position: relative;
         }
 
         .export-btn {
