@@ -7,7 +7,7 @@ const gridEl = document.getElementById('bookmark-grid');
 const modal = document.getElementById('modal');
 const editActions = document.getElementById('edit-actions');
 const editToggleBtn = document.getElementById('edit-toggle-btn');
-const editTextSpan = document.getElementById('edit-text'); // 获取文字span
+const editTextSpan = document.getElementById('edit-text');
 
 // 1. 初始化
 async function init() {
@@ -25,7 +25,7 @@ async function init() {
     render();
 }
 
-// 2. 渲染 (保持不变)
+// 2. 渲染
 function render() {
     gridEl.innerHTML = '';
     bookmarks.forEach(item => {
@@ -40,9 +40,13 @@ function render() {
             el.querySelector('.bookmark-icon')?.classList.add('text-icon');
             iconHtml = `<span>${item.iconValue || item.title.slice(0,1)}</span>`;
         } else {
-            const domain = new URL(item.url).hostname;
-            const favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-            iconHtml = `<img src="${favUrl}" class="favicon" alt="${item.title}">`;
+            try {
+                const domain = new URL(item.url).hostname;
+                const favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+                iconHtml = `<img src="${favUrl}" class="favicon" alt="${item.title}">`;
+            } catch(e) {
+                iconHtml = `<span>${item.title.slice(0,1)}</span>`;
+            }
         }
 
         const isTextClass = item.iconType === 'text' ? 'text-icon' : '';
@@ -59,15 +63,16 @@ function render() {
         `;
         gridEl.appendChild(el);
     });
+
     if (isEditing) enableDrag();
 }
 
-// 3. 编辑模式切换 (文案已更新)
+// 3. 编辑模式切换 (文案修改：完成 -> 完成编辑)
 editToggleBtn.addEventListener('click', () => {
     isEditing = !isEditing;
     document.body.classList.toggle('editing', isEditing);
 
-    // 切换文字：编辑 <-> 完成编辑
+    // 这里修改了文案
     editTextSpan.textContent = isEditing ? "完成编辑" : "编辑";
 
     if (isEditing) {
@@ -116,30 +121,6 @@ const radios = document.getElementsByName('icon-type');
 const iconValIn = document.getElementById('input-icon-val');
 const preview = document.getElementById('icon-preview');
 
-// 智能补全 URL 协议
-function fixUrl(url) {
-    if (!url) return "";
-    // 如果不包含 :// 则默认添加 https://
-    if (!/^[a-zA-Z]+:\/\//.test(url)) {
-        return 'https://' + url;
-    }
-    return url;
-}
-
-// 从 URL 提取标题 (智能猜测)
-function guessTitleFromUrl(url) {
-    try {
-        const fullUrl = fixUrl(url);
-        const hostname = new URL(fullUrl).hostname;
-        // 移除 www. 和 .com 等后缀，只保留主体
-        let name = hostname.replace('www.', '').split('.')[0];
-        // 首字母大写
-        return name.charAt(0).toUpperCase() + name.slice(1);
-    } catch (e) {
-        return "";
-    }
-}
-
 window.openEditModal = (id) => {
     editingId = id;
     modal.style.display = 'flex';
@@ -154,7 +135,6 @@ window.openEditModal = (id) => {
         [...radios].forEach(r => r.checked = (r.value === item.iconType));
         iconValIn.value = item.iconValue || "";
     } else {
-        // 新增时清空
         titleIn.value = '';
         urlIn.value = '';
         iconValIn.value = '';
@@ -171,18 +151,46 @@ function closeModal() {
 document.getElementById('add-btn').addEventListener('click', () => openEditModal(null));
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
 
-// 监听输入：实时预览 + 自动标题
+// --- 核心修改：监听网址输入框的 blur 事件（鼠标离开时触发）---
+urlIn.addEventListener('blur', () => {
+    let rawUrl = urlIn.value.trim();
+    if (!rawUrl) return;
+
+    // 1. 自动补齐 https://
+    if (!/^https?:\/\//i.test(rawUrl)) {
+        rawUrl = 'https://' + rawUrl;
+        urlIn.value = rawUrl; // 回填到输入框
+    }
+
+    // 2. 如果标题为空，自动提取
+    if (!titleIn.value.trim()) {
+        try {
+            const hostname = new URL(rawUrl).hostname; // 例如 www.bilibili.com
+            // 去掉 www.
+            let name = hostname.replace(/^www\./, '');
+            // 取第一个点前面的部分 (bilibili.com -> bilibili)
+            name = name.split('.')[0];
+            // 首字母大写
+            if (name) {
+                titleIn.value = name.charAt(0).toUpperCase() + name.slice(1);
+            }
+        } catch (e) {
+            // 网址格式可能还不正确，忽略
+        }
+    }
+    // 触发预览更新
+    updatePreview();
+});
+
+// 实时预览逻辑
 function updatePreview() {
     const type = [...radios].find(r => r.checked).value;
-    const rawUrl = urlIn.value;
+    let rawUrl = urlIn.value.trim();
 
-    // ---- 新增逻辑：自动填充标题 ----
-    // 只有在添加模式(或标题为空)且有网址时才自动填充，避免覆盖用户修改
-    if (rawUrl && !titleIn.value.trim()) {
-        const guess = guessTitleFromUrl(rawUrl);
-        if (guess) titleIn.value = guess;
+    // 预览时也尝试临时补全一下 protocol 以便显示图标
+    if (rawUrl && !/^https?:\/\//i.test(rawUrl)) {
+        rawUrl = 'https://' + rawUrl;
     }
-    // ---------------------------
 
     const img = preview.querySelector('img');
     const span = preview.querySelector('span');
@@ -194,8 +202,7 @@ function updatePreview() {
 
     if (type === 'auto' && rawUrl) {
         try {
-            const fullUrl = fixUrl(rawUrl);
-            const host = new URL(fullUrl).hostname;
+            const host = new URL(rawUrl).hostname;
             img.src = `https://www.google.com/s2/favicons?domain=${host}&sz=128`;
             img.classList.remove('hidden');
         } catch(e){}
@@ -204,7 +211,6 @@ function updatePreview() {
         img.classList.remove('hidden');
     } else if (type === 'text') {
         preview.classList.add('text-icon');
-        // 如果没有特定文字，取标题首字母
         const letter = iconValIn.value || titleIn.value.charAt(0) || "A";
         span.textContent = letter;
         span.classList.remove('hidden');
@@ -221,12 +227,18 @@ document.getElementById('modal-save').addEventListener('click', () => {
 
     if (!finalUrl) return alert('请填写网址');
 
-    // 自动添加 https://
-    finalUrl = fixUrl(finalUrl);
+    // 保存时再次确保有 protocol
+    if (!/^https?:\/\//i.test(finalUrl)) {
+        finalUrl = 'https://' + finalUrl;
+    }
 
-    // 如果标题仍为空，尝试再次获取，如果还不行就用域名
+    // 兜底：如果没有标题，用域名
     if (!finalTitle) {
-        finalTitle = guessTitleFromUrl(finalUrl) || "未命名";
+        try {
+            finalTitle = new URL(finalUrl).hostname.replace('www.','');
+        } catch (e) {
+            finalTitle = "未命名";
+        }
     }
 
     const newItem = {
