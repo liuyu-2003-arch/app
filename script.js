@@ -8,18 +8,17 @@ const modal = document.getElementById('modal');
 const editActions = document.getElementById('edit-actions');
 const editToggleBtn = document.getElementById('edit-toggle-btn');
 
-// 1. 初始化：从 bookmarks.json 加载
+// 1. 初始化
 async function init() {
     try {
-        // 加时间戳参数，防止GitHub Pages缓存旧数据
         const res = await fetch(`./bookmarks.json?t=${new Date().getTime()}`);
         if (!res.ok) throw new Error('File not found');
         bookmarks = await res.json();
     } catch (e) {
-        console.log('加载失败，使用默认数据', e);
+        console.log('加载失败，使用默认数据');
         bookmarks = [
             { id: "1", title: "Google", url: "https://www.google.com", iconType: "auto", iconValue: "" },
-            { id: "2", title: "GitHub", url: "https://github.com", iconType: "auto", iconValue: "" }
+            { id: "2", title: "Bilibili", url: "https://www.bilibili.com", iconType: "text", iconValue: "B" }
         ];
     }
     render();
@@ -34,14 +33,13 @@ function render() {
         el.dataset.id = item.id;
 
         let iconHtml = '';
-        // 根据类型渲染图标
         if (item.iconType === 'image' && item.iconValue) {
             iconHtml = `<img src="${item.iconValue}" alt="${item.title}">`;
         } else if (item.iconType === 'text') {
             el.querySelector('.bookmark-icon')?.classList.add('text-icon');
             iconHtml = `<span>${item.iconValue || item.title.slice(0,1)}</span>`;
         } else {
-            // 自动模式：使用 Google Favicon API
+            // Favicon API
             const domain = new URL(item.url).hostname;
             const favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             iconHtml = `<img src="${favUrl}" class="favicon" alt="${item.title}">`;
@@ -62,17 +60,14 @@ function render() {
         gridEl.appendChild(el);
     });
 
-    // 如果在编辑模式，需要刷新拖拽功能
     if (isEditing) enableDrag();
 }
 
-// 3. 编辑模式切换
+// 3. 编辑模式
 editToggleBtn.addEventListener('click', () => {
     isEditing = !isEditing;
     document.body.classList.toggle('editing', isEditing);
-
-    const span = editToggleBtn.querySelector('span');
-    span.textContent = isEditing ? "完成" : "编辑";
+    editToggleBtn.querySelector('span').textContent = isEditing ? "完成" : "编辑";
 
     if (isEditing) {
         editActions.classList.remove('hidden');
@@ -80,11 +75,10 @@ editToggleBtn.addEventListener('click', () => {
     } else {
         editActions.classList.add('hidden');
         disableDrag();
-        updateOrderFromDOM(); // 退出时保存顺序
+        updateOrderFromDOM();
     }
 });
 
-// SortableJS 拖拽配置
 function enableDrag() {
     if (!sortableInstance) {
         sortableInstance = new Sortable(gridEl, {
@@ -94,17 +88,14 @@ function enableDrag() {
         });
     }
 }
-
 function disableDrag() {
     if (sortableInstance) {
         sortableInstance.destroy();
         sortableInstance = null;
     }
 }
-
 function updateOrderFromDOM() {
     const newIds = Array.from(gridEl.children).map(el => el.dataset.id);
-    // 根据 DOM 顺序重排数组
     const newArr = [];
     newIds.forEach(id => {
         const item = bookmarks.find(b => b.id === id);
@@ -113,7 +104,6 @@ function updateOrderFromDOM() {
     bookmarks = newArr;
 }
 
-// 4. 删除
 window.deleteBookmark = (e, id) => {
     e.stopPropagation();
     if(confirm('确定删除?')) {
@@ -122,19 +112,23 @@ window.deleteBookmark = (e, id) => {
     }
 };
 
-// 5. 弹窗逻辑 (新增/修改)
+// 4. Modal 逻辑修复
 const titleIn = document.getElementById('input-title');
 const urlIn = document.getElementById('input-url');
 const radios = document.getElementsByName('icon-type');
 const iconValIn = document.getElementById('input-icon-val');
 const preview = document.getElementById('icon-preview');
 
-document.getElementById('add-btn').addEventListener('click', () => openEditModal(null));
-document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('visible'));
-
+// 打开弹窗
 window.openEditModal = (id) => {
     editingId = id;
-    modal.classList.add('visible');
+    // 1. 先设置 display block
+    modal.style.display = 'flex';
+    // 2. 强制重绘后设置 opacity 实现淡入
+    requestAnimationFrame(() => {
+        modal.style.opacity = '1';
+    });
+
     document.getElementById('modal-title').textContent = id ? '编辑书签' : '添加书签';
 
     if (id) {
@@ -150,13 +144,25 @@ window.openEditModal = (id) => {
     updatePreview();
 };
 
-// 实时预览图标
+// 关闭弹窗
+function closeModal() {
+    modal.style.opacity = '0';
+    // 动画结束后隐藏
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+document.getElementById('add-btn').addEventListener('click', () => openEditModal(null));
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+
+// 预览逻辑
 function updatePreview() {
     const type = [...radios].find(r => r.checked).value;
     const img = preview.querySelector('img');
     const span = preview.querySelector('span');
 
-    preview.className = 'bookmark-icon'; // reset class
+    preview.className = 'bookmark-icon';
     img.classList.add('hidden');
     span.classList.add('hidden');
     iconValIn.classList.toggle('hidden', type === 'auto');
@@ -180,7 +186,7 @@ function updatePreview() {
 [titleIn, urlIn, iconValIn].forEach(el => el.addEventListener('input', updatePreview));
 [...radios].forEach(el => el.addEventListener('change', updatePreview));
 
-// 保存按钮
+// 保存
 document.getElementById('modal-save').addEventListener('click', () => {
     if (!titleIn.value || !urlIn.value) return alert('请填写完整');
 
@@ -199,11 +205,11 @@ document.getElementById('modal-save').addEventListener('click', () => {
         bookmarks.push(newItem);
     }
 
-    modal.classList.remove('visible');
+    closeModal();
     render();
 });
 
-// 6. 导出 JSON
+// 导出
 document.getElementById('export-btn').addEventListener('click', () => {
     const str = JSON.stringify(bookmarks, null, 2);
     const blob = new Blob([str], {type: "application/json"});
