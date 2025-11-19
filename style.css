@@ -1,158 +1,255 @@
-/* ========== 基础样式 ========== */
+/* 全局样式 */
+:root {
+    --icon-size: 80px;
+    --grid-gap: 40px;
+    --text-color: #333;
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none; /* 禁止选中文本，提升App感 */
+}
+
 body {
-  margin: 0;
-  font-family: "Helvetica Neue", "PingFang SC", sans-serif;
-  background-color: #f9fafb;
-  color: #333;
-  line-height: 1.7;
-  scroll-behavior: smooth;
-}
-
-/* ========== 导航栏 ========== */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #003d3b;
-  color: #fff;
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-.logo {
-  font-weight: 600;
-  font-size: 1.2rem;
-  letter-spacing: 1px;
-}
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-}
-.nav-links a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 400;
-  transition: opacity 0.3s;
-}
-.nav-links a:hover {
-  opacity: 0.7;
-}
-.menu-btn {
-  display: none;
-  font-size: 1.5rem;
-  background: none;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-/* ========== 横幅区 ========== */
-.hero {
-  background: linear-gradient(to bottom right, #00695c, #004d40);
-  color: white;
-  text-align: center;
-  padding: 6rem 1rem;
-}
-.hero h1 {
-  font-size: 2.6rem;
-  margin-bottom: 0.5rem;
-}
-.hero p {
-  font-size: 1.3rem;
-  margin-bottom: 2rem;
-}
-.btn {
-  display: inline-block;
-  background-color: #ffc107;
-  color: #000;
-  padding: 0.8rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background 0.3s;
-}
-.btn:hover {
-  background-color: #ffb300;
-}
-
-/* ========== 内容区 ========== */
-.content {
-  max-width: 900px;
-  margin: 3rem auto;
-  padding: 0 1.5rem;
-}
-.content h2 {
-  color: #004d40;
-  border-left: 4px solid #004d40;
-  padding-left: 0.6rem;
-}
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-.card {
-  background-color: #e0f2f1;
-  padding: 1.5rem;
-  border-radius: 10px;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* ========== 页脚 ========== */
-.footer {
-  text-align: center;
-  padding: 2rem 1rem;
-  background-color: #003d3b;
-  color: white;
-  font-size: 0.9rem;
-}
-
-/* ========== 动画效果 ========== */
-.fade-in {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 1s ease-out, transform 1s ease-out;
-}
-.fade-in.appear {
-  opacity: 1;
-  transform: translateY(0);
-}
-.delay {
-  transition-delay: 0.3s;
-}
-.delay-2 {
-  transition-delay: 0.6s;
-}
-
-/* ========== 响应式设计 ========== */
-@media (max-width: 768px) {
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    background: #004d40;
-    position: absolute;
-    top: 70px;
-    right: 0;
-    width: 60%;
-    padding: 1rem;
-  }
-  .nav-links.active {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    /* 模拟截图背景：柔和的粉紫白渐变 */
+    background:
+        radial-gradient(circle at 10% 20%, rgb(255, 240, 245) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgb(230, 230, 250) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgb(255, 255, 255) 0%, transparent 60%),
+        linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
+    background-size: 200% 200%;
+    background-attachment: fixed;
+    animation: gradientBG 15s ease infinite;
+    color: var(--text-color);
     display: flex;
-  }
-  .menu-btn {
-    display: block;
-  }
-  .hero h1 {
-    font-size: 2rem;
-  }
-  .hero p {
-    font-size: 1.1rem;
-  }
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 容器 */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 40px;
+    margin-top: -50px; /* 视觉上居中偏上 */
+}
+
+/* 网格布局 */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: var(--grid-gap);
+    justify-content: center;
+    justify-items: center;
+    padding: 20px;
+}
+
+/* 单个书签项 */
+.bookmark-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    position: relative;
+    transition: transform 0.2s;
+    cursor: pointer;
+    width: 100px;
+}
+
+.bookmark-item:hover {
+    transform: translateY(-5px);
+}
+
+/* 图标样式 */
+.bookmark-icon {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    background: white;
+    border-radius: 22px; /* iOS 风格圆角 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 12px;
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    position: relative;
+}
+
+.bookmark-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 自动获取的 favicon 需要缩小留白 */
+.bookmark-icon img.favicon {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+}
+
+/* 只有文字时的背景色 */
+.bookmark-icon.text-icon {
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 标题样式 */
+.bookmark-title {
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 120%;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+}
+
+/* ------- 编辑模式 ------- */
+
+.delete-btn {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: 22px;
+    height: 22px;
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.delete-btn:hover { background: #ff3b30; }
+
+/* 编辑时点击图标的遮罩层 */
+.edit-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 5;
+    display: none;
+}
+
+body.editing .delete-btn,
+body.editing .edit-overlay { display: block; }
+
+body.editing .bookmark-item {
+    animation: shake 0.3s infinite alternate; /* 抖动效果 */
+}
+
+@keyframes shake {
+    from { transform: rotate(-1.5deg); }
+    to { transform: rotate(1.5deg); }
+}
+
+/* ------- 右下角工具栏 ------- */
+.tools-container {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    padding: 20px;
+    z-index: 100;
+}
+
+.tools-wrapper {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 10px;
+    opacity: 0; /* 默认隐藏 */
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+/* 鼠标移入显示 */
+.tools-container:hover .tools-wrapper {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tool-btn {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    color: #333;
+    font-weight: 500;
+}
+
+.tool-btn:hover { background: white; transform: scale(1.05); }
+.tool-btn.primary { background: #007AFF; color: white; }
+.tool-btn.success { background: #34C759; color: white; }
+
+#edit-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+#edit-actions.hidden { display: none; }
+
+/* ------- 弹窗 ------- */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+}
+.modal.visible { opacity: 1; pointer-events: auto; }
+
+.modal-content {
+    background: rgba(255,255,255,0.95);
+    padding: 25px;
+    border-radius: 24px;
+    width: 360px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.modal h3 { margin-top: 0; color: #333; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #666; font-weight: bold;}
+.form-group input {
+    width: 100%; padding: 10px;
+    border: 1px solid #e0e0e0; border-radius: 10px;
+    outline: none; background: #f9f9f9;
+}
+.radio-group { display: flex; gap: 15px; font-size: 13px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.btn-text { border: none; background: none; cursor: pointer; color: #666; }
+.btn-primary { border: none; background: #007AFF; color: white; padding: 8px 20px; border-radius: 12px; cursor: pointer; }
+.hidden { display: none !important; }
+
+.icon-preview-container { display: flex; justify-content: center; margin-top: 10px; }
