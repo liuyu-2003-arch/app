@@ -1,36 +1,8 @@
 [
   {
-    "id": "101",
-    "title": "Google",
-    "url": "https://www.google.com",
-    "iconType": "auto",
-    "iconValue": ""
-  },
-  {
-    "id": "102",
-    "title": "GitHub",
-    "url": "https://github.com",
-    "iconType": "image",
-    "iconValue": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-  },
-  {
-    "id": "103",
-    "title": "ChatGPT",
-    "url": "https://chat.openai.com",
-    "iconType": "auto",
-    "iconValue": ""
-  },
-  {
     "id": "104",
     "title": "Notion",
     "url": "https://www.notion.so",
-    "iconType": "auto",
-    "iconValue": ""
-  },
-  {
-    "id": "105",
-    "title": "Bilibili",
-    "url": "https://www.bilibili.com",
     "iconType": "auto",
     "iconValue": ""
   },
@@ -42,9 +14,142 @@
     "iconValue": ""
   },
   {
+    "id": "105",
+    "title": "Bilibili",
+    "url": "https://www.bilibili.com",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568739733",
+    "title": "Subeasy",
+    "url": "https://www.subeasy.ai/workspace",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568876899",
+    "title": "Dedao",
+    "url": "https://www.dedao.cn/bought",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "101",
+    "title": "Google",
+    "url": "https://www.google.com",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
     "id": "107",
     "title": "Douban",
     "url": "https://www.douban.com",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568759167",
+    "title": "Cilixiong",
+    "url": "https://cilixiong.com/movie/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568776600",
+    "title": "Alipansou",
+    "url": "https://www.alipansou.com/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568791333",
+    "title": "Upyunso",
+    "url": "https://www.upyunso.com/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568803949",
+    "title": "91panta",
+    "url": "https://www.91panta.cn/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568821966",
+    "title": "Sora",
+    "url": "https://sora.chatgpt.com/drafts",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "103",
+    "title": "ChatGPT",
+    "url": "https://chat.openai.com",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568839066",
+    "title": "Grok",
+    "url": "https://grok.com/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568852032",
+    "title": "Gemini",
+    "url": "https://gemini.google.com/app",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568865632",
+    "title": "Zh",
+    "url": "https://zh.wikipedia.org",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568887465",
+    "title": "Appstorrent",
+    "url": "https://appstorrent.ru/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568912265",
+    "title": "Cobalt",
+    "url": "https://cobalt.tools/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568924748",
+    "title": "Macked",
+    "url": "https://macked.app/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "102",
+    "title": "GitHub",
+    "url": "https://github.com",
+    "iconType": "image",
+    "iconValue": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+  },
+  {
+    "id": "1763568936081",
+    "title": "Z-library",
+    "url": "https://z-library.sk/",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "1763568946248",
+    "title": "Dash",
+    "url": "https://dash.cloudflare.com/dd0afffd8fff1c8846db83bc10e2aa1f/home/domains",
     "iconType": "auto",
     "iconValue": ""
   }
