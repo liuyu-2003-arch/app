@@ -8,30 +8,44 @@
   },
   {
     "id": "102",
-    "title": "Bilibili",
-    "url": "https://www.bilibili.com",
-    "iconType": "text",
-    "iconValue": "B"
+    "title": "GitHub",
+    "url": "https://github.com",
+    "iconType": "image",
+    "iconValue": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
   },
   {
     "id": "103",
-    "title": "GitHub",
-    "url": "https://github.com",
-    "iconType": "auto",
-    "iconValue": ""
-  },
-  {
-    "id": "104",
     "title": "ChatGPT",
     "url": "https://chat.openai.com",
     "iconType": "auto",
     "iconValue": ""
   },
   {
-    "id": "105",
+    "id": "104",
     "title": "Notion",
     "url": "https://www.notion.so",
-    "iconType": "text",
-    "iconValue": "N"
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "105",
+    "title": "Bilibili",
+    "url": "https://www.bilibili.com",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "106",
+    "title": "Youtube",
+    "url": "https://www.youtube.com",
+    "iconType": "auto",
+    "iconValue": ""
+  },
+  {
+    "id": "107",
+    "title": "Douban",
+    "url": "https://www.douban.com",
+    "iconType": "auto",
+    "iconValue": ""
   }
 ]

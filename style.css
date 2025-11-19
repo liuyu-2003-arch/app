@@ -5,232 +5,136 @@
     --text-color: #333;
 }
 
-* {
-    box-sizing: border-box;
-    user-select: none;
-}
+* { box-sizing: border-box; user-select: none; }
 
 body {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
     color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    /* 背景设置：渐变 + SVG 波浪线条模拟 */
-    background-color: #f3e7e9;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
     background-image:
-        /* 顶部粉紫光晕 */
-        radial-gradient(circle at 0% 0%, rgba(255, 220, 230, 0.6) 0%, transparent 60%),
-        /* 底部蓝紫光晕 */
-        radial-gradient(circle at 100% 100%, rgba(200, 220, 255, 0.6) 0%, transparent 60%),
-        /* 波浪线条纹理 (SVG Data URI) */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23d57eeb' fill-opacity='0.1' d='M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,186.7C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3Cpath fill='%23fccb90' fill-opacity='0.15' d='M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,90.7C672,85,768,107,864,133.3C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
-    background-size: 100% auto, 100% auto, cover;
-    background-repeat: no-repeat;
+        radial-gradient(at 0% 0%, hsla(340,82%,76%,0.4) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(225,39%,70%,0.4) 0, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(339,49%,70%,0.4) 0, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(255,39%,70%,0.4) 0, transparent 50%);
     background-attachment: fixed;
-    background-position: center;
 }
 
-.container {
-    width: 100%;
-    max-width: 1200px;
-    padding: 40px;
-    margin-top: -50px;
-}
-
+.container { width: 100%; max-width: 1200px; padding: 40px; margin-top: -50px; }
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: var(--grid-gap);
-    justify-content: center;
-    justify-items: center;
-    padding: 20px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--grid-gap); justify-content: center; justify-items: center; padding: 20px;
 }
 
-/* 单个书签容器 */
 .bookmark-item {
-    position: relative;
-    width: 100px; /* 限制宽度确保对齐 */
-    display: flex;
-    flex-direction: column; /* 垂直排列 */
-    align-items: center;   /* 水平居中 */
-    transition: transform 0.2s;
+    position: relative; width: 100px; display: flex;
+    flex-direction: column; align-items: center; transition: transform 0.2s;
 }
+.bookmark-item:hover { transform: translateY(-5px); z-index: 2; }
 
-.bookmark-item:hover {
-    transform: translateY(-5px);
-    z-index: 2;
-}
-
-/* 链接样式修复：居中、去下划线 */
 .bookmark-link {
-    text-decoration: none; /* 去掉横线 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    color: var(--text-color);
+    text-decoration: none; display: flex; flex-direction: column;
+    align-items: center; width: 100%; color: var(--text-color);
 }
 
-/* 图标盒子 */
+/* 图标容器 */
 .bookmark-icon {
-    width: var(--icon-size);
-    height: var(--icon-size);
+    width: var(--icon-size); height: var(--icon-size);
     background: white;
-    border-radius: 22px;
+    border-radius: 22px; /* iOS 圆角 */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin-bottom: 12px;
-    font-size: 36px;
-    font-weight: 600;
-    color: #fff;
-    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; margin-bottom: 12px;
+    font-size: 36px; font-weight: 600; color: #fff; position: relative;
 }
+.bookmark-icon img { width: 100%; height: 100%; object-fit: cover; }
 
-.bookmark-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+/* --- 核心修改区 --- */
 
-/* 自动获取的 favicon：放大比例以减少白边 */
+/* 1. 默认 Favicon（Google, Notion, YouTube 等）：放大到 85%，有留白但更饱满 */
 .bookmark-icon img.favicon {
-    width: 75%;  /* 从 60% 改为 75% */
-    height: 75%;
+    width: 85%; /* 从 65% 调整到 85% */
+    height: 85%; /* 从 65% 调整到 85% */
     object-fit: contain;
+    border-radius: 0;
 }
 
-/* 纯文字图标背景 */
+/* 2. 全填充图标（Bilibili, Douban 等）：100% 填充，无白边 */
+.bookmark-icon img.full-fill {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 0;
+}
+/* ---------------- */
+
 .bookmark-icon.text-icon {
     background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* 标题文字 */
 .bookmark-title {
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center; /* 文字内部居中 */
-    color: #444;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 4px;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.6);
+    font-size: 13px; font-weight: 500; text-align: center; color: #444;
+    width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-top: 4px; text-shadow: 0 1px 1px rgba(255,255,255,0.6);
 }
 
-/* 编辑状态样式 */
+/* 工具 UI */
 .delete-btn {
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    width: 24px; height: 24px;
-    background: rgba(0,0,0,0.4);
-    color: white;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 22px;
-    font-size: 14px;
-    cursor: pointer;
-    display: none;
-    z-index: 10;
-    backdrop-filter: blur(4px);
+    position: absolute; top: -8px; left: -8px; width: 24px; height: 24px;
+    background: rgba(0,0,0,0.4); color: white; border-radius: 50%;
+    text-align: center; line-height: 22px; font-size: 14px; cursor: pointer;
+    display: none; z-index: 10; backdrop-filter: blur(4px);
 }
 .delete-btn:hover { background: #ff3b30; }
-
 .edit-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 5; display: none; cursor: pointer;
 }
-
-body.editing .delete-btn,
-body.editing .edit-overlay { display: block; }
+body.editing .delete-btn, body.editing .edit-overlay { display: block; }
 body.editing .bookmark-item { animation: shake 0.3s infinite alternate; }
+@keyframes shake { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg); } }
 
-@keyframes shake {
-    from { transform: rotate(-1.5deg); }
-    to { transform: rotate(1.5deg); }
-}
-
-/* 工具栏 */
-.tools-container {
-    position: fixed;
-    bottom: 20px; right: 20px;
-    padding: 20px;
-    z-index: 100;
-}
+.tools-container { position: fixed; bottom: 20px; right: 20px; padding: 20px; z-index: 100; }
 .tools-wrapper {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-end;
-    gap: 10px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
+    display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 10px;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s ease;
 }
 .tools-container:hover .tools-wrapper { opacity: 1; transform: translateY(0); }
-
 .tool-btn {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    padding: 10px 16px;
-    border-radius: 25px;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    font-size: 14px; color: #333;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px 16px; border-radius: 25px;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px; color: #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.2s;
 }
 .tool-btn:hover { background: white; transform: scale(1.05); }
 .tool-btn.primary { background: #007AFF; color: white; }
 .tool-btn.success { background: #34C759; color: white; }
-
 #edit-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
 .hidden { display: none !important; }
 
-/* Modal */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
     display: flex; justify-content: center; align-items: center;
-    z-index: 200;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    z-index: 200; opacity: 0; transition: opacity 0.3s ease;
 }
-
-/* Modal 内容 */
 .modal-content {
-    background: rgba(255,255,255,0.95);
-    padding: 25px;
-    border-radius: 24px;
-    width: 360px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.95); padding: 25px; border-radius: 24px;
+    width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
 }
 .modal h3 { margin-top: 0; color: #333; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 8px; font-size: 12px; color: #888; font-weight: 600; }
 .form-group input {
-    width: 100%; padding: 10px 12px;
-    border: 1px solid #e5e5e5; border-radius: 10px;
+    width: 100%; padding: 10px 12px; border: 1px solid #e5e5e5; border-radius: 10px;
     outline: none; background: #f9f9f9;
 }
 .form-group input:focus { background: #fff; border-color: #007AFF; }
-
 .radio-group { display: flex; gap: 15px; font-size: 13px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .btn-text { border: none; background: none; cursor: pointer; color: #666; }
 .btn-primary { border: none; background: #007AFF; color: white; padding: 8px 24px; border-radius: 12px; cursor: pointer; }
-
 .icon-preview-container { display: flex; justify-content: center; margin-top: 15px; }
