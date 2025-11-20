@@ -32,24 +32,30 @@
         <div class="modal-content">
             <h3>编辑/添加书签</h3>
 
-            <input type="text" id="input-url" placeholder="网址 (例如 bilibili.com)" oninput="autoFillInfo()">
+            <div class="preview-container">
+                <div id="preview-card" class="bookmark-item">
+                    <div class="icon-box">
+                        <img id="preview-img" src="" alt="">
+                        <div id="preview-text" class="text-icon hidden">A</div>
+                    </div>
+                    <div id="preview-title" class="bookmark-title">标题预览</div>
+                </div>
+                <div class="preview-label">效果预览</div>
+            </div>
 
-            <input type="text" id="input-title" placeholder="标题 (自动获取或手动输入)" oninput="updatePreviewText()">
-
-            <div class="icon-preview-box">
-                <img id="preview-img" src="" alt="" onerror="handlePreviewError()">
-                <div id="preview-text" class="hidden">A</div>
-
-                <input type="text" id="input-icon" placeholder="图标链接 (为空则显示文字)" oninput="updatePreview()">
+            <div class="form-group">
+                <input type="text" id="input-url" placeholder="网址 (例如 youtube.com)" oninput="autoFillInfo()">
+                <input type="text" id="input-title" placeholder="标题" oninput="updatePreview()">
+                <input type="text" id="input-icon" placeholder="图标链接 (自动获取或手动粘贴)" oninput="updatePreview()">
             </div>
 
             <div class="style-select">
                 <label class="radio-label">
-                    <input type="radio" name="icon-style" value="full" checked>
+                    <input type="radio" name="icon-style" value="full" checked onchange="updatePreview()">
                     <span>铺满 (Full)</span>
                 </label>
                 <label class="radio-label">
-                    <input type="radio" name="icon-style" value="white">
+                    <input type="radio" name="icon-style" value="white" onchange="updatePreview()">
                     <span>留白 (White)</span>
                 </label>
             </div>
