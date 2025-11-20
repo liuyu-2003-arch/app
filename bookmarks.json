@@ -154,5 +154,35 @@
     "url": "https://www.bbc.com/zhongwen/simp",
     "icon": "https://manifest.im/icon/www.bbc.com",
     "style": "full"
+  },
+  {
+    "title": "Aliyundrive",
+    "url": "https://www.aliyundrive.com/drive/home",
+    "icon": "https://manifest.im/icon/www.aliyundrive.com",
+    "style": "full"
+  },
+  {
+    "title": "Grabcad",
+    "url": "https://grabcad.com/library",
+    "icon": "https://grabcad.com/favicon.ico",
+    "style": "white"
+  },
+  {
+    "title": "Ifixit",
+    "url": "https://www.ifixit.com/Teardown",
+    "icon": "https://favicon.vemetric.com/www.ifixit.com",
+    "style": "full"
+  },
+  {
+    "title": "Portal",
+    "url": "https://portal.shadowsocks.au/",
+    "icon": "https://favicon.vemetric.com/portal.shadowsocks.au",
+    "style": "full"
+  },
+  {
+    "title": "Spotify",
+    "url": "https://open.spotify.com/",
+    "icon": "https://favicon.vemetric.com/open.spotify.com",
+    "style": "white"
   }
 ]
