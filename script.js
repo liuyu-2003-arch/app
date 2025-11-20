@@ -36,7 +36,10 @@ function render() {
 
         div.onclick = (e) => {
             if (isEditing) {
-                if (!e.target.classList.contains('delete-btn')) openModal(index);
+                // 防止点到删除按钮触发编辑
+                if (!e.target.classList.contains('delete-btn')) {
+                    openModal(index);
+                }
             } else {
                 window.location.href = item.url;
             }
@@ -66,6 +69,7 @@ function render() {
         grid.appendChild(div);
     });
 
+    // 每次渲染后，如果处于编辑模式，必须重新初始化拖拽，否则新元素无法拖拽
     if (isEditing) initSortable();
 }
 
@@ -78,12 +82,14 @@ function openModal(index = -1) {
     const radios = document.getElementsByName('icon-style');
 
     if (index >= 0) {
+        // 编辑模式
         const item = bookmarks[index];
         titleInput.value = item.title;
         urlInput.value = item.url;
         iconInput.value = item.icon || "";
         for(let r of radios) if(r.value === item.style) r.checked = true;
     } else {
+        // 添加模式
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
@@ -98,7 +104,7 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// --- 新增：切换图标源 ---
+// 切换图标源
 function switchIconSource(type) {
     const urlVal = document.getElementById('input-url').value;
     const iconInput = document.getElementById('input-icon');
@@ -122,18 +128,17 @@ function switchIconSource(type) {
         } else if (type === 'vemetric') {
             newIconUrl = `https://favicon.vemetric.com/${domain}`;
         } else if (type === 'direct') {
-            // 官网直接：尝试 https://domain/favicon.ico
             newIconUrl = `${urlObj.protocol}//${domain}/favicon.ico`;
         }
 
         iconInput.value = newIconUrl;
-        updatePreview(); // 立即刷新预览看看行不行
+        updatePreview();
     } catch (e) {
         console.error("URL解析错误");
     }
 }
 
-// 自动填充 (默认使用 Manifest)
+// 自动填充
 function autoFillInfo() {
     if (autoFillTimer) clearTimeout(autoFillTimer);
 
@@ -151,7 +156,7 @@ function autoFillInfo() {
                 let domain = urlObj.hostname;
                 if (domain.endsWith('.')) domain = domain.slice(0, -1);
 
-                // 默认源：Manifest
+                // 默认 Manifest
                 if (!iconInput.value) {
                     iconInput.value = `https://manifest.im/icon/${domain}`;
                 }
@@ -244,14 +249,22 @@ function toggleEditMode(enable) {
     }
 }
 
+// --- 核心修复：拖拽后重新渲染 ---
 function initSortable() {
     const grid = document.getElementById('bookmark-grid');
     if (sortableInstance) sortableInstance.destroy();
+
     sortableInstance = new Sortable(grid, {
-        animation: 350, ghostClass: 'sortable-ghost', delay: 100,
+        animation: 350,
+        ghostClass: 'sortable-ghost',
+        delay: 100,
         onEnd: function (evt) {
+            // 1. 更新数组数据顺序
             const item = bookmarks.splice(evt.oldIndex, 1)[0];
             bookmarks.splice(evt.newIndex, 0, item);
+
+            // 2. 【关键】立即重新渲染，确保DOM索引与数组一致
+            render();
         }
     });
 }

@@ -6,27 +6,33 @@
     "style": "full"
   },
   {
-    "title": "Youtube",
-    "url": "https://youtube.com",
-    "icon": "https://manifest.im/icon/youtube.com",
-    "style": "white"
-  },
-  {
-    "title": "GitHub",
-    "url": "https://github.com",
-    "icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-    "style": "full"
-  },
-  {
     "title": "Notion",
     "url": "https://notion.so",
     "icon": "https://manifest.im/icon/notion.so",
     "style": "full"
   },
   {
-    "title": "Douban",
-    "url": "https://douban.com",
-    "icon": "https://favicon.vemetric.com/douban.com",
+    "title": "Youtube",
+    "url": "https://youtube.com",
+    "icon": "https://manifest.im/icon/youtube.com",
+    "style": "white"
+  },
+  {
+    "title": "Bilibili",
+    "url": "https://bilibili.com",
+    "icon": "https://favicon.vemetric.com/bilibili.com",
+    "style": "full"
+  },
+  {
+    "title": "yt-dlp",
+    "url": "https://324893.xyz/yt-dlp/",
+    "icon": "https://manifest.im/icon/324893.xyz",
+    "style": "full"
+  },
+  {
+    "title": "Subeasy",
+    "url": "https://www.subeasy.ai/workspace",
+    "icon": "https://manifest.im/icon/www.subeasy.ai",
     "style": "white"
   },
   {
@@ -36,9 +42,15 @@
     "style": "white"
   },
   {
-    "title": "Subeasy",
-    "url": "https://www.subeasy.ai/workspace",
-    "icon": "https://manifest.im/icon/www.subeasy.ai",
+    "title": "GitHub",
+    "url": "https://github.com",
+    "icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+    "style": "full"
+  },
+  {
+    "title": "Douban",
+    "url": "https://douban.com",
+    "icon": "https://favicon.vemetric.com/douban.com",
     "style": "white"
   },
   {
@@ -90,12 +102,6 @@
     "style": "white"
   },
   {
-    "title": "Zh",
-    "url": "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5",
-    "icon": "https://manifest.im/icon/zh.wikipedia.org",
-    "style": "full"
-  },
-  {
     "title": "Dedao",
     "url": "https://www.dedao.cn/bought",
     "icon": "https://manifest.im/icon/www.dedao.cn",
@@ -132,9 +138,21 @@
     "style": "white"
   },
   {
-    "title": "yt-dlp",
-    "url": "https://324893.xyz/yt-dlp/",
-    "icon": "https://manifest.im/icon/324893.xyz",
+    "title": "Zh",
+    "url": "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5",
+    "icon": "https://manifest.im/icon/zh.wikipedia.org",
+    "style": "full"
+  },
+  {
+    "title": "NY Times",
+    "url": "https://m.cn.nytimes.com/",
+    "icon": "https://manifest.im/icon/m.cn.nytimes.com",
+    "style": "full"
+  },
+  {
+    "title": "Bbc",
+    "url": "https://www.bbc.com/zhongwen/simp",
+    "icon": "https://manifest.im/icon/www.bbc.com",
     "style": "full"
   }
 ]
