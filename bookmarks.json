@@ -36,6 +36,12 @@
     "style": "white"
   },
   {
+    "title": "Tingwu",
+    "url": "https://tingwu.aliyun.com/home",
+    "icon": "https://favicon.vemetric.com/tingwu.aliyun.com",
+    "style": "fit"
+  },
+  {
     "title": "Google",
     "url": "https://www.google.com/",
     "icon": "https://manifest.im/icon/www.google.com",
@@ -196,5 +202,17 @@
     "url": "https://artsandculture.google.com",
     "icon": "https://manifest.im/icon/artsandculture.google.com",
     "style": "full"
+  },
+  {
+    "title": "Earth",
+    "url": "https://earth.google.com",
+    "icon": "https://favicon.vemetric.com/earth.google.com",
+    "style": "white"
+  },
+  {
+    "title": "Ifixit",
+    "url": "https://ifixit.com",
+    "icon": "https://img.logo.dev/ifixit.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+    "style": "fit"
   }
 ]
