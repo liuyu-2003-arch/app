@@ -25,6 +25,7 @@ body {
 .container { width: 90%; max-width: 1200px; padding: 20px; }
 .grid { display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center; padding: 20px; }
 
+/* 卡片样式 */
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
@@ -41,7 +42,20 @@ body {
 }
 
 .icon-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.bookmark-item.style-white .icon-box img { width: 65%; height: 65%; object-fit: contain; }
+
+/* --- 三种样式状态 --- */
+/* 1. 铺满 (默认): object-fit: cover (上面已经定义) */
+
+/* 2. 适中 (新增): 稍微留一点边，完整显示 */
+.bookmark-item.style-fit .icon-box img {
+    width: 85%; height: 85%; object-fit: contain;
+}
+
+/* 3. 留白: 留更多边，小图标 */
+.bookmark-item.style-white .icon-box img {
+    width: 60%; height: 60%; object-fit: contain;
+}
+/* ------------------- */
 
 .text-icon {
     width: 100%; height: 100%; background: #e0e0e0; color: #555;
@@ -90,10 +104,7 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 101; transition: bottom 0.4s;
 }
 .edit-controls.hidden { bottom: -100px; }
-.edit-controls button {
-    border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px;
-    font-weight: 600; cursor: pointer; color: #333;
-}
+.edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; }
 .edit-controls button.done-btn { background: #007AFF; color: white; }
 
 .modal {
@@ -104,7 +115,9 @@ body {
 
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    width: 340px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    /* --- 修改：加宽模态框 --- */
+    width: 450px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     display: flex; flex-direction: column; gap: 15px;
     animation: popUp 0.3s ease;
 }
@@ -112,41 +125,39 @@ body {
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; }
-
-.preview-container {
-    background: #f5f7f9; border-radius: 16px; padding: 20px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    margin-bottom: 5px;
-}
+.preview-container { background: #f5f7f9; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; }
 .preview-label { margin-top: 10px; font-size: 12px; color: #999; }
 
 .form-group { display: flex; flex-direction: column; gap: 12px; }
-.modal-content input {
-    width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0;
-    border-radius: 12px; background: #f9f9f9; font-size: 15px;
-    outline: none; box-sizing: border-box; transition: border-color 0.2s;
-}
+.modal-content input { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9; font-size: 15px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
 .modal-content input:focus { border-color: #007AFF; background: white; }
 
-/* --- 新增：源切换标签样式 --- */
+/* --- 修改：源切换标签 (单行) --- */
 .icon-sources {
-    display: flex; gap: 8px; margin-top: 6px; align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    align-items: center;
+    flex-wrap: nowrap; /* 强制不换行 */
+    overflow-x: auto; /* 如果实在不够，允许横向滚动 */
+    white-space: nowrap;
 }
-.icon-sources span { font-size: 12px; color: #999; }
+/* 隐藏滚动条 (Chrome/Safari) */
+.icon-sources::-webkit-scrollbar { display: none; }
+
+.icon-sources span { font-size: 12px; color: #999; flex-shrink: 0; }
 .source-tag {
-    background: #f0f0f0; padding: 4px 8px; border-radius: 6px;
+    background: #f0f0f0; padding: 5px 10px; border-radius: 6px;
     font-size: 12px; color: #555; cursor: pointer; transition: all 0.2s;
+    flex-shrink: 0; /* 防止按钮被压缩 */
 }
 .source-tag:hover { background: #007AFF; color: white; }
 /* ------------------------- */
 
-.style-select { display: flex; gap: 20px; padding-left: 5px; }
+.style-select { display: flex; gap: 20px; padding-left: 5px; justify-content: flex-start; }
 .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #555; cursor: pointer; }
 .radio-label input { width: auto; margin: 0; accent-color: #007AFF; }
 
 .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
-.modal-actions button {
-    flex: 1; padding: 12px; border: none; border-radius: 12px;
-    cursor: pointer; background: #eee; font-size: 15px; font-weight: 600;
-}
+.modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; background: #eee; font-size: 15px; font-weight: 600; }
 .modal-actions button.primary { background: #007AFF; color: white; }

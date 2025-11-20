@@ -19,7 +19,7 @@ async function loadBookmarks() {
         console.warn("无法加载远程JSON", error);
         bookmarks = [
             { title: "GitHub", url: "https://github.com", icon: "https://manifest.im/icon/github.com", style: "white" },
-            { title: "Bilibili", url: "https://www.bilibili.com", icon: "https://manifest.im/icon/bilibili.com", style: "white" }
+            { title: "Bilibili", url: "https://www.bilibili.com", icon: "https://manifest.im/icon/bilibili.com", style: "fit" }
         ];
     }
     render();
@@ -31,12 +31,16 @@ function render() {
 
     bookmarks.forEach((item, index) => {
         const div = document.createElement('div');
-        div.className = `bookmark-item ${item.style === 'white' ? 'style-white' : ''}`;
+        // 处理三种样式类名
+        let styleClass = '';
+        if (item.style === 'white') styleClass = 'style-white';
+        else if (item.style === 'fit') styleClass = 'style-fit';
+
+        div.className = `bookmark-item ${styleClass}`;
         div.dataset.index = index;
 
         div.onclick = (e) => {
             if (isEditing) {
-                // 防止点到删除按钮触发编辑
                 if (!e.target.classList.contains('delete-btn')) {
                     openModal(index);
                 }
@@ -69,7 +73,6 @@ function render() {
         grid.appendChild(div);
     });
 
-    // 每次渲染后，如果处于编辑模式，必须重新初始化拖拽，否则新元素无法拖拽
     if (isEditing) initSortable();
 }
 
@@ -82,18 +85,19 @@ function openModal(index = -1) {
     const radios = document.getElementsByName('icon-style');
 
     if (index >= 0) {
-        // 编辑模式
         const item = bookmarks[index];
         titleInput.value = item.title;
         urlInput.value = item.url;
         iconInput.value = item.icon || "";
-        for(let r of radios) if(r.value === item.style) r.checked = true;
+        // 选中对应的样式
+        for(let r of radios) {
+            if(r.value === (item.style || 'full')) r.checked = true;
+        }
     } else {
-        // 添加模式
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
-        radios[0].checked = true;
+        radios[0].checked = true; // 默认选中铺满
     }
 
     updatePreview();
@@ -104,7 +108,6 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// 切换图标源
 function switchIconSource(type) {
     const urlVal = document.getElementById('input-url').value;
     const iconInput = document.getElementById('input-icon');
@@ -123,13 +126,11 @@ function switchIconSource(type) {
         if (domain.endsWith('.')) domain = domain.slice(0, -1);
 
         let newIconUrl = "";
-        if (type === 'manifest') {
-            newIconUrl = `https://manifest.im/icon/${domain}`;
-        } else if (type === 'vemetric') {
-            newIconUrl = `https://favicon.vemetric.com/${domain}`;
-        } else if (type === 'direct') {
-            newIconUrl = `${urlObj.protocol}//${domain}/favicon.ico`;
-        }
+        if (type === 'manifest') newIconUrl = `https://manifest.im/icon/${domain}`;
+        else if (type === 'vemetric') newIconUrl = `https://favicon.vemetric.com/${domain}`;
+        else if (type === 'logodev') newIconUrl = `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png`;
+        else if (type === 'brandfetch') newIconUrl = `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ`;
+        else if (type === 'direct') newIconUrl = `${urlObj.protocol}//${domain}/favicon.ico`;
 
         iconInput.value = newIconUrl;
         updatePreview();
@@ -138,10 +139,8 @@ function switchIconSource(type) {
     }
 }
 
-// 自动填充
 function autoFillInfo() {
     if (autoFillTimer) clearTimeout(autoFillTimer);
-
     autoFillTimer = setTimeout(() => {
         const urlVal = document.getElementById('input-url').value;
         const titleInput = document.getElementById('input-title');
@@ -150,17 +149,12 @@ function autoFillInfo() {
         if (urlVal.includes('.') && urlVal.length > 4) {
             let safeUrl = urlVal;
             if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
-
             try {
                 const urlObj = new URL(safeUrl);
                 let domain = urlObj.hostname;
                 if (domain.endsWith('.')) domain = domain.slice(0, -1);
 
-                // 默认 Manifest
-                if (!iconInput.value) {
-                    iconInput.value = `https://manifest.im/icon/${domain}`;
-                }
-
+                if (!iconInput.value) iconInput.value = `https://manifest.im/icon/${domain}`;
                 if (!titleInput.value) {
                     let domainName = domain.replace('www.', '').split('.')[0];
                     if(domainName) {
@@ -174,6 +168,7 @@ function autoFillInfo() {
     }, 500);
 }
 
+// 预览更新逻辑（支持3种样式）
 function updatePreview() {
     const titleVal = document.getElementById('input-title').value || "标题预览";
     const iconVal = document.getElementById('input-icon').value;
@@ -186,10 +181,14 @@ function updatePreview() {
 
     previewTitle.innerText = titleVal;
 
+    // 重置样式类
+    previewCard.classList.remove('style-white', 'style-fit');
+
+    // 应用新样式
     if (styleVal === 'white') {
         previewCard.classList.add('style-white');
-    } else {
-        previewCard.classList.remove('style-white');
+    } else if (styleVal === 'fit') {
+        previewCard.classList.add('style-fit');
     }
 
     const firstChar = titleVal.charAt(0).toUpperCase() || "A";
@@ -227,11 +226,8 @@ function saveBookmark() {
 
     const newItem = { title, url, icon, style };
 
-    if (currentEditIndex >= 0) {
-        bookmarks[currentEditIndex] = newItem;
-    } else {
-        bookmarks.push(newItem);
-    }
+    if (currentEditIndex >= 0) bookmarks[currentEditIndex] = newItem;
+    else bookmarks.push(newItem);
 
     closeModal();
     render();
@@ -249,21 +245,14 @@ function toggleEditMode(enable) {
     }
 }
 
-// --- 核心修复：拖拽后重新渲染 ---
 function initSortable() {
     const grid = document.getElementById('bookmark-grid');
     if (sortableInstance) sortableInstance.destroy();
-
     sortableInstance = new Sortable(grid, {
-        animation: 350,
-        ghostClass: 'sortable-ghost',
-        delay: 100,
+        animation: 350, ghostClass: 'sortable-ghost', delay: 100,
         onEnd: function (evt) {
-            // 1. 更新数组数据顺序
             const item = bookmarks.splice(evt.oldIndex, 1)[0];
             bookmarks.splice(evt.newIndex, 0, item);
-
-            // 2. 【关键】立即重新渲染，确保DOM索引与数组一致
             render();
         }
     });

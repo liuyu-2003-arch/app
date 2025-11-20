@@ -50,8 +50,14 @@
   {
     "title": "Douban",
     "url": "https://douban.com",
-    "icon": "https://favicon.vemetric.com/douban.com",
-    "style": "white"
+    "icon": "https://cdn.brandfetch.io/douban.com?c=1idVW8VN57Jat7AexnZ",
+    "style": "fit"
+  },
+  {
+    "title": "Aliyundrive",
+    "url": "https://www.aliyundrive.com/drive/home",
+    "icon": "https://manifest.im/icon/www.aliyundrive.com",
+    "style": "full"
   },
   {
     "title": "Cilixiong",
@@ -61,20 +67,20 @@
   },
   {
     "title": "Alipansou",
-    "url": "https://www.alipansou.com/",
-    "icon": "https://manifest.im/icon/www.alipansou.com",
+    "url": "https://alipansou.com",
+    "icon": "https://cdn.brandfetch.io/alipansou.com?c=1idVW8VN57Jat7AexnZ",
     "style": "full"
   },
   {
     "title": "Upyunso",
-    "url": "https://www.upyunso.com/",
-    "icon": "https://manifest.im/icon/www.upyunso.com",
+    "url": "https://upyunso.com",
+    "icon": "https://cdn.brandfetch.io/upyunso.com?c=1idVW8VN57Jat7AexnZ",
     "style": "full"
   },
   {
     "title": "91panta",
-    "url": "https://www.91panta.cn/",
-    "icon": "https://manifest.im/icon/www.91panta.cn",
+    "url": "https://91panta.cn",
+    "icon": "https://cdn.brandfetch.io/91panta.cn?c=1idVW8VN57Jat7AexnZ",
     "style": "full"
   },
   {
@@ -91,15 +97,15 @@
   },
   {
     "title": "Grok",
-    "url": "https://grok.com/",
-    "icon": "https://favicon.vemetric.com/grok.com",
-    "style": "white"
+    "url": "https://grok.com",
+    "icon": "https://cdn.brandfetch.io/grok.com?c=1idVW8VN57Jat7AexnZ",
+    "style": "full"
   },
   {
     "title": "Gemini",
     "url": "https://gemini.google.com/app",
     "icon": "https://favicon.vemetric.com/gemini.google.com",
-    "style": "white"
+    "style": "fit"
   },
   {
     "title": "Dedao",
@@ -133,9 +139,15 @@
   },
   {
     "title": "Dash",
-    "url": "https://dash.cloudflare.com/dd0afffd8fff1c8846db83bc10e2aa1f/home/domains",
-    "icon": "https://manifest.im/icon/dash.cloudflare.com",
-    "style": "white"
+    "url": "https://cloudflare.com",
+    "icon": "https://img.logo.dev/cloudflare.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+    "style": "fit"
+  },
+  {
+    "title": "Shadowsocks",
+    "url": "https://shadowsocks.au",
+    "icon": "https://manifest.im/icon/shadowsocks.au",
+    "style": "full"
   },
   {
     "title": "Zh",
@@ -156,16 +168,10 @@
     "style": "full"
   },
   {
-    "title": "Aliyundrive",
-    "url": "https://www.aliyundrive.com/drive/home",
-    "icon": "https://manifest.im/icon/www.aliyundrive.com",
-    "style": "full"
-  },
-  {
     "title": "Grabcad",
-    "url": "https://grabcad.com/library",
-    "icon": "https://grabcad.com/favicon.ico",
-    "style": "white"
+    "url": "https://grabcad.com",
+    "icon": "https://cdn.brandfetch.io/grabcad.com?c=1idVW8VN57Jat7AexnZ",
+    "style": "full"
   },
   {
     "title": "Ifixit",
@@ -174,15 +180,9 @@
     "style": "full"
   },
   {
-    "title": "Portal",
-    "url": "https://portal.shadowsocks.au/",
-    "icon": "https://favicon.vemetric.com/portal.shadowsocks.au",
+    "title": "spotify",
+    "url": "https://spotify.com",
+    "icon": "https://img.logo.dev/spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
     "style": "full"
-  },
-  {
-    "title": "Spotify",
-    "url": "https://open.spotify.com/",
-    "icon": "https://favicon.vemetric.com/open.spotify.com",
-    "style": "white"
   }
 ]

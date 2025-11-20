@@ -52,7 +52,9 @@
                         <span>切换源:</span>
                         <span class="source-tag" onclick="switchIconSource('manifest')">Manifest</span>
                         <span class="source-tag" onclick="switchIconSource('vemetric')">Vemetric</span>
-                        <span class="source-tag" onclick="switchIconSource('direct')">官网直接</span>
+                        <span class="source-tag" onclick="switchIconSource('logodev')">Logo.dev</span>
+                        <span class="source-tag" onclick="switchIconSource('brandfetch')">Brandfetch</span>
+                        <span class="source-tag" onclick="switchIconSource('direct')">官网</span>
                     </div>
                 </div>
             </div>
@@ -61,6 +63,10 @@
                 <label class="radio-label">
                     <input type="radio" name="icon-style" value="full" checked onchange="updatePreview()">
                     <span>铺满 (Full)</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="icon-style" value="fit" onchange="updatePreview()">
+                    <span>适中 (Fit)</span>
                 </label>
                 <label class="radio-label">
                     <input type="radio" name="icon-style" value="white" onchange="updatePreview()">
