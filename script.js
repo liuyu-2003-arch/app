@@ -1,230 +1,258 @@
+// 你的线上数据文件地址
+const DATA_URL = 'https://324893.xyz/bookmarks.json';
+
 let bookmarks = [];
 let isEditing = false;
 let sortableInstance = null;
-let editingId = null;
+let currentEditIndex = -1;
 
-const gridEl = document.getElementById('bookmark-grid');
-const modal = document.getElementById('modal');
-const editActions = document.getElementById('edit-actions');
-const editToggleBtn = document.getElementById('edit-toggle-btn');
-const editTextSpan = document.getElementById('edit-text'); 
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    loadBookmarks();
+});
 
-// 默认数据
-const defaultData = [
-    { id: "1", title: "Google", url: "https://www.google.com", iconType: "auto", iconValue: "" },
-    { id: "2", title: "GitHub", url: "https://github.com", iconType: "image", iconValue: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" },
-    { id: "3", title: "Bilibili", url: "https://www.bilibili.com", iconType: "auto", iconValue: "" }
-];
-
-async function init() {
+// 1. 加载数据
+async function loadBookmarks() {
     try {
-        const res = await fetch(`./bookmarks.json?t=${new Date().getTime()}`);
-        if (!res.ok) throw new Error('File not found');
-        bookmarks = await res.json();
-        if (!Array.isArray(bookmarks) || bookmarks.length === 0) bookmarks = defaultData;
-    } catch (e) {
-        console.warn('Using default data:', e);
-        bookmarks = defaultData;
+        const response = await fetch(DATA_URL);
+        if (!response.ok) throw new Error("Fetch failed");
+        bookmarks = await response.json();
+    } catch (error) {
+        console.warn("无法加载远程JSON，加载默认演示数据", error);
+        // 默认演示数据
+        bookmarks = [
+            { title: "GitHub", url: "https://github.com", icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png", style: "white" },
+            { title: "Bilibili", url: "https://www.bilibili.com", icon: "https://icons.duckduckgo.com/ip3/bilibili.com.ico", style: "white" },
+            { title: "无图标示例", url: "https://example.com", icon: "", style: "full" }
+        ];
     }
     render();
 }
 
+// 2. 渲染函数 (核心逻辑)
 function render() {
-    if (!gridEl) return;
-    gridEl.innerHTML = '';
+    const grid = document.getElementById('bookmark-grid');
+    grid.innerHTML = '';
 
-    bookmarks.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'bookmark-item';
-        el.dataset.id = item.id;
+    bookmarks.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = `bookmark-item ${item.style === 'white' ? 'style-white' : ''}`;
+        div.dataset.index = index;
 
+        div.onclick = (e) => {
+            if (isEditing) {
+                if (!e.target.classList.contains('delete-btn')) openModal(index);
+            } else {
+                window.location.href = item.url;
+            }
+        };
+
+        // 获取首字母（用于文字Logo）
+        const firstChar = item.title ? item.title.charAt(0).toUpperCase() : 'A';
+
+        // 渲染逻辑：如果有图标链接，渲染图片（带onerror回退）；否则直接渲染文字
         let iconHtml = '';
-        let isTextClass = '';
-
-        // --- 核心修改：智能判断是否需要全填充 ---
-        // 定义哪些域名需要撑满整个图标（去白边）
-        const fullFillDomains = ['bilibili.com', 'douban.com', 'weibo.com', 'tmall.com', 'jd.com'];
-        let imgClass = 'favicon'; // 默认有留白
-
-        // 如果是图片模式或者自动模式，检查是否需要全填充
-        if (item.url) {
-            const isFullFill = fullFillDomains.some(domain => item.url.includes(domain));
-            if (isFullFill) {
-                imgClass = 'full-fill';
-            }
-        }
-        // -------------------------------------
-
-        if (item.iconType === 'image' && item.iconValue) {
-            // 自定义图片通常也建议全填充，或者根据需要调整
-            // 这里默认给自定义图片全填充逻辑，如果它是透明png可以改回
-            iconHtml = `<img src="${item.iconValue}" class="full-fill" alt="${item.title}">`;
-        } else if (item.iconType === 'text') {
-            isTextClass = 'text-icon';
-            iconHtml = `<span>${item.iconValue || item.title.slice(0,1)}</span>`;
+        if (item.icon && item.icon.trim() !== "") {
+            iconHtml = `
+                <img src="${item.icon}"
+                     onload="this.style.display='block'; this.nextElementSibling.style.display='none'"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="text-icon" style="display:none">${firstChar}</div>
+            `;
         } else {
-            try {
-                const domain = new URL(item.url).hostname;
-                const favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-                iconHtml = `<img src="${favUrl}" class="${imgClass}" alt="${item.title}">`;
-            } catch(e) {
-                isTextClass = 'text-icon';
-                iconHtml = `<span>${item.title.slice(0,1)}</span>`;
-            }
+            iconHtml = `<div class="text-icon">${firstChar}</div>`;
         }
 
-        el.innerHTML = `
-            <div class="delete-btn" onclick="deleteBookmark(event, '${item.id}')">✕</div>
-            <div class="edit-overlay" onclick="openEditModal('${item.id}')"></div>
-            <a href="${item.url}" class="bookmark-link" target="_blank">
-                <div class="bookmark-icon ${isTextClass}">
-                    ${iconHtml}
-                </div>
-                <div class="bookmark-title">${item.title}</div>
-            </a>
+        div.innerHTML = `
+            <div class="delete-btn" onclick="deleteBookmark(event, ${index})">×</div>
+            <div class="icon-box">
+                ${iconHtml}
+            </div>
+            <div class="bookmark-title">${item.title}</div>
         `;
-        gridEl.appendChild(el);
+        grid.appendChild(div);
     });
 
-    if (isEditing) enableDrag();
-    else disableDrag();
+    if (isEditing) initSortable();
 }
 
-// 下面的代码保持不变
-editToggleBtn.addEventListener('click', () => {
-    isEditing = !isEditing;
-    document.body.classList.toggle('editing', isEditing);
-    editTextSpan.textContent = isEditing ? "完成编辑" : "编辑";
+// 3. 切换编辑模式
+function toggleEditMode(enable) {
+    isEditing = enable;
+    const container = document.querySelector('.container');
+    const controls = document.getElementById('edit-controls');
 
-    if (isEditing) { editActions.classList.remove('hidden'); enableDrag(); }
-    else { editActions.classList.add('hidden'); disableDrag(); updateOrderFromDOM(); }
-});
-
-function enableDrag() {
-    if (!sortableInstance) sortableInstance = new Sortable(gridEl, { animation: 150, ghostClass: 'sortable-ghost', onEnd: updateOrderFromDOM });
-}
-function disableDrag() {
-    if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
-}
-function updateOrderFromDOM() {
-    const newIds = Array.from(gridEl.children).map(el => el.dataset.id);
-    const newArr = [];
-    newIds.forEach(id => { const item = bookmarks.find(b => b.id === id); if(item) newArr.push(item); });
-    bookmarks = newArr;
-}
-
-window.deleteBookmark = (e, id) => {
-    e.stopPropagation();
-    if(confirm('确定删除?')) { bookmarks = bookmarks.filter(b => b.id !== id); render(); }
-};
-
-const titleIn = document.getElementById('input-title');
-const urlIn = document.getElementById('input-url');
-const radios = document.getElementsByName('icon-type');
-const iconValIn = document.getElementById('input-icon-val');
-const preview = document.getElementById('icon-preview');
-
-window.openEditModal = (id) => {
-    editingId = id;
-    modal.style.display = 'flex';
-    requestAnimationFrame(() => modal.style.opacity = '1');
-    document.getElementById('modal-title').textContent = id ? '编辑书签' : '添加书签';
-
-    if (id) {
-        const item = bookmarks.find(b => b.id === id);
-        titleIn.value = item.title; urlIn.value = item.url;
-        [...radios].forEach(r => r.checked = (r.value === item.iconType));
-        iconValIn.value = item.iconValue || "";
+    if (enable) {
+        container.classList.add('is-editing');
+        controls.classList.remove('hidden');
+        initSortable();
     } else {
-        titleIn.value = ''; urlIn.value = ''; iconValIn.value = ''; radios[0].checked = true;
+        container.classList.remove('is-editing');
+        controls.classList.add('hidden');
+        if (sortableInstance) {
+            sortableInstance.destroy();
+            sortableInstance = null;
+        }
     }
+}
+
+// 4. 拖拽逻辑
+function initSortable() {
+    const grid = document.getElementById('bookmark-grid');
+    if (sortableInstance) sortableInstance.destroy();
+
+    sortableInstance = new Sortable(grid, {
+        animation: 350,
+        ghostClass: 'sortable-ghost',
+        delay: 100,
+        onEnd: function (evt) {
+            const item = bookmarks.splice(evt.oldIndex, 1)[0];
+            bookmarks.splice(evt.newIndex, 0, item);
+        }
+    });
+}
+
+// 5. 删除
+function deleteBookmark(e, index) {
+    e.stopPropagation();
+    if (confirm('确定删除这个书签吗？')) {
+        bookmarks.splice(index, 1);
+        render();
+    }
+}
+
+// 6. 模态框逻辑
+function openModal(index = -1) {
+    currentEditIndex = index;
+    const modal = document.getElementById('modal');
+    const titleInput = document.getElementById('input-title');
+    const urlInput = document.getElementById('input-url');
+    const iconInput = document.getElementById('input-icon');
+    const radios = document.getElementsByName('icon-style');
+
+    if (index >= 0) {
+        const item = bookmarks[index];
+        titleInput.value = item.title;
+        urlInput.value = item.url;
+        iconInput.value = item.icon || "";
+        for(let r of radios) if(r.value === item.style) r.checked = true;
+    } else {
+        titleInput.value = '';
+        urlInput.value = '';
+        iconInput.value = '';
+        radios[0].checked = true;
+    }
+
     updatePreview();
-};
+    modal.classList.remove('hidden');
+}
 
 function closeModal() {
-    modal.style.opacity = '0'; setTimeout(() => modal.style.display = 'none', 300);
+    document.getElementById('modal').classList.add('hidden');
 }
-document.getElementById('add-btn').addEventListener('click', () => openEditModal(null));
-document.getElementById('modal-cancel').addEventListener('click', closeModal);
 
-urlIn.addEventListener('blur', () => {
-    let rawUrl = urlIn.value.trim();
-    if (!rawUrl) return;
-    if (!/^https?:\/\//i.test(rawUrl)) { rawUrl = 'https://' + rawUrl; urlIn.value = rawUrl; }
-    if (!titleIn.value.trim()) {
+// 自动填充信息 (增强版：提取域名做标题)
+function autoFillInfo() {
+    const urlVal = document.getElementById('input-url').value;
+    const titleInput = document.getElementById('input-title');
+    const iconInput = document.getElementById('input-icon');
+
+    if (urlVal.length > 3) {
+        // 智能补全 https
+        let safeUrl = urlVal;
+        if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
+
         try {
-            const hostname = new URL(rawUrl).hostname;
-            let name = hostname.replace(/^www\./, '').split('.')[0];
-            if (name) titleIn.value = name.charAt(0).toUpperCase() + name.slice(1);
-        } catch (e) {}
+            const urlObj = new URL(safeUrl);
+            const domain = urlObj.hostname;
+
+            // 自动填充图标 (仅当图标栏为空时)
+            if (!iconInput.value) {
+                const autoIconUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+                iconInput.value = autoIconUrl;
+                updatePreview();
+            }
+
+            // 自动填充标题 (从域名提取，如 www.youtube.com -> Youtube)
+            if (!titleInput.value) {
+                let domainName = domain.replace('www.', '').split('.')[0];
+                if(domainName) {
+                    domainName = domainName.charAt(0).toUpperCase() + domainName.slice(1);
+                    titleInput.value = domainName;
+                    updatePreviewText();
+                }
+            }
+        } catch (e) {
+            // 忽略不完整的URL
+        }
     }
-    updatePreview();
-});
+}
 
 function updatePreview() {
-    const type = [...radios].find(r => r.checked).value;
-    let rawUrl = urlIn.value.trim();
-    if (rawUrl && !/^https?:\/\//i.test(rawUrl)) rawUrl = 'https://' + rawUrl;
+    const iconUrl = document.getElementById('input-icon').value;
+    const img = document.getElementById('preview-img');
+    const txt = document.getElementById('preview-text');
 
-    const img = preview.querySelector('img');
-    const span = preview.querySelector('span');
-
-    preview.className = 'bookmark-icon';
-    img.classList.add('hidden'); span.classList.add('hidden');
-    iconValIn.classList.toggle('hidden', type === 'auto');
-    img.className = ''; // Reset classes
-
-    // 预览逻辑也加上全填充判断
-    const fullFillDomains = ['bilibili.com', 'douban.com', 'weibo.com'];
-    let previewImgClass = 'favicon';
-    if (rawUrl && fullFillDomains.some(d => rawUrl.includes(d))) {
-        previewImgClass = 'full-fill';
-    }
-
-    if (type === 'image' && iconValIn.value) {
-        img.src = iconValIn.value; img.classList.remove('hidden');
-        img.className = 'full-fill'; // 自定义图片预览默认全填充
-    } else if (type === 'text') {
-        preview.classList.add('text-icon');
-        span.textContent = iconValIn.value || titleIn.value.charAt(0) || "A";
-        span.classList.remove('hidden');
-    } else if (type === 'auto' && rawUrl) {
-        try {
-            const host = new URL(rawUrl).hostname;
-            img.src = `https://www.google.com/s2/favicons?domain=${host}&sz=128`;
-            img.classList.remove('hidden');
-            img.className = previewImgClass;
-        } catch(e){}
+    if (iconUrl) {
+        img.src = iconUrl;
+        img.classList.remove('hidden');
+        txt.classList.add('hidden');
+    } else {
+        handlePreviewError();
     }
 }
 
-[titleIn, urlIn, iconValIn].forEach(el => el.addEventListener('input', updatePreview));
-[...radios].forEach(el => el.addEventListener('change', updatePreview));
+// 图片加载失败或无图片时显示文字
+function handlePreviewError() {
+    const img = document.getElementById('preview-img');
+    const txt = document.getElementById('preview-text');
 
-document.getElementById('modal-save').addEventListener('click', () => {
-    let finalUrl = urlIn.value.trim(); let finalTitle = titleIn.value.trim();
-    if (!finalUrl) return alert('请填写网址');
-    if (!/^https?:\/\//i.test(finalUrl)) finalUrl = 'https://' + finalUrl;
-    if (!finalTitle) {
-        try { finalTitle = new URL(finalUrl).hostname.replace('www.','').split('.')[0]; finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1); }
-        catch (e) { finalTitle = "未命名"; }
+    img.classList.add('hidden');
+    txt.classList.remove('hidden');
+    updatePreviewText();
+}
+
+function updatePreviewText() {
+    const titleVal = document.getElementById('input-title').value;
+    const txt = document.getElementById('preview-text');
+    txt.innerText = titleVal ? titleVal.charAt(0).toUpperCase() : 'A';
+}
+
+function saveBookmark() {
+    const title = document.getElementById('input-title').value;
+    let url = document.getElementById('input-url').value;
+    const icon = document.getElementById('input-icon').value;
+    const style = document.querySelector('input[name="icon-style"]:checked').value;
+
+    if (!title || !url) {
+        alert('标题和网址是必填的');
+        return;
     }
-    const newItem = {
-        id: editingId || Date.now().toString(),
-        title: finalTitle, url: finalUrl,
-        iconType: [...radios].find(r => r.checked).value, iconValue: iconValIn.value
-    };
-    if (editingId) { const idx = bookmarks.findIndex(b => b.id === editingId); bookmarks[idx] = newItem; }
-    else { bookmarks.push(newItem); }
-    closeModal(); render();
-});
+    if (!url.startsWith('http')) url = 'https://' + url;
 
-document.getElementById('export-btn').addEventListener('click', () => {
-    const str = JSON.stringify(bookmarks, null, 2);
-    const blob = new Blob([str], {type: "application/json"});
+    const newItem = { title, url, icon, style };
+
+    if (currentEditIndex >= 0) {
+        bookmarks[currentEditIndex] = newItem;
+    } else {
+        bookmarks.push(newItem);
+    }
+
+    closeModal();
+    render();
+}
+
+// 7. 导出配置
+function exportConfig() {
+    const dataStr = JSON.stringify(bookmarks, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'bookmarks.json'; a.click();
-});
 
-init();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "bookmarks.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
