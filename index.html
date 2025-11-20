@@ -12,8 +12,7 @@
     <div class="background-layer"></div>
 
     <div class="container">
-        <div id="bookmark-grid" class="grid">
-            </div>
+        <div id="bookmark-grid" class="grid"></div>
     </div>
 
     <div id="edit-controls" class="edit-controls hidden">
@@ -44,9 +43,18 @@
             </div>
 
             <div class="form-group">
-                <input type="text" id="input-url" placeholder="网址 (例如 youtube.com)" oninput="autoFillInfo()">
+                <input type="text" id="input-url" placeholder="网址 (例如 bilibili.com)" oninput="autoFillInfo()">
                 <input type="text" id="input-title" placeholder="标题" oninput="updatePreview()">
-                <input type="text" id="input-icon" placeholder="图标链接 (自动获取或手动粘贴)" oninput="updatePreview()">
+
+                <div>
+                    <input type="text" id="input-icon" placeholder="图标链接" oninput="updatePreview()">
+                    <div class="icon-sources">
+                        <span>切换源:</span>
+                        <span class="source-tag" onclick="switchIconSource('manifest')">Manifest</span>
+                        <span class="source-tag" onclick="switchIconSource('vemetric')">Vemetric</span>
+                        <span class="source-tag" onclick="switchIconSource('direct')">官网直接</span>
+                    </div>
+                </div>
             </div>
 
             <div class="style-select">

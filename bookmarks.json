@@ -1,26 +1,140 @@
 [
   {
-    "title": "GitHub",
-    "url": "https://github.com",
-    "icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-    "style": "white"
-  },
-  {
-    "title": "Bilibili",
-    "url": "https://www.bilibili.com",
-    "icon": "https://icons.duckduckgo.com/ip3/bilibili.com.ico",
-    "style": "white"
-  },
-  {
-    "title": "无图标示例",
-    "url": "https://example.com",
-    "icon": "",
+    "title": "Jemch",
+    "url": "https://www.jemch.com/",
+    "icon": "https://manifest.im/icon/www.jemch.com",
     "style": "full"
   },
   {
     "title": "Youtube",
-    "url": "http://www.youtube.com",
-    "icon": "https://icons.duckduckgo.com/ip3/yout.ico",
+    "url": "https://youtube.com",
+    "icon": "https://manifest.im/icon/youtube.com",
+    "style": "white"
+  },
+  {
+    "title": "GitHub",
+    "url": "https://github.com",
+    "icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+    "style": "full"
+  },
+  {
+    "title": "Notion",
+    "url": "https://notion.so",
+    "icon": "https://manifest.im/icon/notion.so",
+    "style": "full"
+  },
+  {
+    "title": "Douban",
+    "url": "https://douban.com",
+    "icon": "https://favicon.vemetric.com/douban.com",
+    "style": "white"
+  },
+  {
+    "title": "Google",
+    "url": "https://www.google.com/",
+    "icon": "https://manifest.im/icon/www.google.com",
+    "style": "white"
+  },
+  {
+    "title": "Subeasy",
+    "url": "https://www.subeasy.ai/workspace",
+    "icon": "https://manifest.im/icon/www.subeasy.ai",
+    "style": "white"
+  },
+  {
+    "title": "Cilixiong",
+    "url": "https://www.cilixiong.com/movie/",
+    "icon": "https://manifest.im/icon/www.cilixiong.com",
+    "style": "full"
+  },
+  {
+    "title": "Alipansou",
+    "url": "https://www.alipansou.com/",
+    "icon": "https://manifest.im/icon/www.alipansou.com",
+    "style": "full"
+  },
+  {
+    "title": "Upyunso",
+    "url": "https://www.upyunso.com/",
+    "icon": "https://manifest.im/icon/www.upyunso.com",
+    "style": "full"
+  },
+  {
+    "title": "91panta",
+    "url": "https://www.91panta.cn/",
+    "icon": "https://manifest.im/icon/www.91panta.cn",
+    "style": "full"
+  },
+  {
+    "title": "Chatgpt",
+    "url": "https://chatgpt.com/",
+    "icon": "https://manifest.im/icon/chatgpt.com",
+    "style": "full"
+  },
+  {
+    "title": "Sora",
+    "url": "https://sora.chatgpt.com/drafts",
+    "icon": "https://manifest.im/icon/sora.chatgpt.com",
+    "style": "full"
+  },
+  {
+    "title": "Grok",
+    "url": "https://grok.com/",
+    "icon": "https://favicon.vemetric.com/grok.com",
+    "style": "white"
+  },
+  {
+    "title": "Gemini",
+    "url": "https://gemini.google.com/app",
+    "icon": "https://favicon.vemetric.com/gemini.google.com",
+    "style": "white"
+  },
+  {
+    "title": "Zh",
+    "url": "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5",
+    "icon": "https://manifest.im/icon/zh.wikipedia.org",
+    "style": "full"
+  },
+  {
+    "title": "Dedao",
+    "url": "https://www.dedao.cn/bought",
+    "icon": "https://manifest.im/icon/www.dedao.cn",
+    "style": "full"
+  },
+  {
+    "title": "Appstorrent",
+    "url": "https://appstorrent.ru/",
+    "icon": "https://manifest.im/icon/appstorrent.ru",
+    "style": "full"
+  },
+  {
+    "title": "Cobalt",
+    "url": "https://cobalt.tools/",
+    "icon": "https://manifest.im/icon/cobalt.tools",
+    "style": "full"
+  },
+  {
+    "title": "Macked",
+    "url": "https://macked.app/",
+    "icon": "https://manifest.im/icon/macked.app",
+    "style": "full"
+  },
+  {
+    "title": "Z-library",
+    "url": "https://z-library.sk/",
+    "icon": "https://manifest.im/icon/z-library.sk",
+    "style": "full"
+  },
+  {
+    "title": "Dash",
+    "url": "https://dash.cloudflare.com/dd0afffd8fff1c8846db83bc10e2aa1f/home/domains",
+    "icon": "https://manifest.im/icon/dash.cloudflare.com",
+    "style": "white"
+  },
+  {
+    "title": "yt-dlp",
+    "url": "https://324893.xyz/yt-dlp/",
+    "icon": "https://manifest.im/icon/324893.xyz",
     "style": "full"
   }
 ]
