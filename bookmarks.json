@@ -184,5 +184,17 @@
     "url": "https://spotify.com",
     "icon": "https://img.logo.dev/spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
     "style": "full"
+  },
+  {
+    "title": "Gmail",
+    "url": "https://gmail.com",
+    "icon": "https://cdn.brandfetch.io/gmail.com?c=1idVW8VN57Jat7AexnZ",
+    "style": "full"
+  },
+  {
+    "title": "Google Art",
+    "url": "https://artsandculture.google.com",
+    "icon": "https://manifest.im/icon/artsandculture.google.com",
+    "style": "full"
   }
 ]
