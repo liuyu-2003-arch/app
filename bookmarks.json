@@ -214,5 +214,11 @@
     "url": "https://ifixit.com",
     "icon": "https://img.logo.dev/ifixit.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
     "style": "fit"
+  },
+  {
+    "title": "Us-west-1",
+    "url": "https://us-west-1.run.claw.cloud/",
+    "icon": "https://manifest.im/icon/us-west-1.run.claw.cloud",
+    "style": "full"
   }
 ]
