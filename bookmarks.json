@@ -66,6 +66,12 @@
     "style": "full"
   },
   {
+    "title": "Mobile Yun",
+    "url": "https://yun.139.com/",
+    "icon": "https://img.logo.dev/yun.139.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+    "style": "white"
+  },
+  {
     "title": "Cilixiong",
     "url": "https://www.cilixiong.com/movie/",
     "icon": "https://manifest.im/icon/www.cilixiong.com",
@@ -74,7 +80,7 @@
   {
     "title": "Alipansou",
     "url": "https://alipansou.com",
-    "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=1ghhyk",
+    "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=7aduelm",
     "style": "full"
   },
   {
@@ -86,7 +92,7 @@
   {
     "title": "91panta",
     "url": "https://91panta.cn",
-    "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=ug49wk",
+    "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=h6wsbe",
     "style": "full"
   },
   {
@@ -150,9 +156,15 @@
     "style": "fit"
   },
   {
+    "title": "Us-west-1",
+    "url": "https://us-west-1.run.claw.cloud/",
+    "icon": "https://manifest.im/icon/us-west-1.run.claw.cloud",
+    "style": "full"
+  },
+  {
     "title": "Shadowsocks",
     "url": "https://shadowsocks.au",
-    "icon": "https://manifest.im/icon/shadowsocks.au",
+    "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=70s5uo",
     "style": "full"
   },
   {
@@ -214,11 +226,5 @@
     "url": "https://ifixit.com",
     "icon": "https://img.logo.dev/ifixit.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
     "style": "fit"
-  },
-  {
-    "title": "Us-west-1",
-    "url": "https://us-west-1.run.claw.cloud/",
-    "icon": "https://manifest.im/icon/us-west-1.run.claw.cloud",
-    "style": "full"
   }
 ]
