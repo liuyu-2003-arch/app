@@ -26,12 +26,10 @@ async function loadBookmarks() {
     render();
 }
 
-// --- 主题逻辑更新 ---
 function initTheme() {
     const savedColor = localStorage.getItem('themeColor') || '#f8e8ee';
     document.querySelector('.background-layer').style.backgroundColor = savedColor;
 
-    // 初始化选中状态
     const swatches = document.querySelectorAll('.swatch');
     swatches.forEach(swatch => {
         if (rgbToHex(swatch.style.backgroundColor) === savedColor.toLowerCase()) {
@@ -44,19 +42,16 @@ function changeTheme(color, element) {
     document.querySelector('.background-layer').style.backgroundColor = color;
     localStorage.setItem('themeColor', color);
 
-    // 更新UI选中状态
     document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
     if (element) element.classList.add('active');
 }
 
-// 辅助：颜色比较
 function rgbToHex(col) {
     if(col.charAt(0)=='#') return col;
     let rgb = col.match(/\d+/g);
-    if(!rgb) return '#f8e8ee'; // fallback
+    if(!rgb) return '#f8e8ee';
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
-// --------------------
 
 function render() {
     const grid = document.getElementById('bookmark-grid');
@@ -139,16 +134,27 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// --- 切换源 (修复随机图标) ---
+// --- 修复：更换随机源 ---
 function switchIconSource(type) {
     const iconInput = document.getElementById('input-icon');
+    const seed = Math.random().toString(36).substring(7);
 
-    // 【核心修改】使用 DiceBear Shapes 服务
-    if (type === 'random') {
-        const seed = Math.random().toString(36).substring(7);
+    // 1. 几何 (DiceBear Shapes)
+    if (type === 'random-shapes') {
         iconInput.value = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
-        updatePreview();
-        return;
+        updatePreview(); return;
+    }
+
+    // 2. 抽象 (修复：替换为 DiceBear Rings，非常稳定的抽象艺术风格)
+    if (type === 'random-bauhaus') {
+        iconInput.value = `https://api.dicebear.com/9.x/rings/svg?seed=${seed}`;
+        updatePreview(); return;
+    }
+
+    // 3. 像素 (DiceBear Identicon)
+    if (type === 'random-identicon') {
+        iconInput.value = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
+        updatePreview(); return;
     }
 
     const urlVal = document.getElementById('input-url').value;

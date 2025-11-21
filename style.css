@@ -20,7 +20,7 @@ body {
 
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-    background-color: #f8e8ee; /* 默认粉色 */
+    background-color: #f8e8ee;
     background-image:
         radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 40%),
         radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 40%),
@@ -102,7 +102,6 @@ body {
 .edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
 .edit-controls button.done-btn { background: #007AFF; color: white; }
 
-/* --- 新增：主题色块选择器 --- */
 .theme-swatches {
     display: flex; gap: 8px; padding-right: 10px; border-right: 1px solid #ddd;
 }
@@ -112,7 +111,6 @@ body {
 }
 .swatch:hover { transform: scale(1.1); }
 .swatch.active { border-color: #333; transform: scale(1.1); }
-/* --------------------------- */
 
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -121,7 +119,7 @@ body {
 }
 
 .modal-content {
-    background: white; padding: 25px; border-radius: 24px; width: 450px;
+    background: white; padding: 25px; border-radius: 24px; width: 500px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 15px;
     animation: popUp 0.3s ease; max-width: 90%;
 }
@@ -135,14 +133,35 @@ body {
 .modal-content input[type="text"] { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9; font-size: 15px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
 .modal-content input:focus { border-color: #007AFF; background: white; }
 
-.icon-sources { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; }
+/* --- 核心修改：单行横向滑动布局 --- */
+.icon-sources {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    align-items: center;
+    flex-wrap: nowrap; /* 不换行 */
+    overflow-x: auto; /* 横向滑动 */
+    white-space: nowrap;
+    padding-bottom: 5px; /* 防止滚动条遮挡 */
+    -webkit-overflow-scrolling: touch; /* iOS顺滑滚动 */
+
+    /* 两侧遮罩渐变，提示可滑动 */
+    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    padding-left: 5px; padding-right: 5px;
+}
+
+/* 隐藏滚动条 */
 .icon-sources::-webkit-scrollbar { display: none; }
+
 .icon-sources span { font-size: 12px; color: #999; flex-shrink: 0; }
 .source-tag {
-    background: #f0f0f0; padding: 5px 10px; border-radius: 6px;
+    background: #f0f0f0; padding: 6px 12px; border-radius: 8px; /* 稍微加大点击区域 */
     font-size: 12px; color: #555; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    border: 1px solid transparent;
 }
-.source-tag:hover { background: #007AFF; color: white; }
+.source-tag:hover { background: #007AFF; color: white; border-color: #0062cc; }
+/* -------------------------------- */
 
 .style-select { display: flex; gap: 20px; padding-left: 5px; justify-content: flex-start; }
 .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #555; cursor: pointer; }
