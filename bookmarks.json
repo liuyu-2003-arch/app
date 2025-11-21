@@ -1,15 +1,15 @@
 [
   {
-    "title": "Jemch",
-    "url": "https://www.jemch.com/",
-    "icon": "https://manifest.im/icon/www.jemch.com",
-    "style": "full"
-  },
-  {
     "title": "Notion",
     "url": "https://notion.so",
     "icon": "https://manifest.im/icon/notion.so",
     "style": "full"
+  },
+  {
+    "title": "Google",
+    "url": "https://www.google.com/",
+    "icon": "https://manifest.im/icon/www.google.com",
+    "style": "white"
   },
   {
     "title": "Youtube",
@@ -24,28 +24,28 @@
     "style": "full"
   },
   {
-    "title": "yt-dlp",
-    "url": "https://324893.xyz/yt-dlp/",
-    "icon": "https://manifest.im/icon/324893.xyz",
-    "style": "full"
-  },
-  {
     "title": "Subeasy",
     "url": "https://www.subeasy.ai/workspace",
     "icon": "https://manifest.im/icon/www.subeasy.ai",
     "style": "white"
   },
   {
+    "title": "yt-dlp",
+    "url": "https://324893.xyz/yt-dlp/",
+    "icon": "https://manifest.im/icon/324893.xyz",
+    "style": "full"
+  },
+  {
+    "title": "Cobalt",
+    "url": "https://cobalt.tools/",
+    "icon": "https://manifest.im/icon/cobalt.tools",
+    "style": "full"
+  },
+  {
     "title": "Tingwu",
     "url": "https://tingwu.aliyun.com/home",
     "icon": "https://favicon.vemetric.com/tingwu.aliyun.com",
     "style": "fit"
-  },
-  {
-    "title": "Google",
-    "url": "https://www.google.com/",
-    "icon": "https://manifest.im/icon/www.google.com",
-    "style": "white"
   },
   {
     "title": "GitHub",
@@ -132,12 +132,6 @@
     "style": "full"
   },
   {
-    "title": "Cobalt",
-    "url": "https://cobalt.tools/",
-    "icon": "https://manifest.im/icon/cobalt.tools",
-    "style": "full"
-  },
-  {
     "title": "Macked",
     "url": "https://macked.app/",
     "icon": "https://manifest.im/icon/macked.app",
@@ -150,25 +144,25 @@
     "style": "full"
   },
   {
-    "title": "Dash",
+    "title": "Cloudflare",
     "url": "https://cloudflare.com",
     "icon": "https://img.logo.dev/cloudflare.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
     "style": "fit"
   },
   {
-    "title": "Us-west-1",
+    "title": "Claw Cloud",
     "url": "https://us-west-1.run.claw.cloud/",
     "icon": "https://manifest.im/icon/us-west-1.run.claw.cloud",
     "style": "full"
   },
   {
     "title": "Shadowsocks",
-    "url": "https://shadowsocks.au",
+    "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
     "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=70s5uo",
     "style": "full"
   },
   {
-    "title": "Zh",
+    "title": "Wikipedia",
     "url": "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5",
     "icon": "https://manifest.im/icon/zh.wikipedia.org",
     "style": "full"
@@ -192,10 +186,10 @@
     "style": "full"
   },
   {
-    "title": "Ifixit",
+    "title": "iFixit",
     "url": "https://www.ifixit.com/Teardown",
-    "icon": "https://favicon.vemetric.com/www.ifixit.com",
-    "style": "full"
+    "icon": "https://img.logo.dev/www.ifixit.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+    "style": "fit"
   },
   {
     "title": "spotify",
@@ -220,11 +214,5 @@
     "url": "https://earth.google.com",
     "icon": "https://favicon.vemetric.com/earth.google.com",
     "style": "white"
-  },
-  {
-    "title": "Ifixit",
-    "url": "https://ifixit.com",
-    "icon": "https://img.logo.dev/ifixit.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-    "style": "fit"
   }
 ]
