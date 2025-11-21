@@ -39,34 +39,36 @@
         <div class="modal-content">
             <h3>编辑/添加书签</h3>
 
-            <div class="preview-container">
-                <div id="preview-card" class="bookmark-item">
-                    <div class="icon-box">
-                        <img id="preview-img" src="" alt="">
-                        <div id="preview-text" class="text-icon hidden">A</div>
+            <div class="modal-top-split">
+                <div class="preview-section">
+                    <div id="preview-card" class="bookmark-item">
+                        <div class="icon-box">
+                            <img id="preview-img" src="" alt="">
+                            <div id="preview-text" class="text-icon hidden">A</div>
+                        </div>
+                        <div id="preview-title" class="bookmark-title">标题预览</div>
                     </div>
-                    <div id="preview-title" class="bookmark-title">标题预览</div>
+                    <div class="preview-label">效果预览</div>
                 </div>
-                <div class="preview-label">效果预览</div>
+
+                <div class="candidate-section">
+                    <div id="icon-candidates" class="candidate-grid">
+                        </div>
+                </div>
             </div>
 
             <div class="form-group">
-                <input type="text" id="input-url" placeholder="网址 (例如 bilibili.com)" oninput="autoFillInfo()">
-                <input type="text" id="input-title" placeholder="标题" oninput="updatePreview()">
-
-                <div>
-                    <input type="text" id="input-icon" placeholder="图标链接" oninput="updatePreview()">
-                    <div class="icon-sources">
-                        <span>切换源:</span>
-                        <span class="source-tag" onclick="switchIconSource('manifest')">Manifest</span>
-                        <span class="source-tag" onclick="switchIconSource('vemetric')">Vemetric</span>
-                        <span class="source-tag" onclick="switchIconSource('logodev')">Logo.dev</span>
-                        <span class="source-tag" onclick="switchIconSource('brandfetch')">Brandfetch</span>
-                        <span class="source-tag" onclick="switchIconSource('direct')">官网</span>
-                        <span class="source-tag" onclick="switchIconSource('random-shapes')">🎲 几何</span>
-                        <span class="source-tag" onclick="switchIconSource('random-bauhaus')">🎨 抽象</span>
-                        <span class="source-tag" onclick="switchIconSource('random-identicon')">🧩 像素</span>
-                    </div>
+                <div class="input-row">
+                    <span class="input-label">网页网址</span>
+                    <input type="text" id="input-url" placeholder="例如 bilibili.com" oninput="autoFillInfo()">
+                </div>
+                <div class="input-row">
+                    <span class="input-label">网页标题</span>
+                    <input type="text" id="input-title" placeholder="标题" oninput="updatePreview()">
+                </div>
+                <div class="input-row">
+                    <span class="input-label">Logo地址</span>
+                    <input type="text" id="input-icon" placeholder="图标链接 (选填)" oninput="updatePreview()">
                 </div>
             </div>
 

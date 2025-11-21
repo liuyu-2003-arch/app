@@ -110,6 +110,9 @@ function openModal(index = -1) {
     const urlInput = document.getElementById('input-url');
     const iconInput = document.getElementById('input-icon');
     const radios = document.getElementsByName('icon-style');
+    const candidates = document.getElementById('icon-candidates');
+
+    renderRandomButtons(candidates);
 
     if (index >= 0) {
         const item = bookmarks[index];
@@ -119,6 +122,7 @@ function openModal(index = -1) {
         for(let r of radios) {
             if(r.value === (item.style || 'full')) r.checked = true;
         }
+        if (item.url) generateIconCandidates(item.url);
     } else {
         titleInput.value = '';
         urlInput.value = '';
@@ -134,55 +138,86 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// --- 修复：更换随机源 ---
-function switchIconSource(type) {
-    const iconInput = document.getElementById('input-icon');
-    const seed = Math.random().toString(36).substring(7);
-
-    // 1. 几何 (DiceBear Shapes)
-    if (type === 'random-shapes') {
-        iconInput.value = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
-        updatePreview(); return;
-    }
-
-    // 2. 抽象 (修复：替换为 DiceBear Rings，非常稳定的抽象艺术风格)
-    if (type === 'random-bauhaus') {
-        iconInput.value = `https://api.dicebear.com/9.x/rings/svg?seed=${seed}`;
-        updatePreview(); return;
-    }
-
-    // 3. 像素 (DiceBear Identicon)
-    if (type === 'random-identicon') {
-        iconInput.value = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
-        updatePreview(); return;
-    }
-
-    const urlVal = document.getElementById('input-url').value;
-    if (!urlVal || !urlVal.includes('.')) {
-        alert('请先输入正确的网址');
-        return;
-    }
+function generateIconCandidates(urlVal) {
+    if (!urlVal || !urlVal.includes('.') || urlVal.length < 4) return;
 
     let safeUrl = urlVal;
     if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
 
+    let domain = "";
+    let protocol = "https:";
     try {
         const urlObj = new URL(safeUrl);
-        let domain = urlObj.hostname;
+        domain = urlObj.hostname;
+        protocol = urlObj.protocol;
         if (domain.endsWith('.')) domain = domain.slice(0, -1);
+    } catch(e) { return; }
 
-        let newIconUrl = "";
-        if (type === 'manifest') newIconUrl = `https://manifest.im/icon/${domain}`;
-        else if (type === 'vemetric') newIconUrl = `https://favicon.vemetric.com/${domain}`;
-        else if (type === 'logodev') newIconUrl = `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png`;
-        else if (type === 'brandfetch') newIconUrl = `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ`;
-        else if (type === 'direct') newIconUrl = `${urlObj.protocol}//${domain}/favicon.ico`;
+    const list = document.getElementById('icon-candidates');
+    renderRandomButtons(list);
 
-        iconInput.value = newIconUrl;
-        updatePreview();
-    } catch (e) {
-        console.error("URL解析错误");
-    }
+    const sources = [
+        { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
+        { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
+        { name: 'Logo.dev', url: `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png` },
+        { name: 'Brandfetch', url: `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ` },
+        { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` }
+    ];
+
+    sources.forEach(src => {
+        const item = document.createElement('div');
+        item.className = 'candidate-item';
+        item.title = src.name;
+
+        const img = document.createElement('img');
+        img.src = src.url;
+
+        item.onclick = () => {
+            document.getElementById('input-icon').value = src.url;
+            updatePreview();
+            document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+        };
+
+        img.onerror = () => {
+            item.style.display = 'none';
+        };
+
+        item.appendChild(img);
+        list.insertBefore(item, list.firstChild);
+    });
+}
+
+function renderRandomButtons(container) {
+    container.innerHTML = '';
+
+    const randomTypes = [
+        { type: 'random-shapes', icon: '🎲', name: '几何' },
+        { type: 'random-rings', icon: '🎯', name: '抽象' },
+        { type: 'random-identicon', icon: '🧩', name: '像素' },
+        { type: 'random-emoji', icon: '😀', name: '表情' } // 修改：使用 emoji 风格
+    ];
+
+    randomTypes.forEach(rnd => {
+        const item = document.createElement('div');
+        item.className = 'candidate-item candidate-random';
+        item.innerText = rnd.icon;
+        item.title = rnd.name;
+        item.onclick = () => {
+            const seed = Math.random().toString(36).substring(7);
+            let url = '';
+            if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
+            else if(rnd.type === 'random-rings') url = `https://api.dicebear.com/9.x/rings/svg?seed=${seed}`;
+            else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
+            else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`; // 修复的 URL
+
+            document.getElementById('input-icon').value = url;
+            updatePreview();
+            document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+        };
+        container.appendChild(item);
+    });
 }
 
 function autoFillInfo() {
@@ -192,6 +227,8 @@ function autoFillInfo() {
         const titleInput = document.getElementById('input-title');
         const iconInput = document.getElementById('input-icon');
 
+        generateIconCandidates(urlVal);
+
         if (urlVal.includes('.') && urlVal.length > 4) {
             let safeUrl = urlVal;
             if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
@@ -200,7 +237,11 @@ function autoFillInfo() {
                 let domain = urlObj.hostname;
                 if (domain.endsWith('.')) domain = domain.slice(0, -1);
 
-                if (!iconInput.value) iconInput.value = `https://manifest.im/icon/${domain}`;
+                if (!iconInput.value) {
+                    const defaultUrl = `https://manifest.im/icon/${domain}`;
+                    iconInput.value = defaultUrl;
+                }
+
                 if (!titleInput.value) {
                     let domainName = domain.replace('www.', '').split('.')[0];
                     if(domainName) {

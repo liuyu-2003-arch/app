@@ -8,13 +8,9 @@ body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 5vh;
-    padding-bottom: 120px;
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 5vh; padding-bottom: 120px;
     box-sizing: border-box;
 }
 
@@ -102,9 +98,7 @@ body {
 .edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
 .edit-controls button.done-btn { background: #007AFF; color: white; }
 
-.theme-swatches {
-    display: flex; gap: 8px; padding-right: 10px; border-right: 1px solid #ddd;
-}
+.theme-swatches { display: flex; gap: 8px; padding-right: 10px; border-right: 1px solid #ddd; }
 .swatch {
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;
@@ -119,54 +113,95 @@ body {
 }
 
 .modal-content {
-    background: white; padding: 25px; border-radius: 24px; width: 500px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 15px;
+    background: white; padding: 25px; border-radius: 24px;
+    /* 修改：宽度缩小到 420px */
+    width: 420px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
     animation: popUp 0.3s ease; max-width: 90%;
 }
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; }
-.preview-container { background: #f5f7f9; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 5px; }
-.preview-label { margin-top: 10px; font-size: 12px; color: #999; }
 
-.form-group { display: flex; flex-direction: column; gap: 12px; }
-.modal-content input[type="text"] { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9; font-size: 15px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+/* --- 顶部左右分栏 --- */
+.modal-top-split {
+    display: flex;
+    /* 修改：减小间距 */
+    gap: 15px;
+    background: #f5f7f9;
+    /* 修改：减小内边距 */
+    padding: 15px;
+    border-radius: 16px;
+    align-items: stretch;
+}
+
+/* 左侧预览区 */
+.preview-section {
+    /* 修改：收缩宽度 */
+    flex: 0 0 115px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #e0e0e0;
+    /* 修改：减小右侧padding */
+    padding-right: 15px;
+}
+.preview-label { margin-top: 12px; font-size: 12px; color: #999; }
+
+/* 右侧候选区 */
+.candidate-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 九宫格网格 */
+.candidate-grid {
+    display: grid;
+    /* 稍微缩小图标和间距以适应窄窗口 */
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    gap: 10px;
+}
+
+.candidate-item {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer; border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.candidate-item img { width: 80%; height: 80%; object-fit: contain; }
+.candidate-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.candidate-item.active { border-color: #007AFF; background: white; box-shadow: 0 4px 12px rgba(0,122,255,0.2); }
+.candidate-random { background: #e8f2ff; color: #007AFF; font-size: 20px; }
+
+
+.form-group { display: flex; flex-direction: column; gap: 15px; }
+.input-row {
+    display: flex; align-items: center; gap: 10px;
+}
+.input-label {
+    font-size: 13px; color: #666; width: 65px; text-align: right; flex-shrink: 0; font-weight: 500;
+}
+.modal-content input[type="text"] {
+    flex: 1; padding: 8px 12px; border: 1px solid #e0e0e0;
+    border-radius: 10px; background: #f9f9f9; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+}
 .modal-content input:focus { border-color: #007AFF; background: white; }
 
-/* --- 核心修改：单行横向滑动布局 --- */
-.icon-sources {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    align-items: center;
-    flex-wrap: nowrap; /* 不换行 */
-    overflow-x: auto; /* 横向滑动 */
-    white-space: nowrap;
-    padding-bottom: 5px; /* 防止滚动条遮挡 */
-    -webkit-overflow-scrolling: touch; /* iOS顺滑滚动 */
-
-    /* 两侧遮罩渐变，提示可滑动 */
-    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-    padding-left: 5px; padding-right: 5px;
+.style-select {
+    display: flex; gap: 20px; justify-content: center; padding-top: 5px;
 }
-
-/* 隐藏滚动条 */
-.icon-sources::-webkit-scrollbar { display: none; }
-
-.icon-sources span { font-size: 12px; color: #999; flex-shrink: 0; }
-.source-tag {
-    background: #f0f0f0; padding: 6px 12px; border-radius: 8px; /* 稍微加大点击区域 */
-    font-size: 12px; color: #555; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-    border: 1px solid transparent;
-}
-.source-tag:hover { background: #007AFF; color: white; border-color: #0062cc; }
-/* -------------------------------- */
-
-.style-select { display: flex; gap: 20px; padding-left: 5px; justify-content: flex-start; }
-.radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #555; cursor: pointer; }
+.radio-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; cursor: pointer; }
 .radio-label input { width: auto; margin: 0; accent-color: #007AFF; }
 
-.modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 5px; }
 .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; background: #eee; font-size: 15px; font-weight: 600; }
 .modal-actions button.primary { background: #007AFF; color: white; }
