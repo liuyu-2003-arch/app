@@ -10,7 +10,9 @@ body {
     min-height: 100vh;
     overflow-y: auto; overflow-x: hidden;
     display: flex; flex-direction: column; align-items: center;
-    padding-top: 5vh; padding-bottom: 120px;
+    /* 修改：改回 5vh，保持视觉平衡 */
+    padding-top: 5vh;
+    padding-bottom: 120px;
     box-sizing: border-box;
 }
 
@@ -114,7 +116,6 @@ body {
 
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    /* 修改：宽度缩小到 420px */
     width: 420px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
     animation: popUp 0.3s ease; max-width: 90%;
@@ -123,33 +124,26 @@ body {
 
 .modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; }
 
-/* --- 顶部左右分栏 --- */
 .modal-top-split {
     display: flex;
-    /* 修改：减小间距 */
     gap: 15px;
     background: #f5f7f9;
-    /* 修改：减小内边距 */
     padding: 15px;
     border-radius: 16px;
     align-items: stretch;
 }
 
-/* 左侧预览区 */
 .preview-section {
-    /* 修改：收缩宽度 */
     flex: 0 0 115px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     border-right: 1px solid #e0e0e0;
-    /* 修改：减小右侧padding */
     padding-right: 15px;
 }
 .preview-label { margin-top: 12px; font-size: 12px; color: #999; }
 
-/* 右侧候选区 */
 .candidate-section {
     flex: 1;
     display: flex;
@@ -158,10 +152,8 @@ body {
     justify-content: center;
 }
 
-/* 九宫格网格 */
 .candidate-grid {
     display: grid;
-    /* 稍微缩小图标和间距以适应窄窗口 */
     grid-template-columns: repeat(3, 44px);
     grid-template-rows: repeat(3, 44px);
     gap: 10px;
