@@ -8,6 +8,7 @@ let autoFillTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadBookmarks();
+    initTheme();
 });
 
 async function loadBookmarks() {
@@ -25,13 +26,44 @@ async function loadBookmarks() {
     render();
 }
 
+// --- 主题逻辑更新 ---
+function initTheme() {
+    const savedColor = localStorage.getItem('themeColor') || '#f8e8ee';
+    document.querySelector('.background-layer').style.backgroundColor = savedColor;
+
+    // 初始化选中状态
+    const swatches = document.querySelectorAll('.swatch');
+    swatches.forEach(swatch => {
+        if (rgbToHex(swatch.style.backgroundColor) === savedColor.toLowerCase()) {
+            swatch.classList.add('active');
+        }
+    });
+}
+
+function changeTheme(color, element) {
+    document.querySelector('.background-layer').style.backgroundColor = color;
+    localStorage.setItem('themeColor', color);
+
+    // 更新UI选中状态
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+    if (element) element.classList.add('active');
+}
+
+// 辅助：颜色比较
+function rgbToHex(col) {
+    if(col.charAt(0)=='#') return col;
+    let rgb = col.match(/\d+/g);
+    if(!rgb) return '#f8e8ee'; // fallback
+    return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
+}
+// --------------------
+
 function render() {
     const grid = document.getElementById('bookmark-grid');
     grid.innerHTML = '';
 
     bookmarks.forEach((item, index) => {
         const div = document.createElement('div');
-        // 处理三种样式类名
         let styleClass = '';
         if (item.style === 'white') styleClass = 'style-white';
         else if (item.style === 'fit') styleClass = 'style-fit';
@@ -89,7 +121,6 @@ function openModal(index = -1) {
         titleInput.value = item.title;
         urlInput.value = item.url;
         iconInput.value = item.icon || "";
-        // 选中对应的样式
         for(let r of radios) {
             if(r.value === (item.style || 'full')) r.checked = true;
         }
@@ -97,7 +128,7 @@ function openModal(index = -1) {
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
-        radios[0].checked = true; // 默认选中铺满
+        radios[0].checked = true;
     }
 
     updatePreview();
@@ -108,10 +139,19 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
+// --- 切换源 (修复随机图标) ---
 function switchIconSource(type) {
-    const urlVal = document.getElementById('input-url').value;
     const iconInput = document.getElementById('input-icon');
 
+    // 【核心修改】使用 DiceBear Shapes 服务
+    if (type === 'random') {
+        const seed = Math.random().toString(36).substring(7);
+        iconInput.value = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
+        updatePreview();
+        return;
+    }
+
+    const urlVal = document.getElementById('input-url').value;
     if (!urlVal || !urlVal.includes('.')) {
         alert('请先输入正确的网址');
         return;
@@ -168,7 +208,6 @@ function autoFillInfo() {
     }, 500);
 }
 
-// 预览更新逻辑（支持3种样式）
 function updatePreview() {
     const titleVal = document.getElementById('input-title').value || "标题预览";
     const iconVal = document.getElementById('input-icon').value;
@@ -181,15 +220,9 @@ function updatePreview() {
 
     previewTitle.innerText = titleVal;
 
-    // 重置样式类
     previewCard.classList.remove('style-white', 'style-fit');
-
-    // 应用新样式
-    if (styleVal === 'white') {
-        previewCard.classList.add('style-white');
-    } else if (styleVal === 'fit') {
-        previewCard.classList.add('style-fit');
-    }
+    if (styleVal === 'white') previewCard.classList.add('style-white');
+    else if (styleVal === 'fit') previewCard.classList.add('style-fit');
 
     const firstChar = titleVal.charAt(0).toUpperCase() || "A";
     previewText.innerText = firstChar;

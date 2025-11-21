@@ -7,29 +7,36 @@
 body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    height: 100vh; overflow: hidden;
-    user-select: none;
-    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 5vh;
+    padding-bottom: 120px;
+    box-sizing: border-box;
 }
 
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-    background: radial-gradient(circle at 10% 10%, rgba(255, 230, 240, 1) 0%, rgba(255, 255, 255, 0) 40%),
-                radial-gradient(circle at 90% 20%, rgba(255, 220, 230, 1) 0%, rgba(255, 255, 255, 0) 40%),
-                radial-gradient(circle at 30% 80%, rgba(220, 210, 255, 1) 0%, rgba(255, 255, 255, 0) 50%),
-                linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    background-color: #f8e8ee;
-    filter: blur(20px);
+    background-color: #f8e8ee; /* 默认粉色 */
+    background-image:
+        radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 40%),
+        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 40%),
+        radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 50%),
+        linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+    transition: background-color 0.5s ease;
 }
 
-.container { width: 90%; max-width: 1200px; padding: 20px; }
+.container { width: 90%; max-width: 1200px; padding: 10px; }
 .grid { display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center; padding: 20px; }
 
-/* 卡片样式 */
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
     transition: transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 .bookmark-item:hover { transform: scale(1.05); }
 
@@ -40,22 +47,10 @@ body {
     display: flex; align-items: center; justify-content: center;
     position: relative;
 }
-
 .icon-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
-/* --- 三种样式状态 --- */
-/* 1. 铺满 (默认): object-fit: cover (上面已经定义) */
-
-/* 2. 适中 (新增): 稍微留一点边，完整显示 */
-.bookmark-item.style-fit .icon-box img {
-    width: 85%; height: 85%; object-fit: contain;
-}
-
-/* 3. 留白: 留更多边，小图标 */
-.bookmark-item.style-white .icon-box img {
-    width: 60%; height: 60%; object-fit: contain;
-}
-/* ------------------- */
+.bookmark-item.style-fit .icon-box img { width: 85%; height: 85%; object-fit: contain; }
+.bookmark-item.style-white .icon-box img { width: 60%; height: 60%; object-fit: contain; }
 
 .text-icon {
     width: 100%; height: 100%; background: #e0e0e0; color: #555;
@@ -100,12 +95,24 @@ body {
 .edit-controls {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
-    padding: 10px 20px; border-radius: 30px; display: flex; gap: 15px;
+    padding: 10px 20px; border-radius: 30px; display: flex; gap: 15px; align-items: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 101; transition: bottom 0.4s;
 }
 .edit-controls.hidden { bottom: -100px; }
-.edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; }
+.edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
 .edit-controls button.done-btn { background: #007AFF; color: white; }
+
+/* --- 新增：主题色块选择器 --- */
+.theme-swatches {
+    display: flex; gap: 8px; padding-right: 10px; border-right: 1px solid #ddd;
+}
+.swatch {
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.2s;
+}
+.swatch:hover { transform: scale(1.1); }
+.swatch.active { border-color: #333; transform: scale(1.1); }
+/* --------------------------- */
 
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -114,14 +121,10 @@ body {
 }
 
 .modal-content {
-    background: white; padding: 25px; border-radius: 24px;
-    /* --- 修改：加宽模态框 --- */
-    width: 450px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    display: flex; flex-direction: column; gap: 15px;
-    animation: popUp 0.3s ease;
+    background: white; padding: 25px; border-radius: 24px; width: 450px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 15px;
+    animation: popUp 0.3s ease; max-width: 90%;
 }
-
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; }
@@ -129,30 +132,17 @@ body {
 .preview-label { margin-top: 10px; font-size: 12px; color: #999; }
 
 .form-group { display: flex; flex-direction: column; gap: 12px; }
-.modal-content input { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9; font-size: 15px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+.modal-content input[type="text"] { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9; font-size: 15px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
 .modal-content input:focus { border-color: #007AFF; background: white; }
 
-/* --- 修改：源切换标签 (单行) --- */
-.icon-sources {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    align-items: center;
-    flex-wrap: nowrap; /* 强制不换行 */
-    overflow-x: auto; /* 如果实在不够，允许横向滚动 */
-    white-space: nowrap;
-}
-/* 隐藏滚动条 (Chrome/Safari) */
+.icon-sources { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; }
 .icon-sources::-webkit-scrollbar { display: none; }
-
 .icon-sources span { font-size: 12px; color: #999; flex-shrink: 0; }
 .source-tag {
     background: #f0f0f0; padding: 5px 10px; border-radius: 6px;
-    font-size: 12px; color: #555; cursor: pointer; transition: all 0.2s;
-    flex-shrink: 0; /* 防止按钮被压缩 */
+    font-size: 12px; color: #555; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
 }
 .source-tag:hover { background: #007AFF; color: white; }
-/* ------------------------- */
 
 .style-select { display: flex; gap: 20px; padding-left: 5px; justify-content: flex-start; }
 .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #555; cursor: pointer; }

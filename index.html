@@ -16,8 +16,16 @@
     </div>
 
     <div id="edit-controls" class="edit-controls hidden">
-        <button onclick="openModal()">➕ 添加书签</button>
-        <button onclick="exportConfig()">📤 导出配置</button>
+        <div class="theme-swatches">
+            <div class="swatch" style="background: #f8e8ee" onclick="changeTheme('#f8e8ee', this)"></div>
+            <div class="swatch" style="background: #e0f2ff" onclick="changeTheme('#e0f2ff', this)"></div>
+            <div class="swatch" style="background: #e0ffe8" onclick="changeTheme('#e0ffe8', this)"></div>
+            <div class="swatch" style="background: #f3e0ff" onclick="changeTheme('#f3e0ff', this)"></div>
+            <div class="swatch" style="background: #dcdcdc" onclick="changeTheme('#dcdcdc', this)"></div>
+        </div>
+
+        <button onclick="openModal()">➕ 添加</button>
+        <button onclick="exportConfig()">📤 导出</button>
         <button class="done-btn" onclick="toggleEditMode(false)">完成</button>
     </div>
 
@@ -55,6 +63,7 @@
                         <span class="source-tag" onclick="switchIconSource('logodev')">Logo.dev</span>
                         <span class="source-tag" onclick="switchIconSource('brandfetch')">Brandfetch</span>
                         <span class="source-tag" onclick="switchIconSource('direct')">官网</span>
+                        <span class="source-tag" onclick="switchIconSource('random')">🎲 随机</span>
                     </div>
                 </div>
             </div>
