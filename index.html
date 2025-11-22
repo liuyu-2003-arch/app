@@ -7,7 +7,7 @@
 
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76'/%3E%3C/svg%3E">
 
-    <link rel="apple-touch-icon" href="https://img.icons8.com/dusk/200/compass--v1.png">
+    <link rel="apple-touch-icon" href="https://324893.xyz/icon.png">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -19,13 +19,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-
     <div class="background-layer"></div>
-
     <div class="container">
         <div id="bookmark-grid" class="grid"></div>
     </div>
-
     <div id="edit-controls" class="edit-controls hidden">
         <div class="theme-swatches">
             <div class="swatch" style="background: #f8e8ee" onclick="changeTheme('#f8e8ee', this)"></div>
@@ -34,22 +31,18 @@
             <div class="swatch" style="background: #f3e0ff" onclick="changeTheme('#f3e0ff', this)"></div>
             <div class="swatch" style="background: #dcdcdc" onclick="changeTheme('#dcdcdc', this)"></div>
         </div>
-
         <button onclick="openModal()">➕ 添加</button>
         <button onclick="exportConfig()">📤 导出</button>
         <button class="done-btn" onclick="toggleEditMode(false)">完成</button>
     </div>
-
     <div class="edit-trigger-area">
         <div class="edit-fab" onclick="toggleEditMode(true)">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
         </div>
     </div>
-
     <div id="modal" class="modal hidden">
         <div class="modal-content">
             <h3>编辑/添加书签</h3>
-
             <div class="modal-top-split">
                 <div class="preview-section">
                     <div id="preview-card" class="bookmark-item">
@@ -61,13 +54,10 @@
                     </div>
                     <div class="preview-label">效果预览</div>
                 </div>
-
                 <div class="candidate-section">
-                    <div id="icon-candidates" class="candidate-grid">
-                        </div>
+                    <div id="icon-candidates" class="candidate-grid"></div>
                 </div>
             </div>
-
             <div class="form-group">
                 <div class="input-row">
                     <span class="input-label">网页网址</span>
@@ -79,10 +69,9 @@
                 </div>
                 <div class="input-row">
                     <span class="input-label">Logo地址</span>
-                    <input type="text" id="input-icon" placeholder="图标链接 (可选，点击上方图标自动填入)" oninput="updatePreview()">
+                    <input type="text" id="input-icon" placeholder="图标链接 (选填)" oninput="updatePreview()">
                 </div>
             </div>
-
             <div class="style-select">
                 <label class="radio-label">
                     <input type="radio" name="icon-style" value="full" checked onchange="updatePreview()">
@@ -97,14 +86,12 @@
                     <span>留白 (White)</span>
                 </label>
             </div>
-
             <div class="modal-actions">
                 <button onclick="closeModal()">取消</button>
                 <button class="primary" onclick="saveBookmark()">确定</button>
             </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
