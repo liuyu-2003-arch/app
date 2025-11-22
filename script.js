@@ -138,6 +138,7 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
+// --- 核心修改：生成 6 个固定图标候选 ---
 function generateIconCandidates(urlVal) {
     if (!urlVal || !urlVal.includes('.') || urlVal.length < 4) return;
 
@@ -154,17 +155,24 @@ function generateIconCandidates(urlVal) {
     } catch(e) { return; }
 
     const list = document.getElementById('icon-candidates');
+    // 先重置为 3 个随机按钮
     renderRandomButtons(list);
 
+    // 定义 6 个固定源 (新增 Web Icon)
     const sources = [
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
         { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
         { name: 'Logo.dev', url: `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png` },
         { name: 'Brandfetch', url: `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ` },
-        { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` }
+        { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` },
+        { name: 'Web Icon', url: `${protocol}//${domain}/icon.png` } // 新增
     ];
 
-    sources.forEach(src => {
+    // 倒序插入到列表最前面
+    // 最终顺序：Manifest, Vemetric, Logo.dev, Brandfetch, Direct, Web Icon, 随机1, 随机2, 随机3
+    // 正好 9 个
+    for (let i = sources.length - 1; i >= 0; i--) {
+        const src = sources[i];
         const item = document.createElement('div');
         item.className = 'candidate-item';
         item.title = src.name;
@@ -180,22 +188,25 @@ function generateIconCandidates(urlVal) {
         };
 
         img.onerror = () => {
+            // 如果图标加载失败，为了保持九宫格整齐，可以隐藏，或者显示一个占位符
+            // 这里选择隐藏，如果隐藏多了可能会缺角，但在有随机按钮垫底的情况下通常还好
             item.style.display = 'none';
         };
 
         item.appendChild(img);
         list.insertBefore(item, list.firstChild);
-    });
+    }
 }
 
+// --- 核心修改：只保留 3 个随机按钮 ---
 function renderRandomButtons(container) {
     container.innerHTML = '';
 
     const randomTypes = [
         { type: 'random-shapes', icon: '🎲', name: '几何' },
-        { type: 'random-rings', icon: '🎯', name: '抽象' },
+        // 删除了 Rings (抽象)
         { type: 'random-identicon', icon: '🧩', name: '像素' },
-        { type: 'random-emoji', icon: '😀', name: '表情' } // 修改：使用 emoji 风格
+        { type: 'random-emoji', icon: '😀', name: '表情' }
     ];
 
     randomTypes.forEach(rnd => {
@@ -207,9 +218,8 @@ function renderRandomButtons(container) {
             const seed = Math.random().toString(36).substring(7);
             let url = '';
             if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
-            else if(rnd.type === 'random-rings') url = `https://api.dicebear.com/9.x/rings/svg?seed=${seed}`;
             else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
-            else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`; // 修复的 URL
+            else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
 
             document.getElementById('input-icon').value = url;
             updatePreview();
