@@ -220,5 +220,17 @@
     "url": "https://earth.google.com",
     "icon": "https://favicon.vemetric.com/earth.google.com",
     "style": "white"
+  },
+  {
+    "title": "Whisper",
+    "url": "https://whisper.324893.xyz/",
+    "icon": "https://api.dicebear.com/9.x/shapes/svg?seed=nx21i",
+    "style": "full"
+  },
+  {
+    "title": "FFmpeg",
+    "url": "http://ffmpeg.324893.xyz/",
+    "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=zk67b",
+    "style": "full"
   }
 ]
