@@ -6,8 +6,9 @@
     <title>yt-dlp Command Generator</title>
     <style>
         :root {
+            /* More distinct default colors for a visible gradient */
             --bg-grad-start: #f8f9fa;
-            --bg-grad-end: #e9ecef;
+            --bg-grad-end: #d4d7dd;
             --card-bg: #ffffff;
             --accent-color: #6366f1; /* Indigo */
             --accent-hover: #4f46e5;
@@ -20,14 +21,15 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
         body {
-            background-color: var(--bg-grad-start);
-            background-image: radial-gradient(circle at top left, var(--bg-grad-start), var(--bg-grad-end));
+            /* The background now correctly uses the CSS variables */
+            background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
             color: var(--text-main);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            /* Add a transition for the background colors */
             transition: background 0.5s ease;
         }
 
@@ -187,10 +189,11 @@
 <body>
 
     <div class="theme-switcher">
-        <div class="color-dot" style="background-color: #f8f9fa;" onclick="changeTheme('#f8f9fa', '#e9ecef')"></div>
-        <div class="color-dot" style="background-color: #f1f3f5;" onclick="changeTheme('#f1f3f5', '#dee2e6')"></div>
-        <div class="color-dot" style="background-color: #e6f7ff;" onclick="changeTheme('#e6f7ff', '#b3e0ff')"></div>
-        <div class="color-dot" style="background-color: #f0f9f4;" onclick="changeTheme('#f0f9f4', '#ccebdc')"></div>
+        <!-- Using more distinct colors for the theme options -->
+        <div class="color-dot" style="background: linear-gradient(135deg, #f8f9fa, #d4d7dd);" onclick="changeTheme('#f8f9fa', '#d4d7dd')"></div>
+        <div class="color-dot" style="background: linear-gradient(135deg, #e6f7ff, #a5d8ff);" onclick="changeTheme('#e6f7ff', '#a5d8ff')"></div>
+        <div class="color-dot" style="background: linear-gradient(135deg, #f0f9f4, #b2dfc8);" onclick="changeTheme('#f0f9f4', '#b2dfc8')"></div>
+        <div class="color-dot" style="background: linear-gradient(135deg, #fff3e0, #ffcc80);" onclick="changeTheme('#fff3e0', '#ffcc80')"></div>
     </div>
 
     <div class="container">
@@ -290,6 +293,7 @@
             });
         }
 
+        // This function now correctly updates the CSS variables
         function changeTheme(startColor, endColor) {
             document.documentElement.style.setProperty('--bg-grad-start', startColor);
             document.documentElement.style.setProperty('--bg-grad-end', endColor);
