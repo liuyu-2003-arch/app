@@ -12,12 +12,6 @@
     "style": "full"
   },
   {
-    "title": "Google",
-    "url": "https://www.google.com/",
-    "icon": "https://manifest.im/icon/www.google.com",
-    "style": "white"
-  },
-  {
     "title": "Youtube",
     "url": "https://youtube.com",
     "icon": "https://manifest.im/icon/youtube.com",
@@ -60,10 +54,22 @@
     "style": "full"
   },
   {
+    "title": "Vercel",
+    "url": "https://vercel.com",
+    "icon": "https://img.logo.dev/vercel.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+    "style": "white"
+  },
+  {
     "title": "Douban",
     "url": "https://movie.douban.com/",
     "icon": "https://cdn.brandfetch.io/douban.com?c=1idVW8VN57Jat7AexnZ",
     "style": "fit"
+  },
+  {
+    "title": "Google",
+    "url": "https://www.google.com/",
+    "icon": "https://manifest.im/icon/www.google.com",
+    "style": "white"
   },
   {
     "title": "Aliyundrive",
