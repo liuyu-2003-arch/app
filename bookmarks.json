@@ -232,5 +232,11 @@
     "url": "http://ffmpeg.324893.xyz/",
     "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=zk67b",
     "style": "full"
+  },
+  {
+    "title": "Daily Art",
+    "url": "https://dailyart.324893.xyz/",
+    "icon": "https://api.dicebear.com/9.x/shapes/svg?seed=fsjwzb",
+    "style": "full"
   }
 ]
