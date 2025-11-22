@@ -1,5 +1,11 @@
 [
   {
+    "title": "Homepage",
+    "url": "https://324893.xyz",
+    "icon": "https://324893.xyz/icon.png",
+    "style": "full"
+  },
+  {
     "title": "Notion",
     "url": "https://notion.so",
     "icon": "https://manifest.im/icon/notion.so",
