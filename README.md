@@ -5,7 +5,6 @@
 纯静态 HTML/CSS/JS 实现，无需后端，部署在 GitHub Pages 即可使用。
 
 ![Project Preview](preview.png)
-*(建议：你可以在这里放一张网页的截图，文件名为 preview.png 上传到仓库根目录)*
 
 ## ✨ 主要功能 (Features)
 
