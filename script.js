@@ -50,7 +50,6 @@ function migrateData(oldData) {
     const pageTitles = oldData.pageTitles || ["个人收藏", "常用工具", "学习资源"];
     let bookmarks = oldData.bookmarks || oldData;
 
-    // Ensure bookmarks is an array
     if (!Array.isArray(bookmarks)) bookmarks = [];
 
     const totalPages = Math.max(pageTitles.length, Math.ceil(bookmarks.length / itemsPerPage));
@@ -105,7 +104,7 @@ function createVisualPages() {
     const chunkSize = isMobile ? 12 : 32;
 
     pages.forEach((page, originalPageIndex) => {
-        if (page.bookmarks.length === 0 && isEditing) { // Only show empty pages in edit mode
+        if (page.bookmarks.length === 0 && isEditing) {
             visualPages.push({
                 title: page.title,
                 bookmarks: [],
@@ -249,7 +248,6 @@ function showPaginationDots() {
 function renderPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     dotsContainer.innerHTML = '';
-    // if (visualPages.length <= 1) return;
 
     for (let i = 0; i < visualPages.length; i++) {
         const dot = document.createElement('div');
@@ -283,57 +281,40 @@ function initSwiper() {
     swiper.addEventListener('wheel', handleWheel, { passive: false });
 }
 
-/* --- 核心修改：优化触控板体验 (防回弹 + 限制单页) --- */
 function handleWheel(e) {
     e.preventDefault();
 
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
     const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
 
-    // 1. 禁用过渡动画，实现实时跟手
     swiperWrapper.style.transition = 'none';
-
-    // 2. 实时更新位移
     currentTranslate -= e.deltaX;
 
-    // 3. 应用位移
     setSwiperPosition();
     showPaginationDots();
 
-    // 4. 防抖：检测滚动结束 (手指离开或停止)
     clearTimeout(wheelTimeout);
     wheelTimeout = setTimeout(() => {
-        // 计算当前基于位移的理论页码 (小数)
         const movedIndex = -currentTranslate / swiperWidth;
-
-        // 计算与当前固定页面的偏移量
         const diff = movedIndex - currentPage;
-
         let targetPage = currentPage;
 
-        // 阈值判断：改为 0.15 (15%)，即只要拖动超过 15% 的距离，松手就自动翻页
-        // 这样解决了"拖一半松手弹回去"的问题
         if (diff > 0.15) {
             targetPage = currentPage + 1;
         } else if (diff < -0.15) {
             targetPage = currentPage - 1;
         }
-        // 否则 targetPage 保持不变 (吸附回原位)
 
-        // 关键：限制每次只能翻一页 (防止惯性飞过好几页)
-        // 确保 targetPage 只能是 currentPage - 1, currentPage, 或 currentPage + 1
         if (targetPage > currentPage + 1) targetPage = currentPage + 1;
         if (targetPage < currentPage - 1) targetPage = currentPage - 1;
 
-        // 边界检查
         targetPage = Math.max(0, Math.min(visualPages.length - 1, targetPage));
 
-        // 执行翻页
         currentPage = targetPage;
-        updateSwiperPosition(true); // 启用动画吸附过去
+        updateSwiperPosition(true);
         renderPaginationDots();
 
-    }, 60); // 60ms 延迟，既能保证连续跟手，又能快速响应停止
+    }, 60);
 }
 
 function dragStart(e) {
@@ -367,8 +348,6 @@ function dragEnd(e) {
     const movedBy = currentTranslate - prevTranslate;
     const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
 
-    // 同样的逻辑应用到鼠标/触摸拖拽上：
-    // 降低阈值，增加跟手感
     let targetPage = currentPage;
     if (movedBy < -swiperWidth * 0.15 && currentPage < visualPages.length - 1) {
         targetPage++;
@@ -379,7 +358,6 @@ function dragEnd(e) {
     currentPage = targetPage;
     updateSwiperPosition(true);
     renderPaginationDots();
-    // if (pageChanged) showPaginationDots(); // 只要拖拽结束都更新点，不需要额外判断
     showPaginationDots();
 }
 
@@ -650,12 +628,12 @@ function updatePreview() {
     const previewImg = document.getElementById('preview-img');
     const previewText = document.getElementById('preview-text');
     const previewTitle = document.getElementById('preview-title');
-    
+
     previewTitle.innerText = titleVal;
     previewCard.classList.remove('style-white', 'style-fit');
     if (styleVal === 'white') previewCard.classList.add('style-white');
     else if (styleVal === 'fit') previewCard.classList.add('style-fit');
-    
+
     const firstChar = titleVal.charAt(0).toUpperCase() || "A";
     previewText.innerText = firstChar;
 
@@ -684,13 +662,13 @@ function saveBookmark() {
 
     if (!title || !url) { alert('标题和网址是必填的'); return; }
     if (!url.startsWith('http')) url = 'https://' + url;
-    
+
     const { pageIndex, bookmarkIndex } = currentEditInfo;
 
     if (pageIndex >= 0 && bookmarkIndex >= 0) { // Editing existing
         const itemToUpdate = pages[pageIndex].bookmarks[bookmarkIndex];
         const newItem = { ...itemToUpdate, title, url, icon, style };
-        
+
         if (pageIndex !== newPageIndex) {
             pages[pageIndex].bookmarks.splice(bookmarkIndex, 1);
             pages[newPageIndex].bookmarks.push(newItem);
@@ -746,7 +724,7 @@ function deletePage(e, pageIndex) {
     setTimeout(() => {
         pages.splice(pageIndex, 1);
         saveData();
-        
+
         if (currentPage >= pages.length) {
             currentPage = Math.max(0, pages.length - 1);
         }
@@ -761,7 +739,7 @@ function initSortable() {
     document.querySelectorAll('.bookmark-page-content').forEach(content => {
         const instance = new Sortable(content, {
             group: 'shared-bookmarks',
-            animation: 150,
+            animation: 350, // 核心修改：变慢，让排挤动画更优雅 (原 150)
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
             forceFallback: true,
@@ -769,7 +747,7 @@ function initSortable() {
                 const itemEl = evt.item;
                 const newRect = itemEl.getBoundingClientRect();
                 const fallbackEl = document.querySelector('.sortable-drag');
-                
+
                 if (fallbackEl) {
                     const oldRect = fallbackEl.getBoundingClientRect();
                     const dx = oldRect.left - newRect.left;
@@ -778,10 +756,12 @@ function initSortable() {
                     requestAnimationFrame(() => {
                         itemEl.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
                         itemEl.style.transition = 'transform 0s';
-                        
+
                         requestAnimationFrame(() => {
                             itemEl.style.transform = 'translate3d(0, 0, 0)';
-                            itemEl.style.transition = 'transform 0.25s ease-out';
+                            // 核心修改：从 0.25s 改为 0.35s，并使用 cubic-bezier
+                            // 这种曲线模拟了“快速移动后缓慢吸附”的物理质感
+                            itemEl.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)';
                         });
                     });
                 }
