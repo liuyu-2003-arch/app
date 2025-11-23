@@ -16,14 +16,25 @@ body {
     visibility: hidden; /* Default hidden to prevent flicker */
 }
 
+/* --- 背景层重构：曲线分隔色块风格 --- */
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-    background-color: #f8e8ee;
+    background-color: #f8e8ee; /* 基础底色，由 JS 控制切换 */
+
+    /* 核心修改：利用多个径向渐变模拟流动的曲线色块 */
     background-image:
-        radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 40%),
-        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 40%),
-        radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 50%),
-        linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+        /* 左上角：强光大色块，制造主曲线 */
+        radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 50%),
+
+        /* 右下角：底部上浮的色块 */
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 60%),
+
+        /* 中间偏右：一个较硬的色块，制造明显的“分隔”感 */
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 25%),
+
+        /* 左下角：柔和的补充色块 */
+        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 40%);
+
     transition: background-color 0.5s ease;
 }
 
@@ -88,7 +99,6 @@ body {
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
-    /* transition removed to allow smooth drag, handled by hover effect manually if needed or kept simple */
     transition: transform 0.2s;
     -webkit-tap-highlight-color: transparent;
     will-change: transform;
@@ -139,7 +149,7 @@ body {
 .is-editing .bookmark-item:nth-child(5n) { animation-duration: 0.27s; animation-delay: -0.08s; }
 .is-editing .bookmark-item:nth-child(7n) { animation-direction: alternate-reverse; }
 
-/* --- 拖拽样式修复 (解决不跟随鼠标问题) --- */
+/* --- 拖拽样式修复 --- */
 .sortable-ghost {
     opacity: 0.2;
     background: #cce5ff;
@@ -155,7 +165,7 @@ body {
     box-shadow: 0 20px 40px rgba(0,0,0,0.25);
     z-index: 9999 !important;
     cursor: grabbing;
-    transition: none !important; /* 关键：禁用过渡，实现实时跟随 */
+    transition: none !important;
 }
 
 /* --- 删除按钮弹出动画 --- */
