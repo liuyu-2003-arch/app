@@ -248,7 +248,7 @@ function showPaginationDots() {
 function renderPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     dotsContainer.innerHTML = '';
-    // if (visualPages.length <= 1) return; // 只有一页时也可以显示，方便调试
+    // if (visualPages.length <= 1) return;
 
     for (let i = 0; i < visualPages.length; i++) {
         const dot = document.createElement('div');
@@ -260,7 +260,6 @@ function renderPaginationDots() {
         // 2. 添加提示文字
         const pageTitle = visualPages[i].title || `第 ${i + 1} 页`;
         dot.setAttribute('data-title', pageTitle);
-        dot.title = pageTitle;
 
         // 3. 添加点击跳转事件
         dot.onclick = (e) => {
@@ -348,7 +347,7 @@ function dragEnd(e) {
         currentPage--;
         pageChanged = true;
     }
-    
+
     updateSwiperPosition(true);
     renderPaginationDots();
     if (pageChanged) showPaginationDots();
@@ -437,7 +436,7 @@ function openModal(pageIndex = -1, bookmarkIndex = -1) {
     document.querySelectorAll('.style-option').forEach(opt => {
         opt.classList.toggle('active', opt.dataset.style === currentStyle);
     });
-    
+
     renderPageOptions(currentPageIndex);
     updatePreview();
 }
@@ -519,18 +518,22 @@ function generateIconCandidates(urlVal) {
         domain = urlObj.hostname;
         protocol = urlObj.protocol;
         if (domain.endsWith('.')) domain = domain.slice(0, -1);
-    } catch(e) { 
+    } catch(e) {
         renderRandomButtons(list);
-        return; 
+        return;
     }
     renderRandomButtons(list);
     const sources = [
+        // 1. Manifest
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
+        // 2. Vemetric
         { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
+        // 3. Logo.dev
         { name: 'Logo.dev', url: `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png` },
+        // 4. Brandfetch
         { name: 'Brandfetch', url: `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ` },
-        { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` },
-        { name: 'Web Icon', url: `${protocol}//${domain}/icon.png` }
+        // 5. Direct (/favicon.ico)
+        { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` }
     ];
     for (let i = sources.length - 1; i >= 0; i--) {
         const src = sources[i];
@@ -556,7 +559,8 @@ function renderRandomButtons(container) {
         { type: 'random-shapes', icon: '🎲', name: '几何' },
         { type: 'random-identicon', icon: '🧩', name: '像素' },
         { type: 'random-emoji', icon: '😀', name: '表情' },
-        { type: 'random-bottts', icon: '🤖', name: '机器人' }
+        { type: 'random-bottts', icon: '🤖', name: '机器人' },
+        { type: 'random-avataaars', icon: '🧑', name: '人物' } // 新增: 人物头像
     ];
     randomTypes.forEach(rnd => {
         const item = document.createElement('div');
@@ -569,6 +573,7 @@ function renderRandomButtons(container) {
             if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
             else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
             else if(rnd.type === 'random-bottts') url = `https://api.dicebear.com/9.x/bottts/svg?seed=${seed}`;
+            else if(rnd.type === 'random-avataaars') url = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`; // 新增处理逻辑
             else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
             document.getElementById('input-icon').value = url;
             updatePreview();
