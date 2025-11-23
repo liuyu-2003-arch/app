@@ -334,10 +334,29 @@ body {
     transform: translateX(-50%) scale(1);
 }
 
+/* --- 手机端适配 --- */
 @media (max-width: 768px) {
-    .container { padding-top: 80px; }
-    .bookmark-page { padding-top: 0; }
-    .bookmark-page-content { justify-content: center; }
-    .page-title { text-align: center; }
-    .pagination-dots { bottom: 40px; }
+    .container {
+        /* 原来是 80px，改为 50px */
+        /* 这样既能避开大部分手机的状态栏/灵动岛，又能让图标整体上移 */
+        padding-top: 50px;
+    }
+
+    .bookmark-page {
+        padding-top: 0;
+    }
+
+    .bookmark-page-content {
+        justify-content: center;
+    }
+
+    .page-title {
+        text-align: center;
+        /* 可以微调标题下方的间距，让图标离标题近一点点，显得更紧凑 */
+        margin-bottom: 10px;
+    }
+
+    .pagination-dots {
+        bottom: 40px;
+    }
 }
