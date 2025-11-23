@@ -16,25 +16,35 @@ body {
     visibility: hidden; /* Default hidden to prevent flicker */
 }
 
-/* --- 背景层重构：曲线分隔色块风格 --- */
+/* --- 背景层重构：流体曲线色块风格 (Abstract Waves) --- */
 .background-layer {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-    background-color: #f8e8ee; /* 基础底色，由 JS 控制切换 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
 
-    /* 核心修改：利用多个径向渐变模拟流动的曲线色块 */
+    /* 基础底色，由 JS 动态修改 */
+    background-color: #f8e8ee;
+
+    /* 核心技巧：
+       不再使用 0% -> 100% 的线性过渡，而是使用密集的断点（如 40% -> 60%）
+       制造出"半硬边"效果，模拟实体色块的轮廓。
+    */
     background-image:
-        /* 左上角：强光大色块，制造主曲线 */
-        radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 50%),
+        /* 1. 右上角：巨大的主色块，边缘有清晰的过渡带 */
+        radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0) 65%),
 
-        /* 右下角：底部上浮的色块 */
-        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 60%),
+        /* 2. 左下角：次要色块，像山坡一样隆起 */
+        radial-gradient(circle at 0% 100%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.4) 35%, rgba(255, 255, 255, 0) 60%),
 
-        /* 中间偏右：一个较硬的色块，制造明显的“分隔”感 */
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 25%),
+        /* 3. 中间偏左：一个漂浮的圆形高光，增加层次感 */
+        radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 25%);
 
-        /* 左下角：柔和的补充色块 */
-        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 40%);
-
+    /* 确保背景固定，不随滚动条移动（虽然现在 body 禁止了滚动，但为了保险） */
+    background-attachment: fixed;
+    background-size: cover;
     transition: background-color 0.5s ease;
 }
 
