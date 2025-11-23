@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         render();
         updateSwiperPosition(false);
     });
+    document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
 function migrateData(oldData) {
@@ -43,15 +44,23 @@ function migrateData(oldData) {
     return newPages;
 }
 
-function loadData() {
-    const storedData = localStorage.getItem('pagedData');
-    if (storedData) {
-        pages = JSON.parse(storedData);
-    } else {
-        const oldBookmarks = localStorage.getItem('bookmarks');
-        const oldPageTitles = localStorage.getItem('pageTitles');
-        if (oldBookmarks) {
-            pages = migrateData({ bookmarks: JSON.parse(oldBookmarks), pageTitles: JSON.parse(oldPageTitles) });
+async function loadData() {
+    try {
+        const response = await fetch('homepage_config.json');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        // Check if data is in the new format, otherwise migrate
+        if (Array.isArray(data) && data.length > 0 && data[0].hasOwnProperty('bookmarks')) {
+            pages = data;
+        } else {
+            pages = migrateData(data);
+        }
+        saveData();
+    } catch (error) {
+        console.warn("无法从 homepage_config.json 加载, 尝试从 localStorage 加载...", error);
+        const storedData = localStorage.getItem('pagedData');
+        if (storedData) {
+            pages = JSON.parse(storedData);
         } else {
             pages = [
                 { title: "个人收藏", bookmarks: [
@@ -60,8 +69,8 @@ function loadData() {
                 ]},
                 { title: "常用工具", bookmarks: [] }
             ];
+            saveData();
         }
-        saveData();
     }
     render();
     document.body.style.visibility = 'visible';
@@ -117,24 +126,8 @@ function render() {
 
         const title = document.createElement('h2');
         title.className = 'page-title';
-        title.textContent = pageData.title || (isEditing ? '新标题' : '');
-        
-        if (isEditing) {
-            title.contentEditable = "true";
-            title.onblur = (e) => {
-                pages[pageIndex].title = e.target.textContent;
-                saveData();
-            };
-        }
+        title.textContent = pageData.title || '新页面';
         header.appendChild(title);
-
-        if (isEditing && pageData.bookmarks.length === 0 && pages.length > 1) {
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-page-btn';
-            deleteBtn.textContent = '删除此空页';
-            deleteBtn.onclick = () => deletePage(pageIndex);
-            header.appendChild(deleteBtn);
-        }
         
         pageContainer.appendChild(header);
 
@@ -325,6 +318,7 @@ function updateSwiperPosition(withTransition = true) {
 function openModal(pageIndex = -1, bookmarkIndex = -1) {
     currentEditInfo = { pageIndex, bookmarkIndex };
     const modal = document.getElementById('modal');
+    modal.classList.remove('hidden');
     const titleInput = document.getElementById('input-title');
     const urlInput = document.getElementById('input-url');
     const iconInput = document.getElementById('input-icon');
@@ -357,11 +351,68 @@ function openModal(pageIndex = -1, bookmarkIndex = -1) {
     }
 
     updatePreview();
-    modal.classList.remove('hidden');
 }
 
 function closeModal() {
     document.getElementById('modal').classList.add('hidden');
+}
+
+function openPageEditModal() {
+    const modal = document.getElementById('page-edit-modal');
+    modal.classList.remove('hidden');
+    renderPageList();
+}
+
+function closePageEditModal() {
+    document.getElementById('page-edit-modal').classList.add('hidden');
+    render();
+}
+
+function renderPageList() {
+    const list = document.getElementById('page-list');
+    list.innerHTML = '';
+    pages.forEach((page, index) => {
+        const li = document.createElement('li');
+        li.className = 'page-list-item';
+        li.dataset.index = index;
+
+        const handle = document.createElement('span');
+        handle.className = 'drag-handle';
+        handle.textContent = '☰';
+        li.appendChild(handle);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'page-title-input';
+        input.value = page.title;
+        input.onblur = () => {
+            pages[index].title = input.value;
+            saveData();
+        };
+        li.appendChild(input);
+
+        if (page.bookmarks.length === 0 && pages.length > 1) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-page-list-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = () => deletePage(index);
+            li.appendChild(deleteBtn);
+        }
+
+        list.appendChild(li);
+    });
+
+    if (sortableInstances.pageList) sortableInstances.pageList.destroy();
+    sortableInstances.pageList = new Sortable(list, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: (evt) => {
+            const [movedPage] = pages.splice(evt.oldIndex, 1);
+            pages.splice(evt.newIndex, 0, movedPage);
+            saveData();
+            renderPageList();
+        }
+    });
 }
 
 function generateIconCandidates(urlVal) {
@@ -543,8 +594,12 @@ function toggleEditMode(enable) {
 function addPage() {
     pages.push({ title: "新页面", bookmarks: [] });
     saveData();
-    currentPage = pages.length - 1;
-    render();
+    if (document.getElementById('page-edit-modal').classList.contains('hidden')) {
+        currentPage = pages.length - 1;
+        render();
+    } else {
+        renderPageList();
+    }
 }
 
 function deletePage(pageIndex) {
@@ -562,12 +617,12 @@ function deletePage(pageIndex) {
         currentPage = Math.max(0, pages.length - 1);
     }
     render();
+    renderPageList();
 }
 
 function initSortable() {
     if (!isEditing) return;
 
-    // Sort bookmarks within and between pages
     document.querySelectorAll('.bookmark-page-content').forEach(content => {
         const instance = new Sortable(content, {
             group: 'shared-bookmarks',
@@ -587,23 +642,6 @@ function initSortable() {
         });
         sortableInstances.push(instance);
     });
-
-    // Sort pages
-    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
-    const pageSortable = new Sortable(swiperWrapper, {
-        group: 'pages',
-        animation: 350,
-        handle: '.page-header',
-        filter: '.page-title, .delete-page-btn',
-        preventOnFilter: true,
-        onEnd: function (evt) {
-            const [movedPage] = pages.splice(evt.oldIndex, 1);
-            pages.splice(evt.newIndex, 0, movedPage);
-            saveData();
-            render();
-        }
-    });
-    sortableInstances.push(pageSortable);
 }
 
 function deleteBookmark(e, pageIndex, bookmarkIndex) {
@@ -622,4 +660,32 @@ function exportConfig() {
     const a = document.createElement('a');
     a.href = url; a.download = "homepage_config.json";
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function importConfig() {
+    document.getElementById('import-file-input').click();
+}
+
+function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (Array.isArray(importedData) && (importedData.length === 0 || importedData[0].hasOwnProperty('bookmarks'))) {
+                pages = importedData;
+            } else {
+                pages = migrateData(importedData);
+            }
+            saveData();
+            render();
+            alert('配置导入成功！');
+        } catch (err) {
+            alert('导入失败，请确保文件是正确的 JSON 格式。');
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
 }
