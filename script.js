@@ -2,13 +2,29 @@ const DATA_URL = 'https://324893.xyz/bookmarks.json';
 
 let bookmarks = [];
 let isEditing = false;
-let sortableInstance = null;
+let sortableInstances = [];
 let currentEditIndex = -1;
 let autoFillTimer = null;
+
+// Swiper state
+let currentPage = 0;
+let totalPages = 0;
+let itemsPerPage = 16;
+let isDragging = false;
+let startPos = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
+let animationID;
+let isWheeling = false; // For trackpad swipe throttling
 
 document.addEventListener('DOMContentLoaded', () => {
     loadBookmarks();
     initTheme();
+    initSwiper();
+    window.addEventListener('resize', () => {
+        render();
+        updateSwiperPosition(false);
+    });
 });
 
 async function loadBookmarks() {
@@ -26,10 +42,35 @@ async function loadBookmarks() {
     render();
 }
 
+function calculateItemsPerPage() {
+    const page = document.querySelector('.bookmark-page');
+    if (!page) { // Fallback for initial load
+        const containerWidth = window.innerWidth * 0.9;
+        const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 80;
+        const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 30;
+        const itemsPerRow = Math.floor((containerWidth - gap) / (cardSize + gap));
+        return Math.max(1, itemsPerRow * 4);
+    }
+
+    const pageStyles = getComputedStyle(page);
+    const pageHeight = page.clientHeight - parseFloat(pageStyles.paddingTop) - parseFloat(pageStyles.paddingBottom);
+    const pageWidth = page.clientWidth - parseFloat(pageStyles.paddingLeft) - parseFloat(pageStyles.paddingRight);
+    const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 80;
+    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 30;
+    const itemHeight = cardSize + 20; // title height approx
+    const itemWidth = cardSize;
+
+    const itemsPerRow = Math.floor((pageWidth + gap) / (itemWidth + gap));
+    const calculatedRows = Math.floor((pageHeight + gap) / (itemHeight + gap));
+    const itemsPerCol = Math.min(4, calculatedRows > 0 ? calculatedRows : 1);
+
+    return Math.max(1, (itemsPerRow > 0 ? itemsPerRow : 1) * itemsPerCol);
+}
+
+
 function initTheme() {
     const savedColor = localStorage.getItem('themeColor') || '#f8e8ee';
     document.querySelector('.background-layer').style.backgroundColor = savedColor;
-
     const swatches = document.querySelectorAll('.swatch');
     swatches.forEach(swatch => {
         if (rgbToHex(swatch.style.backgroundColor) === savedColor.toLowerCase()) {
@@ -41,7 +82,6 @@ function initTheme() {
 function changeTheme(color, element) {
     document.querySelector('.background-layer').style.backgroundColor = color;
     localStorage.setItem('themeColor', color);
-
     document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
     if (element) element.classList.add('active');
 }
@@ -54,10 +94,33 @@ function rgbToHex(col) {
 }
 
 function render() {
-    const grid = document.getElementById('bookmark-grid');
-    grid.innerHTML = '';
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    swiperWrapper.innerHTML = '';
+    sortableInstances.forEach(instance => instance.destroy());
+    sortableInstances = [];
+
+    const tempPage = document.createElement('div');
+    tempPage.className = 'bookmark-page';
+    tempPage.style.visibility = 'hidden';
+    swiperWrapper.appendChild(tempPage);
+    itemsPerPage = calculateItemsPerPage();
+    swiperWrapper.removeChild(tempPage);
+
+    totalPages = Math.ceil(bookmarks.length / itemsPerPage);
+    if (totalPages === 0) totalPages = 1;
+
+    for (let i = 0; i < totalPages; i++) {
+        const page = document.createElement('div');
+        page.className = 'bookmark-page';
+        page.dataset.pageIndex = i;
+        swiperWrapper.appendChild(page);
+    }
 
     bookmarks.forEach((item, index) => {
+        const pageIndex = Math.floor(index / itemsPerPage);
+        const page = swiperWrapper.children[pageIndex];
+        if (!page) return;
+
         const div = document.createElement('div');
         let styleClass = '';
         if (item.style === 'white') styleClass = 'style-white';
@@ -72,12 +135,11 @@ function render() {
                     openModal(index);
                 }
             } else {
-                window.location.href = item.url;
+                if (!isDragging) window.location.href = item.url;
             }
         };
 
         const firstChar = item.title ? item.title.charAt(0).toUpperCase() : 'A';
-
         let iconHtml = '';
         if (item.icon && item.icon.trim() !== "") {
              iconHtml = `
@@ -97,11 +159,143 @@ function render() {
             </div>
             <div class="bookmark-title">${item.title}</div>
         `;
-        grid.appendChild(div);
+        page.appendChild(div);
     });
 
+    if (currentPage >= totalPages) {
+        currentPage = totalPages - 1;
+    }
+    updateSwiperPosition(false);
+    renderPaginationDots();
     if (isEditing) initSortable();
 }
+
+function renderPaginationDots() {
+    const dotsContainer = document.getElementById('pagination-dots');
+    dotsContainer.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        if (i === currentPage) {
+            dot.classList.add('active');
+        }
+        dotsContainer.appendChild(dot);
+    }
+}
+
+function initSwiper() {
+    const swiper = document.getElementById('bookmark-swiper');
+    swiper.addEventListener('mousedown', dragStart);
+    swiper.addEventListener('touchstart', dragStart, { passive: true });
+
+    swiper.addEventListener('mouseup', dragEnd);
+    swiper.addEventListener('mouseleave', dragEnd);
+    swiper.addEventListener('touchend', dragEnd);
+
+    swiper.addEventListener('mousemove', drag);
+    swiper.addEventListener('touchmove', drag, { passive: true });
+
+    swiper.addEventListener('wheel', handleWheel, { passive: false });
+
+    swiper.addEventListener('click', (e) => {
+        if(Math.abs(currentTranslate - prevTranslate) > 5) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+}
+
+function handleWheel(e) {
+    if (isEditing) return;
+    e.preventDefault();
+    if (isWheeling) return;
+
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        let pageChanged = false;
+        if (e.deltaX > 1 && currentPage < totalPages - 1) {
+            currentPage++;
+            pageChanged = true;
+        } else if (e.deltaX < -1 && currentPage > 0) {
+            currentPage--;
+            pageChanged = true;
+        }
+
+        if (pageChanged) {
+            isWheeling = true;
+            updateSwiperPosition(true);
+            renderPaginationDots();
+            setTimeout(() => {
+                isWheeling = false;
+            }, 400); // Throttle duration
+        }
+    }
+}
+
+function dragStart(e) {
+    if (isEditing) return;
+    isDragging = true;
+    startPos = getPositionX(e);
+    animationID = requestAnimationFrame(animation);
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    swiperWrapper.style.transition = 'none';
+}
+
+function drag(e) {
+    if (isDragging) {
+        const currentPosition = getPositionX(e);
+        currentTranslate = prevTranslate + currentPosition - startPos;
+    }
+}
+
+function dragEnd(e) {
+    if (!isDragging) return;
+    
+    cancelAnimationFrame(animationID);
+
+    const movedBy = currentTranslate - prevTranslate;
+
+    if (movedBy < -50 && currentPage < totalPages - 1) {
+        currentPage++;
+    }
+    if (movedBy > 50 && currentPage > 0) {
+        currentPage--;
+    }
+
+    updateSwiperPosition(true);
+    renderPaginationDots();
+    
+    setTimeout(() => {
+        isDragging = false;
+    }, 50);
+}
+
+function getPositionX(e) {
+    return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+}
+
+function animation() {
+    setSwiperPosition();
+    if (isDragging) requestAnimationFrame(animation);
+}
+
+function setSwiperPosition() {
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    swiperWrapper.style.transform = `translateX(${currentTranslate}px)`;
+}
+
+function updateSwiperPosition(withTransition = true) {
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
+    currentTranslate = currentPage * -swiperWidth;
+    prevTranslate = currentTranslate;
+    if (withTransition) {
+        swiperWrapper.style.transition = 'transform 0.3s ease-out';
+    }
+    setSwiperPosition();
+}
+
 
 function openModal(index = -1) {
     currentEditIndex = index;
@@ -138,15 +332,11 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// --- 核心修改：生成 6 个固定图标候选 ---
 function generateIconCandidates(urlVal) {
     if (!urlVal || !urlVal.includes('.') || urlVal.length < 4) return;
-
     let safeUrl = urlVal;
     if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
-
-    let domain = "";
-    let protocol = "https:";
+    let domain = "", protocol = "https:";
     try {
         const urlObj = new URL(safeUrl);
         domain = urlObj.hostname;
@@ -155,60 +345,43 @@ function generateIconCandidates(urlVal) {
     } catch(e) { return; }
 
     const list = document.getElementById('icon-candidates');
-    // 先重置为 3 个随机按钮
     renderRandomButtons(list);
 
-    // 定义 6 个固定源 (新增 Web Icon)
     const sources = [
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
         { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
         { name: 'Logo.dev', url: `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png` },
         { name: 'Brandfetch', url: `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ` },
         { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` },
-        { name: 'Web Icon', url: `${protocol}//${domain}/icon.png` } // 新增
+        { name: 'Web Icon', url: `${protocol}//${domain}/icon.png` }
     ];
 
-    // 倒序插入到列表最前面
-    // 最终顺序：Manifest, Vemetric, Logo.dev, Brandfetch, Direct, Web Icon, 随机1, 随机2, 随机3
-    // 正好 9 个
     for (let i = sources.length - 1; i >= 0; i--) {
         const src = sources[i];
         const item = document.createElement('div');
         item.className = 'candidate-item';
         item.title = src.name;
-
         const img = document.createElement('img');
         img.src = src.url;
-
         item.onclick = () => {
             document.getElementById('input-icon').value = src.url;
             updatePreview();
             document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
         };
-
-        img.onerror = () => {
-            // 如果图标加载失败，为了保持九宫格整齐，可以隐藏，或者显示一个占位符
-            // 这里选择隐藏，如果隐藏多了可能会缺角，但在有随机按钮垫底的情况下通常还好
-            item.style.display = 'none';
-        };
-
+        img.onerror = () => { item.style.display = 'none'; };
         item.appendChild(img);
         list.insertBefore(item, list.firstChild);
     }
 }
 
-// --- 核心修改：只保留 3 个随机按钮 ---
 function renderRandomButtons(container) {
     container.innerHTML = '';
-
     const randomTypes = [
         { type: 'random-shapes', icon: '🎲', name: '几何' },
-        // 删除了 Rings (抽象)
         { type: 'random-identicon', icon: '🧩', name: '像素' },
         { type: 'random-emoji', icon: '😀', name: '表情' }
     ];
-
     randomTypes.forEach(rnd => {
         const item = document.createElement('div');
         item.className = 'candidate-item candidate-random';
@@ -220,7 +393,6 @@ function renderRandomButtons(container) {
             if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
             else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
             else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
-
             document.getElementById('input-icon').value = url;
             updatePreview();
             document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
@@ -236,9 +408,7 @@ function autoFillInfo() {
         const urlVal = document.getElementById('input-url').value;
         const titleInput = document.getElementById('input-title');
         const iconInput = document.getElementById('input-icon');
-
         generateIconCandidates(urlVal);
-
         if (urlVal.includes('.') && urlVal.length > 4) {
             let safeUrl = urlVal;
             if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
@@ -246,12 +416,10 @@ function autoFillInfo() {
                 const urlObj = new URL(safeUrl);
                 let domain = urlObj.hostname;
                 if (domain.endsWith('.')) domain = domain.slice(0, -1);
-
                 if (!iconInput.value) {
                     const defaultUrl = `https://manifest.im/icon/${domain}`;
                     iconInput.value = defaultUrl;
                 }
-
                 if (!titleInput.value) {
                     let domainName = domain.replace('www.', '').split('.')[0];
                     if(domainName) {
@@ -269,21 +437,16 @@ function updatePreview() {
     const titleVal = document.getElementById('input-title').value || "标题预览";
     const iconVal = document.getElementById('input-icon').value;
     const styleVal = document.querySelector('input[name="icon-style"]:checked').value;
-
     const previewCard = document.getElementById('preview-card');
     const previewImg = document.getElementById('preview-img');
     const previewText = document.getElementById('preview-text');
     const previewTitle = document.getElementById('preview-title');
-
     previewTitle.innerText = titleVal;
-
     previewCard.classList.remove('style-white', 'style-fit');
     if (styleVal === 'white') previewCard.classList.add('style-white');
     else if (styleVal === 'fit') previewCard.classList.add('style-fit');
-
     const firstChar = titleVal.charAt(0).toUpperCase() || "A";
     previewText.innerText = firstChar;
-
     if (iconVal) {
         previewImg.src = iconVal;
         previewImg.classList.remove('hidden');
@@ -316,8 +479,14 @@ function saveBookmark() {
 
     const newItem = { title, url, icon, style };
 
-    if (currentEditIndex >= 0) bookmarks[currentEditIndex] = newItem;
-    else bookmarks.push(newItem);
+    if (currentEditIndex >= 0) {
+        bookmarks[currentEditIndex] = newItem;
+    } else {
+        bookmarks.push(newItem);
+        itemsPerPage = calculateItemsPerPage();
+        totalPages = Math.ceil(bookmarks.length / itemsPerPage);
+        currentPage = totalPages - 1;
+    }
 
     closeModal();
     render();
@@ -325,32 +494,68 @@ function saveBookmark() {
 
 function toggleEditMode(enable) {
     isEditing = enable;
-    const container = document.querySelector('.container');
+    document.body.classList.toggle('is-editing', enable);
     const controls = document.getElementById('edit-controls');
     if (enable) {
-        container.classList.add('is-editing'); controls.classList.remove('hidden'); initSortable();
+        controls.classList.remove('hidden');
+        initSortable();
     } else {
-        container.classList.remove('is-editing'); controls.classList.add('hidden');
-        if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+        controls.classList.add('hidden');
+        sortableInstances.forEach(instance => instance.destroy());
+        sortableInstances = [];
     }
+    render();
 }
 
 function initSortable() {
-    const grid = document.getElementById('bookmark-grid');
-    if (sortableInstance) sortableInstance.destroy();
-    sortableInstance = new Sortable(grid, {
-        animation: 350, ghostClass: 'sortable-ghost', delay: 100,
-        onEnd: function (evt) {
-            const item = bookmarks.splice(evt.oldIndex, 1)[0];
-            bookmarks.splice(evt.newIndex, 0, item);
-            render();
-        }
+    if (!isEditing) return;
+    const pages = document.querySelectorAll('.bookmark-page');
+    sortableInstances.forEach(instance => instance.destroy());
+    sortableInstances = [];
+
+    pages.forEach((page, pageIndex) => {
+        const instance = new Sortable(page, {
+            group: 'shared',
+            animation: 350,
+            ghostClass: 'sortable-ghost',
+            delay: 100,
+            onEnd: function (evt) {
+                const fromPageIndex = parseInt(evt.from.dataset.pageIndex);
+                const toPageIndex = parseInt(evt.to.dataset.pageIndex);
+                const oldItemIndex = (fromPageIndex * itemsPerPage) + evt.oldIndex;
+                
+                const item = bookmarks.splice(oldItemIndex, 1)[0];
+
+                const toPageItems = Array.from(evt.to.children).filter(el => el !== evt.item);
+                let newItemIndex;
+
+                if (evt.newIndex < toPageItems.length) {
+                    const referenceItemIndex = parseInt(toPageItems[evt.newIndex].dataset.index);
+                    const referenceBookmark = bookmarks.find((b, i) => i === referenceItemIndex);
+                    newItemIndex = bookmarks.indexOf(referenceBookmark);
+                } else if (toPageItems.length > 0) {
+                    const lastItemIndex = parseInt(toPageItems[toPageItems.length - 1].dataset.index);
+                    const lastBookmark = bookmarks.find((b, i) => i === lastItemIndex);
+                    newItemIndex = bookmarks.indexOf(lastBookmark) + 1;
+                } else {
+                    newItemIndex = toPageIndex * itemsPerPage;
+                }
+                
+                bookmarks.splice(newItemIndex, 0, item);
+
+                render();
+            }
+        });
+        sortableInstances.push(instance);
     });
 }
 
 function deleteBookmark(e, index) {
     e.stopPropagation();
-    if (confirm('确定删除这个书签吗？')) { bookmarks.splice(index, 1); render(); }
+    if (confirm('确定删除这个书签吗？')) {
+        bookmarks.splice(index, 1);
+        render();
+    }
 }
 
 function exportConfig() {
