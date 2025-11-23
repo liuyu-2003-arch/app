@@ -353,9 +353,12 @@ body {
 
 @media (max-width: 768px) {
     .page-container {
-        padding-top: 5vh;
+        padding-top: 8vh; /* Increased top padding */
     }
     .bookmark-page-content {
-        justify-content: center;
+        justify-content: flex-start; /* Left-align icons */
+    }
+    .pagination-dots {
+        bottom: 60px; /* Move dots down */
     }
 }
