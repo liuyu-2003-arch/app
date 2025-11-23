@@ -350,3 +350,12 @@ body {
 .delete-page-list-btn:hover {
     color: #cc0000;
 }
+
+@media (max-width: 768px) {
+    .page-container {
+        padding-top: 5vh;
+    }
+    .bookmark-page-content {
+        justify-content: center;
+    }
+}

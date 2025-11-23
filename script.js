@@ -1,4 +1,5 @@
 let pages = [];
+let visualPages = []; // New global to hold the rendered page structure
 let isEditing = false;
 let sortableInstances = [];
 let currentEditInfo = { pageIndex: -1, bookmarkIndex: -1 };
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function migrateData(oldData) {
-    const itemsPerPage = 32; // 8x4 grid
+    const itemsPerPage = 32;
     const newPages = [];
     const pageTitles = oldData.pageTitles || ["个人收藏", "常用工具", "学习资源"];
     const bookmarks = oldData.bookmarks || oldData;
@@ -49,8 +50,7 @@ async function loadData() {
         const response = await fetch('homepage_config.json');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        // Check if data is in the new format, otherwise migrate
-        if (Array.isArray(data) && data.length > 0 && data[0].hasOwnProperty('bookmarks')) {
+        if (Array.isArray(data) && (data.length === 0 || data[0].hasOwnProperty('bookmarks'))) {
             pages = data;
         } else {
             pages = migrateData(data);
@@ -80,6 +80,37 @@ function saveData() {
     localStorage.setItem('pagedData', JSON.stringify(pages));
 }
 
+function createVisualPages() {
+    visualPages = [];
+    const isMobile = window.innerWidth < 768;
+    const chunkSize = isMobile ? 12 : 32;
+
+    pages.forEach((page, originalPageIndex) => {
+        if (page.bookmarks.length === 0) {
+            visualPages.push({
+                title: page.title,
+                bookmarks: [],
+                originalPageIndex: originalPageIndex,
+                chunkIndex: 0
+            });
+        } else {
+            for (let i = 0; i < page.bookmarks.length; i += chunkSize) {
+                const chunk = page.bookmarks.slice(i, i + chunkSize);
+                visualPages.push({
+                    title: page.title,
+                    bookmarks: chunk,
+                    originalPageIndex: originalPageIndex,
+                    chunkIndex: i / chunkSize
+                });
+            }
+        }
+    });
+    if (visualPages.length === 0) {
+         visualPages.push({ title: "新页面", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
+    }
+}
+
+
 function initTheme() {
     const savedColor = localStorage.getItem('themeColor') || '#f8e8ee';
     document.querySelector('.background-layer').style.backgroundColor = savedColor;
@@ -106,17 +137,16 @@ function rgbToHex(col) {
 }
 
 function render() {
+    createVisualPages();
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
     swiperWrapper.innerHTML = '';
     sortableInstances.forEach(instance => instance.destroy());
     sortableInstances = [];
 
-    if (pages.length === 0) pages.push({ title: "新页面", bookmarks: [] });
-
-    pages.forEach((pageData, pageIndex) => {
+    visualPages.forEach((vPage, visualPageIndex) => {
         const page = document.createElement('div');
         page.className = 'bookmark-page';
-        page.dataset.pageIndex = pageIndex;
+        page.dataset.visualPageIndex = visualPageIndex;
 
         const pageContainer = document.createElement('div');
         pageContainer.className = 'page-container';
@@ -126,7 +156,7 @@ function render() {
 
         const title = document.createElement('h2');
         title.className = 'page-title';
-        title.textContent = pageData.title || '新页面';
+        title.textContent = vPage.title || '新页面';
         header.appendChild(title);
         
         pageContainer.appendChild(header);
@@ -135,19 +165,22 @@ function render() {
         content.className = 'bookmark-page-content';
         pageContainer.appendChild(content);
 
-        pageData.bookmarks.forEach((item, bookmarkIndex) => {
+        vPage.bookmarks.forEach((item) => {
+            const originalPageIndex = vPage.originalPageIndex;
+            const originalBookmarkIndex = pages[originalPageIndex].bookmarks.indexOf(item);
+
             const div = document.createElement('div');
             let styleClass = '';
             if (item.style === 'white') styleClass = 'style-white';
             else if (item.style === 'fit') styleClass = 'style-fit';
 
             div.className = `bookmark-item ${styleClass}`;
-            div.dataset.pageIndex = pageIndex;
-            div.dataset.bookmarkIndex = bookmarkIndex;
+            div.dataset.originalPageIndex = originalPageIndex;
+            div.dataset.originalBookmarkIndex = originalBookmarkIndex;
 
             div.onclick = (e) => {
                 if (isEditing) {
-                    if (!e.target.classList.contains('delete-btn')) openModal(pageIndex, bookmarkIndex);
+                    if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
                     if (!hasDragged) window.location.href = item.url;
                 }
@@ -167,7 +200,7 @@ function render() {
             }
 
             div.innerHTML = `
-                <div class="delete-btn" onclick="deleteBookmark(event, ${pageIndex}, ${bookmarkIndex})">×</div>
+                <div class="delete-btn" onclick="deleteBookmark(event, ${originalPageIndex}, ${originalBookmarkIndex})">×</div>
                 <div class="icon-box">
                     ${iconHtml}
                 </div>
@@ -180,7 +213,7 @@ function render() {
         swiperWrapper.appendChild(page);
     });
 
-    if (currentPage >= pages.length) currentPage = Math.max(0, pages.length - 1);
+    if (currentPage >= visualPages.length) currentPage = Math.max(0, visualPages.length - 1);
     updateSwiperPosition(false);
     renderPaginationDots();
     if (isEditing) initSortable();
@@ -188,7 +221,7 @@ function render() {
 
 function showPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
-    if (!dotsContainer || pages.length <= 1) return;
+    if (!dotsContainer || visualPages.length <= 1) return;
 
     dotsContainer.classList.add('visible');
     clearTimeout(dotsTimer);
@@ -200,9 +233,9 @@ function showPaginationDots() {
 function renderPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     dotsContainer.innerHTML = '';
-    if (pages.length <= 1) return;
+    if (visualPages.length <= 1) return;
 
-    for (let i = 0; i < pages.length; i++) {
+    for (let i = 0; i < visualPages.length; i++) {
         const dot = document.createElement('div');
         dot.className = 'dot';
         if (i === currentPage) dot.classList.add('active');
@@ -228,7 +261,7 @@ function handleWheel(e) {
 
     if (Math.abs(e.deltaX) > 20) {
         let pageChanged = false;
-        if (e.deltaX > 1 && currentPage < pages.length - 1) {
+        if (e.deltaX > 1 && currentPage < visualPages.length - 1) {
             currentPage++;
             pageChanged = true;
         } else if (e.deltaX < -1 && currentPage > 0) {
@@ -276,7 +309,7 @@ function dragEnd(e) {
 
     const movedBy = currentTranslate - prevTranslate;
     let pageChanged = false;
-    if (movedBy < -50 && currentPage < pages.length - 1) {
+    if (movedBy < -50 && currentPage < visualPages.length - 1) {
         currentPage++;
         pageChanged = true;
     }
@@ -347,7 +380,8 @@ function openModal(pageIndex = -1, bookmarkIndex = -1) {
         urlInput.value = '';
         iconInput.value = '';
         radios[0].checked = true;
-        pageSelector.value = currentPage;
+        const currentVisualPage = visualPages[currentPage];
+        pageSelector.value = currentVisualPage ? currentVisualPage.originalPageIndex : 0;
     }
 
     updatePreview();
@@ -630,11 +664,28 @@ function initSortable() {
             ghostClass: 'sortable-ghost',
             delay: 100,
             onEnd: function (evt) {
-                const fromPageIndex = parseInt(evt.from.closest('.bookmark-page').dataset.pageIndex);
-                const toPageIndex = parseInt(evt.to.closest('.bookmark-page').dataset.pageIndex);
+                const fromVisualPageIndex = parseInt(evt.from.closest('.bookmark-page').dataset.visualPageIndex);
+                const toVisualPageIndex = parseInt(evt.to.closest('.bookmark-page').dataset.visualPageIndex);
+
+                const fromVPage = visualPages[fromVisualPageIndex];
+                const toVPage = visualPages[toVisualPageIndex];
+
+                const fromOriginalPageIndex = fromVPage.originalPageIndex;
+                const toOriginalPageIndex = toVPage.originalPageIndex;
+
+                const item = fromVPage.bookmarks.splice(evt.oldIndex, 1)[0];
+                toVPage.bookmarks.splice(evt.newIndex, 0, item);
                 
-                const item = pages[fromPageIndex].bookmarks.splice(evt.oldIndex, 1)[0];
-                pages[toPageIndex].bookmarks.splice(evt.newIndex, 0, item);
+                // This is a simplified move, now update the main `pages` array
+                const originalItem = pages[fromOriginalPageIndex].bookmarks.find(bm => bm === item);
+                const originalItemIndex = pages[fromOriginalPageIndex].bookmarks.indexOf(originalItem);
+                pages[fromOriginalPageIndex].bookmarks.splice(originalItemIndex, 1);
+
+                // This is the tricky part, finding the correct new index in the original array
+                const isMobile = window.innerWidth < 768;
+                const chunkSize = isMobile ? 12 : 32;
+                const newOriginalIndex = (toVPage.chunkIndex * chunkSize) + evt.newIndex;
+                pages[toOriginalPageIndex].bookmarks.splice(newOriginalIndex, 0, originalItem);
 
                 saveData();
                 render();
