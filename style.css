@@ -33,7 +33,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-top: 6vh;
+    padding-top: 6vh; /* 电脑端保持这个高度 */
     padding-bottom: 0;
     box-sizing: border-box;
 }
@@ -77,10 +77,7 @@ body {
     font-size: 24px;
     font-weight: 600;
     color: #333;
-    /* --- 重点修改这里 --- */
-    /* 将下边距从 10px 改为 5px，让图标更靠近标题 */
-    margin: 0 0 1px 0;
-    /* ------------------ */
+    margin: 0 0 5px 0;
     text-shadow: 0 1px 2px rgba(255,255,255,0.8);
     padding: 5px;
     border-radius: 8px;
@@ -338,17 +335,28 @@ body {
     color: #cc0000;
 }
 
+/* --- 重点修改的手机端部分 --- */
 @media (max-width: 768px) {
-    .bookmark-page {
-        padding-top: 6vh;
+    .container {
+        /* 在手机上，强制将顶部距离改小，从 6vh 变为 3vh */
+        padding-top: 3vh;
     }
+
+    .bookmark-page {
+        /* 去除之前的累积间距 */
+        padding-top: 0;
+    }
+
     .bookmark-page-content {
         justify-content: center;
     }
+
     .page-title {
         text-align: center;
     }
+
     .pagination-dots {
-        bottom: 50px;
+        /* 防止小圆点遮挡文字，稍微调整位置 */
+        bottom: 40px;
     }
 }
