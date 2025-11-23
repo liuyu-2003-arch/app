@@ -71,7 +71,7 @@ body {
     width: var(--page-width);
     max-width: 90%;
     align-content: flex-start;
-    padding-bottom: 50px; /* Add some padding at the bottom */
+    padding-bottom: 50px;
 }
 
 .page-title {
@@ -85,9 +85,11 @@ body {
     border-radius: 8px;
 }
 
+/* 基础书签样式 */
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
+    /* 这里的 transition 是给 hover 效果用的，但拖拽时必须禁用它 */
     transition: transform 0.2s;
     -webkit-tap-highlight-color: transparent;
     will-change: transform;
@@ -119,14 +121,31 @@ body {
     font-weight: 500; text-shadow: 0 1px 2px rgba(255,255,255,0.8);
 }
 
-@keyframes shake {
-    0% { transform: rotate(0deg); } 25% { transform: rotate(1.5deg); }
-    50% { transform: rotate(0deg); } 75% { transform: rotate(-1.5deg); }
-    100% { transform: rotate(0deg); }
+/* --- iOS 风格抖动动画 --- */
+
+@keyframes ios-jiggle {
+    0% { transform: rotate(-1.5deg); }
+    50% { transform: rotate(1.5deg); }
+    100% { transform: rotate(-1.5deg); }
 }
-.is-editing .bookmark-item:not(.sortable-drag):not(.sortable-ghost) { 
-    animation: shake 0.3s infinite ease-in-out; 
-    cursor: grab; 
+
+/* 编辑模式下，未被拖拽的图标进行抖动 */
+.is-editing .bookmark-item:not(.sortable-drag):not(.sortable-ghost) {
+    animation: ios-jiggle 0.25s infinite ease-in-out;
+    cursor: grab;
+    transform-origin: center center;
+}
+
+/* 随机化节奏，打破整齐划一 */
+.is-editing .bookmark-item:nth-child(2n) { animation-duration: 0.26s; animation-delay: -0.05s; }
+.is-editing .bookmark-item:nth-child(3n) { animation-duration: 0.24s; animation-delay: -0.12s; }
+.is-editing .bookmark-item:nth-child(5n) { animation-duration: 0.27s; animation-delay: -0.08s; }
+.is-editing .bookmark-item:nth-child(7n) { animation-direction: alternate-reverse; }
+
+/* 删除按钮动画 */
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .delete-btn {
@@ -134,8 +153,11 @@ body {
     background: rgba(150, 150, 150, 0.9); color: white; border-radius: 50%;
     text-align: center; line-height: 20px; font-size: 14px;
     display: none; z-index: 10; cursor: pointer;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .is-editing .delete-btn { display: block; }
+
+/* --- 拖拽样式修复 (Fix for following mouse) --- */
 
 .sortable-ghost {
     opacity: 0.2;
@@ -148,11 +170,16 @@ body {
 
 .sortable-drag {
     opacity: 1 !important;
-    transform: scale(1.15);
+    transform: scale(1.15); /* 稍微放大，模拟拿起来的感觉 */
     box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-    z-index: 999;
-    transition: all 0.2s ease-out;
+    z-index: 9999 !important; /* 确保在最顶层 */
+    cursor: grabbing; /* 鼠标变为抓取手势 */
+
+    /* 关键修复：必须禁用 transition，否则图标跟不上鼠标 */
+    transition: none !important;
 }
+
+/* -------------------------- */
 
 .edit-trigger-area {
     position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;
@@ -286,15 +313,13 @@ body {
     font-size: 13px; color: #666; width: 65px; text-align: right; flex-shrink: 0; font-weight: 500;
 }
 .modal-content input[type="text"] {
-    flex: 1; 
+    flex: 1;
     border: 1px solid #e0e0e0;
-    border-radius: 10px; 
-    background: #f9f9f9; 
+    border-radius: 10px;
+    background: #f9f9f9;
     font-size: 14px;
-    outline: none; 
+    outline: none;
     transition: border-color 0.2s;
-
-    /* 高度统一修改 */
     height: 44px;
     padding: 0 12px;
     box-sizing: border-box;
@@ -316,7 +341,6 @@ body {
 }
 
 .page-option {
-    /* 样式与输入框高度统一 */
     height: 44px;
     padding: 0 16px;
     box-sizing: border-box;
@@ -324,7 +348,6 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 14px;
-
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -440,10 +463,9 @@ body {
     color: #cc0000;
 }
 
-/* --- 手机端适配：修正顶部间距 --- */
+/* --- 手机端适配 --- */
 @media (max-width: 768px) {
     .container {
-        /* 在手机上增加顶部间距，80px 足够避开状态栏 */
         padding-top: 80px;
     }
 
