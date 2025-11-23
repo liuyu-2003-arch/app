@@ -337,9 +337,9 @@ body {
 /* --- 手机端适配 --- */
 @media (max-width: 768px) {
     .container {
-        /* 原来是 80px，改为 50px */
+        /* 原来是 80px，改为 30px */
         /* 这样既能避开大部分手机的状态栏/灵动岛，又能让图标整体上移 */
-        padding-top: 50px;
+        padding-top: 30px;
     }
 
     .bookmark-page {
