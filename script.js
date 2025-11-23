@@ -148,22 +148,13 @@ function render() {
         page.className = 'bookmark-page';
         page.dataset.visualPageIndex = visualPageIndex;
 
-        const pageContainer = document.createElement('div');
-        pageContainer.className = 'page-container';
-
-        const header = document.createElement('div');
-        header.className = 'page-header';
-
+        const content = document.createElement('div');
+        content.className = 'bookmark-page-content';
+        
         const title = document.createElement('h2');
         title.className = 'page-title';
         title.textContent = vPage.title || '新页面';
-        header.appendChild(title);
-        
-        pageContainer.appendChild(header);
-
-        const content = document.createElement('div');
-        content.className = 'bookmark-page-content';
-        pageContainer.appendChild(content);
+        content.appendChild(title);
 
         vPage.bookmarks.forEach((item) => {
             const originalPageIndex = vPage.originalPageIndex;
@@ -209,7 +200,7 @@ function render() {
             content.appendChild(div);
         });
 
-        page.appendChild(pageContainer);
+        page.appendChild(content);
         swiperWrapper.appendChild(page);
     });
 
@@ -376,11 +367,11 @@ function openModal(pageIndex = -1, bookmarkIndex = -1) {
         }
         pageSelector.value = pageIndex;
     } else {
+        const currentVisualPage = visualPages[currentPage];
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
         radios[0].checked = true;
-        const currentVisualPage = visualPages[currentPage];
         pageSelector.value = currentVisualPage ? currentVisualPage.originalPageIndex : 0;
     }
 
@@ -674,14 +665,11 @@ function initSortable() {
                 const toOriginalPageIndex = toVPage.originalPageIndex;
 
                 const item = fromVPage.bookmarks.splice(evt.oldIndex, 1)[0];
-                toVPage.bookmarks.splice(evt.newIndex, 0, item);
                 
-                // This is a simplified move, now update the main `pages` array
                 const originalItem = pages[fromOriginalPageIndex].bookmarks.find(bm => bm === item);
                 const originalItemIndex = pages[fromOriginalPageIndex].bookmarks.indexOf(originalItem);
                 pages[fromOriginalPageIndex].bookmarks.splice(originalItemIndex, 1);
 
-                // This is the tricky part, finding the correct new index in the original array
                 const isMobile = window.innerWidth < 768;
                 const chunkSize = isMobile ? 12 : 32;
                 const newOriginalIndex = (toVPage.chunkIndex * chunkSize) + evt.newIndex;
