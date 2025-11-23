@@ -1,5 +1,6 @@
 const DATA_URL = 'https://324893.xyz/bookmarks.json';
 
+let pageTitles = [];
 let bookmarks = [];
 let isEditing = false;
 let sortableInstances = [];
@@ -9,16 +10,18 @@ let autoFillTimer = null;
 // Swiper state
 let currentPage = 0;
 let totalPages = 0;
-let itemsPerPage = 16;
+let itemsPerPage = 32; // 8 columns * 4 rows
 let isDragging = false;
+let hasDragged = false;
 let startPos = 0;
 let currentTranslate = 0;
 let prevTranslate = 0;
 let animationID;
-let isWheeling = false; // For trackpad swipe throttling
+let isWheeling = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadBookmarks();
+    document.body.style.visibility = 'hidden';
+    loadConfig();
     initTheme();
     initSwiper();
     window.addEventListener('resize', () => {
@@ -27,46 +30,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-async function loadBookmarks() {
+function loadPageTitles() {
+    const storedTitles = localStorage.getItem('pageTitles');
+    if (storedTitles) {
+        pageTitles = JSON.parse(storedTitles);
+    } else {
+        pageTitles = ["个人收藏", "常用工具", "学习资源"];
+    }
+}
+
+function savePageTitles() {
+    localStorage.setItem('pageTitles', JSON.stringify(pageTitles));
+}
+
+async function loadConfig() {
     try {
         const response = await fetch(DATA_URL);
         if (!response.ok) throw new Error("Fetch failed");
-        bookmarks = await response.json();
+        const config = await response.json();
+        bookmarks = config.bookmarks || [];
+        pageTitles = config.pageTitles || ["个人收藏", "常用工具", "学习资源"];
+        savePageTitles();
     } catch (error) {
         console.warn("无法加载远程JSON", error);
         bookmarks = [
             { title: "GitHub", url: "https://github.com", icon: "https://manifest.im/icon/github.com", style: "white" },
             { title: "Bilibili", url: "https://www.bilibili.com", icon: "https://manifest.im/icon/bilibili.com", style: "fit" }
         ];
+        loadPageTitles();
     }
     render();
+    document.body.style.visibility = 'visible';
 }
-
-function calculateItemsPerPage() {
-    const content = document.querySelector('.bookmark-page-content');
-    if (!content) { // Fallback for initial load
-        const containerWidth = window.innerWidth * 0.9;
-        const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 80;
-        const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 30;
-        const itemsPerRow = Math.floor((containerWidth - gap) / (cardSize + gap));
-        return Math.max(1, itemsPerRow * 4);
-    }
-
-    const contentStyles = getComputedStyle(content);
-    const pageHeight = content.clientHeight - parseFloat(contentStyles.paddingTop) - parseFloat(contentStyles.paddingBottom);
-    const pageWidth = content.clientWidth - parseFloat(contentStyles.paddingLeft) - parseFloat(contentStyles.paddingRight);
-    const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 80;
-    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 30;
-    const itemHeight = cardSize + 20; // title height approx
-    const itemWidth = cardSize;
-
-    const itemsPerRow = Math.floor((pageWidth + gap) / (itemWidth + gap));
-    const calculatedRows = Math.floor((pageHeight + gap) / (itemHeight + gap));
-    const itemsPerCol = Math.min(4, calculatedRows > 0 ? calculatedRows : 1);
-
-    return Math.max(1, (itemsPerRow > 0 ? itemsPerRow : 1) * itemsPerCol);
-}
-
 
 function initTheme() {
     const savedColor = localStorage.getItem('themeColor') || '#f8e8ee';
@@ -99,26 +94,50 @@ function render() {
     sortableInstances.forEach(instance => instance.destroy());
     sortableInstances = [];
 
-    const tempPage = document.createElement('div');
-    tempPage.className = 'bookmark-page';
-    tempPage.style.visibility = 'hidden';
-    const tempContent = document.createElement('div');
-    tempContent.className = 'bookmark-page-content';
-    tempPage.appendChild(tempContent);
-    swiperWrapper.appendChild(tempPage);
-    itemsPerPage = calculateItemsPerPage();
-    swiperWrapper.removeChild(tempPage);
-
-    totalPages = Math.ceil(bookmarks.length / itemsPerPage);
+    const bookmarkPages = bookmarks.length > 0 ? Math.floor((bookmarks.length - 1) / itemsPerPage) + 1 : 0;
+    totalPages = Math.max(bookmarkPages, pageTitles.length);
     if (totalPages === 0) totalPages = 1;
 
     for (let i = 0; i < totalPages; i++) {
         const page = document.createElement('div');
         page.className = 'bookmark-page';
         page.dataset.pageIndex = i;
+
+        const pageContainer = document.createElement('div');
+        pageContainer.className = 'page-container';
+
+        const header = document.createElement('div');
+        header.className = 'page-header';
+
+        const title = document.createElement('h2');
+        title.className = 'page-title';
+        title.textContent = pageTitles[i] || (isEditing ? '新标题' : '');
+        
+        if (isEditing) {
+            title.contentEditable = "true";
+            title.onblur = (e) => {
+                pageTitles[i] = e.target.textContent;
+                savePageTitles();
+            };
+        }
+        header.appendChild(title);
+
+        const pageBookmarks = bookmarks.filter((_, index) => Math.floor(index / itemsPerPage) === i);
+        if (isEditing && pageBookmarks.length === 0 && totalPages > 1) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-page-btn';
+            deleteBtn.textContent = '删除此空页';
+            deleteBtn.onclick = () => deletePage(i);
+            header.appendChild(deleteBtn);
+        }
+        
+        pageContainer.appendChild(header);
+
         const content = document.createElement('div');
         content.className = 'bookmark-page-content';
-        page.appendChild(content);
+        pageContainer.appendChild(content);
+
+        page.appendChild(pageContainer);
         swiperWrapper.appendChild(page);
     }
 
@@ -138,11 +157,9 @@ function render() {
 
         div.onclick = (e) => {
             if (isEditing) {
-                if (!e.target.classList.contains('delete-btn')) {
-                    openModal(index);
-                }
+                if (!e.target.classList.contains('delete-btn')) openModal(index);
             } else {
-                if (!isDragging) window.location.href = item.url;
+                if (!hasDragged) window.location.href = item.url;
             }
         };
 
@@ -169,9 +186,7 @@ function render() {
         content.appendChild(div);
     });
 
-    if (currentPage >= totalPages) {
-        currentPage = totalPages - 1;
-    }
+    if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
     updateSwiperPosition(false);
     renderPaginationDots();
     if (isEditing) initSortable();
@@ -185,9 +200,7 @@ function renderPaginationDots() {
     for (let i = 0; i < totalPages; i++) {
         const dot = document.createElement('div');
         dot.className = 'dot';
-        if (i === currentPage) {
-            dot.classList.add('active');
-        }
+        if (i === currentPage) dot.classList.add('active');
         dotsContainer.appendChild(dot);
     }
 }
@@ -196,30 +209,19 @@ function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
     swiper.addEventListener('mousedown', dragStart);
     swiper.addEventListener('touchstart', dragStart, { passive: true });
-
     swiper.addEventListener('mouseup', dragEnd);
     swiper.addEventListener('mouseleave', dragEnd);
     swiper.addEventListener('touchend', dragEnd);
-
     swiper.addEventListener('mousemove', drag);
     swiper.addEventListener('touchmove', drag, { passive: true });
-
     swiper.addEventListener('wheel', handleWheel, { passive: false });
-
-    swiper.addEventListener('click', (e) => {
-        if(Math.abs(currentTranslate - prevTranslate) > 5) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    }, true);
 }
 
 function handleWheel(e) {
-    if (isEditing) return;
     e.preventDefault();
     if (isWheeling) return;
 
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+    if (Math.abs(e.deltaX) > 20) {
         let pageChanged = false;
         if (e.deltaX > 1 && currentPage < totalPages - 1) {
             currentPage++;
@@ -233,16 +235,18 @@ function handleWheel(e) {
             isWheeling = true;
             updateSwiperPosition(true);
             renderPaginationDots();
-            setTimeout(() => {
-                isWheeling = false;
-            }, 400); // Throttle duration
+            setTimeout(() => { isWheeling = false; }, 500);
         }
     }
 }
 
 function dragStart(e) {
-    if (isEditing) return;
+    if (isEditing && e.target.closest('.bookmark-item')) {
+        isDragging = false;
+        return;
+    }
     isDragging = true;
+    hasDragged = false;
     startPos = getPositionX(e);
     animationID = requestAnimationFrame(animation);
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
@@ -252,30 +256,22 @@ function dragStart(e) {
 function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
+        if (Math.abs(currentPosition - startPos) > 5) {
+            hasDragged = true;
+        }
         currentTranslate = prevTranslate + currentPosition - startPos;
     }
 }
 
 function dragEnd(e) {
     if (!isDragging) return;
-    
+    isDragging = false;
     cancelAnimationFrame(animationID);
-
     const movedBy = currentTranslate - prevTranslate;
-
-    if (movedBy < -50 && currentPage < totalPages - 1) {
-        currentPage++;
-    }
-    if (movedBy > 50 && currentPage > 0) {
-        currentPage--;
-    }
-
+    if (movedBy < -50 && currentPage < totalPages - 1) currentPage++;
+    if (movedBy > 50 && currentPage > 0) currentPage--;
     updateSwiperPosition(true);
     renderPaginationDots();
-    
-    setTimeout(() => {
-        isDragging = false;
-    }, 50);
 }
 
 function getPositionX(e) {
@@ -303,7 +299,6 @@ function updateSwiperPosition(withTransition = true) {
     setSwiperPosition();
 }
 
-
 function openModal(index = -1) {
     currentEditIndex = index;
     const modal = document.getElementById('modal');
@@ -311,9 +306,15 @@ function openModal(index = -1) {
     const urlInput = document.getElementById('input-url');
     const iconInput = document.getElementById('input-icon');
     const radios = document.getElementsByName('icon-style');
-    const candidates = document.getElementById('icon-candidates');
-
-    renderRandomButtons(candidates);
+    const pageSelector = document.getElementById('input-page');
+    
+    pageSelector.innerHTML = '';
+    for (let i = 0; i < totalPages; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = pageTitles[i] || `第 ${i + 1} 页`;
+        pageSelector.appendChild(option);
+    }
 
     if (index >= 0) {
         const item = bookmarks[index];
@@ -323,12 +324,13 @@ function openModal(index = -1) {
         for(let r of radios) {
             if(r.value === (item.style || 'full')) r.checked = true;
         }
-        if (item.url) generateIconCandidates(item.url);
+        pageSelector.value = Math.floor(index / itemsPerPage);
     } else {
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
         radios[0].checked = true;
+        pageSelector.value = currentPage;
     }
 
     updatePreview();
@@ -350,10 +352,8 @@ function generateIconCandidates(urlVal) {
         protocol = urlObj.protocol;
         if (domain.endsWith('.')) domain = domain.slice(0, -1);
     } catch(e) { return; }
-
     const list = document.getElementById('icon-candidates');
     renderRandomButtons(list);
-
     const sources = [
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
         { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
@@ -362,7 +362,6 @@ function generateIconCandidates(urlVal) {
         { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` },
         { name: 'Web Icon', url: `${protocol}//${domain}/icon.png` }
     ];
-
     for (let i = sources.length - 1; i >= 0; i--) {
         const src = sources[i];
         const item = document.createElement('div');
@@ -477,22 +476,27 @@ function saveBookmark() {
     let url = document.getElementById('input-url').value;
     const icon = document.getElementById('input-icon').value;
     const style = document.querySelector('input[name="icon-style"]:checked').value;
+    const newPageIndex = parseInt(document.getElementById('input-page').value);
 
-    if (!title || !url) {
-        alert('标题和网址是必填的');
-        return;
-    }
+    if (!title || !url) { alert('标题和网址是必填的'); return; }
     if (!url.startsWith('http')) url = 'https://' + url;
-
+    
     const newItem = { title, url, icon, style };
 
-    if (currentEditIndex >= 0) {
-        bookmarks[currentEditIndex] = newItem;
-    } else {
-        bookmarks.push(newItem);
-        itemsPerPage = calculateItemsPerPage();
-        totalPages = Math.ceil(bookmarks.length / itemsPerPage);
-        currentPage = totalPages - 1;
+    if (currentEditIndex >= 0) { // Editing existing
+        const itemToUpdate = bookmarks[currentEditIndex];
+        Object.assign(itemToUpdate, newItem); // Update content in place
+        
+        const oldPageIndex = Math.floor(currentEditIndex / itemsPerPage);
+        if (oldPageIndex !== newPageIndex) {
+            const itemToMove = bookmarks.splice(currentEditIndex, 1)[0];
+            const insertionIndex = (newPageIndex * itemsPerPage);
+            bookmarks.splice(insertionIndex, 0, itemToMove);
+        }
+    } else { // Adding new
+        const insertionIndex = (newPageIndex * itemsPerPage);
+        bookmarks.splice(insertionIndex, 0, newItem);
+        currentPage = newPageIndex;
     }
 
     closeModal();
@@ -505,7 +509,6 @@ function toggleEditMode(enable) {
     const controls = document.getElementById('edit-controls');
     if (enable) {
         controls.classList.remove('hidden');
-        initSortable();
     } else {
         controls.classList.add('hidden');
         sortableInstances.forEach(instance => instance.destroy());
@@ -514,41 +517,50 @@ function toggleEditMode(enable) {
     render();
 }
 
+function addPage() {
+    pageTitles.push("新页面");
+    savePageTitles();
+    currentPage = pageTitles.length - 1;
+    render();
+}
+
+function deletePage(pageIndex) {
+    const pageBookmarks = bookmarks.filter((_, index) => Math.floor(index / itemsPerPage) === pageIndex);
+    if (pageBookmarks.length > 0) {
+        alert("请先移除或移动此页面的所有书签才能删除页面。");
+        return;
+    }
+
+    if (!confirm(`确定要删除第 ${pageIndex + 1} 页吗？`)) return;
+    
+    pageTitles.splice(pageIndex, 1);
+    savePageTitles();
+    
+    if (currentPage >= pageTitles.length) {
+        currentPage = Math.max(0, pageTitles.length - 1);
+    }
+    render();
+}
+
 function initSortable() {
     if (!isEditing) return;
-    const pages = document.querySelectorAll('.bookmark-page');
-    sortableInstances.forEach(instance => instance.destroy());
-    sortableInstances = [];
-
-    pages.forEach((page) => {
-        const content = page.querySelector('.bookmark-page-content');
+    document.querySelectorAll('.bookmark-page-content').forEach(content => {
         const instance = new Sortable(content, {
             group: 'shared',
             animation: 350,
             ghostClass: 'sortable-ghost',
             delay: 100,
             onEnd: function (evt) {
-                const fromPage = evt.from.closest('.bookmark-page');
-                const toPage = evt.to.closest('.bookmark-page');
-                const fromPageIndex = parseInt(fromPage.dataset.pageIndex);
-                const toPageIndex = parseInt(toPage.dataset.pageIndex);
-                
-                const oldGlobalIndex = (fromPageIndex * itemsPerPage) + evt.oldIndex;
-                
+                const itemEl = evt.item;
+                const oldGlobalIndex = parseInt(itemEl.dataset.index);
                 const item = bookmarks.splice(oldGlobalIndex, 1)[0];
 
-                let newGlobalIndex;
-                if (evt.newIndex < evt.to.children.length) {
-                    const referenceItem = evt.to.children[evt.newIndex];
-                    const referenceGlobalIndex = parseInt(referenceItem.dataset.index);
-                    const insertionIndexInBookmarks = bookmarks.findIndex((bm, i) => i === referenceGlobalIndex);
-                    newGlobalIndex = insertionIndexInBookmarks;
-                } else {
-                    newGlobalIndex = (toPageIndex * itemsPerPage) + evt.to.children.length;
-                }
+                const toPageEl = evt.to.closest('.bookmark-page');
+                const toPageIndex = parseInt(toPageEl.dataset.pageIndex);
+                
+                let newGlobalIndex = (toPageIndex * itemsPerPage) + evt.newIndex;
                 
                 bookmarks.splice(newGlobalIndex, 0, item);
-
                 render();
             }
         });
@@ -565,10 +577,10 @@ function deleteBookmark(e, index) {
 }
 
 function exportConfig() {
-    const dataStr = JSON.stringify(bookmarks, null, 2);
+    const dataStr = JSON.stringify({bookmarks, pageTitles}, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = "bookmarks.json";
+    a.href = url; a.download = "config.json";
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }

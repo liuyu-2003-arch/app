@@ -32,7 +32,8 @@
             <div class="swatch" style="background: #f3e0ff" onclick="changeTheme('#f3e0ff', this)"></div>
             <div class="swatch" style="background: #dcdcdc" onclick="changeTheme('#dcdcdc', this)"></div>
         </div>
-        <button onclick="openModal()">➕ 添加</button>
+        <button onclick="openModal()">➕ 添加书签</button>
+        <button onclick="addPage()">➕ 添加页面</button>
         <button onclick="exportConfig()">📤 导出</button>
         <button class="done-btn" onclick="toggleEditMode(false)">完成</button>
     </div>
@@ -72,19 +73,23 @@
                     <span class="input-label">Logo地址</span>
                     <input type="text" id="input-icon" placeholder="图标链接 (选填)" oninput="updatePreview()">
                 </div>
+                <div class="input-row">
+                    <span class="input-label">所在页面</span>
+                    <select id="input-page"></select>
+                </div>
             </div>
             <div class="style-select">
                 <label class="radio-label">
                     <input type="radio" name="icon-style" value="full" checked onchange="updatePreview()">
-                    <span>铺满 (Full)</span>
+                    <span>铺满</span>
                 </label>
                 <label class="radio-label">
                     <input type="radio" name="icon-style" value="fit" onchange="updatePreview()">
-                    <span>适中 (Fit)</span>
+                    <span>适中</span>
                 </label>
                 <label class="radio-label">
                     <input type="radio" name="icon-style" value="white" onchange="updatePreview()">
-                    <span>留白 (White)</span>
+                    <span>留白</span>
                 </label>
             </div>
             <div class="modal-actions">
