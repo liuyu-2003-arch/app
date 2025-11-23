@@ -121,7 +121,7 @@ body {
     50% { transform: rotate(0deg); } 75% { transform: rotate(-2deg); }
     100% { transform: rotate(0deg); }
 }
-.is-editing .bookmark-item { animation: shake 0.25s infinite ease-in-out; cursor: grab; }
+.is-editing .bookmark-item:not(.sortable-drag) { animation: shake 0.25s infinite ease-in-out; cursor: grab; }
 
 .delete-btn {
     position: absolute; top: -8px; left: -8px; width: 22px; height: 22px;
@@ -130,6 +130,19 @@ body {
     display: none; z-index: 10; cursor: pointer;
 }
 .is-editing .delete-btn { display: block; }
+
+.sortable-ghost {
+    opacity: 0.4;
+    background: #cce5ff;
+    border-radius: var(--radius);
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    transform: scale(1.1);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    z-index: 999;
+}
 
 .edit-trigger-area {
     position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;
