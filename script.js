@@ -130,7 +130,8 @@ function createVisualPages() {
 
 
 function initTheme() {
-    const savedColor = localStorage.getItem('themeColor') || '#f8e8ee';
+    // 修改这里：默认颜色改为参考图的淡紫色 #e4d0e5
+    const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
     document.querySelector('.background-layer').style.backgroundColor = savedColor;
     const swatches = document.querySelectorAll('.swatch');
     swatches.forEach(swatch => {
@@ -150,7 +151,7 @@ function changeTheme(color, element) {
 function rgbToHex(col) {
     if(col.charAt(0)=='#') return col;
     let rgb = col.match(/\d+/g);
-    if(!rgb) return '#f8e8ee';
+    if(!rgb) return '#e4d0e5'; // 默认返回值也改一下，虽然极少用到
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
 
