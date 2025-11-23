@@ -31,24 +31,36 @@
         "url": "https://Google.com",
         "icon": "https://cdn.brandfetch.io/google.com?c=1idVW8VN57Jat7AexnZ",
         "style": "white"
+      },
+      {
+        "title": "Chatgpt",
+        "url": "https://chatgpt.com",
+        "icon": "https://manifest.im/icon/chatgpt.com",
+        "style": "full"
+      },
+      {
+        "title": "Sora",
+        "url": "https://sora.chatgpt.com",
+        "icon": "https://manifest.im/icon/sora.chatgpt.com",
+        "style": "full"
+      },
+      {
+        "title": "Grok",
+        "url": "https://grok.com/",
+        "icon": "https://cdn.brandfetch.io/grok.com?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "title": "Gemini",
+        "url": "https://gemini.google.com/app",
+        "icon": "https://manifest.im/icon/gemini.google.com",
+        "style": "fit"
       }
     ]
   },
   {
     "title": "常用工具",
     "bookmarks": [
-      {
-        "title": "Vercel",
-        "url": "https://vercel.com",
-        "icon": "https://manifest.im/icon/vercel.com",
-        "style": "full"
-      },
-      {
-        "title": "GitHub",
-        "url": "https://github.com",
-        "icon": "https://manifest.im/icon/github.com",
-        "style": "full"
-      },
       {
         "title": "Subeasy",
         "url": "https://subeasy.ai",
@@ -86,30 +98,6 @@
         "style": "full"
       },
       {
-        "title": "Chatgpt",
-        "url": "https://chatgpt.com",
-        "icon": "https://manifest.im/icon/chatgpt.com",
-        "style": "full"
-      },
-      {
-        "title": "Sora",
-        "url": "https://sora.chatgpt.com",
-        "icon": "https://manifest.im/icon/sora.chatgpt.com",
-        "style": "full"
-      },
-      {
-        "title": "Grok",
-        "url": "https://grok.com/",
-        "icon": "https://cdn.brandfetch.io/grok.com?c=1idVW8VN57Jat7AexnZ",
-        "style": "full"
-      },
-      {
-        "title": "Gemini",
-        "url": "https://gemini.google.com/app",
-        "icon": "https://manifest.im/icon/gemini.google.com",
-        "style": "fit"
-      },
-      {
         "title": "Appstorrent",
         "url": "https://appstorrent.ru/",
         "icon": "https://manifest.im/icon/appstorrent.ru",
@@ -122,27 +110,50 @@
         "style": "fit"
       },
       {
-        "title": "Z-library",
-        "url": "https://z-library.sk/",
-        "icon": "https://manifest.im/icon/z-library.sk",
-        "style": "fit"
-      },
-      {
-        "title": "Cloudflare",
-        "url": "https://www.cloudflare.com/zh-cn/",
-        "icon": "https://manifest.im/icon/www.cloudflare.com",
-        "style": "fit"
-      },
-      {
-        "title": "Us-west-1",
-        "url": "https://us-west-1.run.claw.cloud/",
-        "icon": "https://img.logo.dev/us-west-1.run.claw.cloud?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "fit"
-      },
-      {
         "title": "Shadowsocks",
         "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
         "icon": "https://img.logo.dev/secure.shadowsocks.au?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "title": "Spotify",
+        "url": "https://open.spotify.com/",
+        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "title": "Gmail",
+        "url": "https://mail.google.com/mail/u/0/",
+        "icon": "https://manifest.im/icon/mail.google.com",
+        "style": "white"
+      },
+      {
+        "title": "Google Earth",
+        "url": "https://earth.google.com/",
+        "icon": "https://manifest.im/icon/earth.google.com",
+        "style": "white"
+      },
+      {
+        "title": "Whisper",
+        "url": "https://whisper.324893.xyz/",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=5ubfma",
+        "style": "full"
+      },
+      {
+        "title": "FFmpeg",
+        "url": "https://ffmpeg.324893.xyz/",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=o4k7i",
+        "style": "full"
+      }
+    ]
+  },
+  {
+    "title": "学习资料",
+    "bookmarks": [
+      {
+        "title": "Dedao",
+        "url": "https://www.dedao.cn/bought",
+        "icon": "https://manifest.im/icon/www.dedao.cn",
         "style": "full"
       },
       {
@@ -176,16 +187,10 @@
         "style": "fit"
       },
       {
-        "title": "Spotify",
-        "url": "https://open.spotify.com/",
-        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full"
-      },
-      {
-        "title": "Gmail",
-        "url": "https://mail.google.com/mail/u/0/",
-        "icon": "https://manifest.im/icon/mail.google.com",
-        "style": "white"
+        "title": "Z-library",
+        "url": "https://z-library.sk/",
+        "icon": "https://manifest.im/icon/z-library.sk",
+        "style": "fit"
       },
       {
         "title": "Google Art",
@@ -194,38 +199,9 @@
         "style": "full"
       },
       {
-        "title": "Google Earth",
-        "url": "https://earth.google.com/",
-        "icon": "https://manifest.im/icon/earth.google.com",
-        "style": "white"
-      },
-      {
-        "title": "Whisper",
-        "url": "https://whisper.324893.xyz/",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=5ubfma",
-        "style": "full"
-      },
-      {
-        "title": "FFmpeg",
-        "url": "https://ffmpeg.324893.xyz/",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=o4k7i",
-        "style": "full"
-      },
-      {
         "title": "Daily Art",
         "url": "https://art.324893.xyz/",
         "icon": "https://api.dicebear.com/9.x/shapes/svg?seed=temrrr",
-        "style": "full"
-      }
-    ]
-  },
-  {
-    "title": "学习资料",
-    "bookmarks": [
-      {
-        "title": "Dedao",
-        "url": "https://www.dedao.cn/bought",
-        "icon": "https://manifest.im/icon/www.dedao.cn",
         "style": "full"
       }
     ]
@@ -255,6 +231,35 @@
         "title": "91panta",
         "url": "https://91panta.cn/",
         "icon": "https://91panta.cn/favicon.ico",
+        "style": "fit"
+      }
+    ]
+  },
+  {
+    "title": "代码工具",
+    "bookmarks": [
+      {
+        "title": "GitHub",
+        "url": "https://github.com",
+        "icon": "https://manifest.im/icon/github.com",
+        "style": "full"
+      },
+      {
+        "title": "Vercel",
+        "url": "https://vercel.com",
+        "icon": "https://manifest.im/icon/vercel.com",
+        "style": "full"
+      },
+      {
+        "title": "Cloudflare",
+        "url": "https://www.cloudflare.com/zh-cn/",
+        "icon": "https://manifest.im/icon/www.cloudflare.com",
+        "style": "fit"
+      },
+      {
+        "title": "Us-west-1",
+        "url": "https://us-west-1.run.claw.cloud/",
+        "icon": "https://img.logo.dev/us-west-1.run.claw.cloud?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "fit"
       }
     ]
