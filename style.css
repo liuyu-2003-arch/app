@@ -432,8 +432,8 @@ body {
 /* --- 重点修改的手机端部分 --- */
 @media (max-width: 768px) {
     .container {
-        /* 在手机上，强制将顶部距离改小，从 6vh 变为 3vh */
-        padding-top: 3vh;
+        /* 修改：在手机上增加顶部间距，80px 足够避开状态栏 */
+        padding-top: 80px;
     }
 
     .bookmark-page {
