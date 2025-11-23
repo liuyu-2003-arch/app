@@ -655,28 +655,49 @@ function initSortable() {
             ghostClass: 'sortable-ghost',
             delay: 100,
             onEnd: function (evt) {
-                const fromVisualPageIndex = parseInt(evt.from.closest('.bookmark-page').dataset.visualPageIndex);
-                const toVisualPageIndex = parseInt(evt.to.closest('.bookmark-page').dataset.visualPageIndex);
-
-                const fromVPage = visualPages[fromVisualPageIndex];
-                const toVPage = visualPages[toVisualPageIndex];
-
+                const fromVPage = visualPages[parseInt(evt.from.closest('.bookmark-page').dataset.visualPageIndex)];
+                const toVPage = visualPages[parseInt(evt.to.closest('.bookmark-page').dataset.visualPageIndex)];
                 const fromOriginalPageIndex = fromVPage.originalPageIndex;
                 const toOriginalPageIndex = toVPage.originalPageIndex;
 
-                const item = fromVPage.bookmarks.splice(evt.oldIndex, 1)[0];
-                
-                const originalItem = pages[fromOriginalPageIndex].bookmarks.find(bm => bm === item);
-                const originalItemIndex = pages[fromOriginalPageIndex].bookmarks.indexOf(originalItem);
-                pages[fromOriginalPageIndex].bookmarks.splice(originalItemIndex, 1);
+                // 1. Get the moved item object from the visual model (don't mutate it).
+                const movedItem = fromVPage.bookmarks[evt.oldIndex];
 
-                const isMobile = window.innerWidth < 768;
-                const chunkSize = isMobile ? 12 : 32;
-                const newOriginalIndex = (toVPage.chunkIndex * chunkSize) + evt.newIndex;
-                pages[toOriginalPageIndex].bookmarks.splice(newOriginalIndex, 0, originalItem);
+                // 2. Remove it from the canonical 'pages' model.
+                const oldIndexInPage = pages[fromOriginalPageIndex].bookmarks.indexOf(movedItem);
+                if (oldIndexInPage === -1) { return; }
+                const [itemToMove] = pages[fromOriginalPageIndex].bookmarks.splice(oldIndexInPage, 1);
+
+                // 3. Find the anchor item (the item we're dropping before) to determine the new index.
+                const anchorItem = toVPage.bookmarks[evt.newIndex];
+                let newIndexInPage;
+
+                if (anchorItem) {
+                    // If there's an anchor, find its current index in the canonical model.
+                    newIndexInPage = pages[toOriginalPageIndex].bookmarks.indexOf(anchorItem);
+                } else {
+                    // If there's no anchor, we're at the end of a visual chunk.
+                    const lastItemInChunk = toVPage.bookmarks[toVPage.bookmarks.length - 1];
+                    if (lastItemInChunk) {
+                        newIndexInPage = pages[toOriginalPageIndex].bookmarks.indexOf(lastItemInChunk) + 1;
+                    } else {
+                        // The chunk is empty. Calculate its starting position.
+                        const isMobile = window.innerWidth < 768;
+                        const chunkSize = isMobile ? 12 : 32;
+                        newIndexInPage = toVPage.chunkIndex * chunkSize;
+                    }
+                }
+                
+                if (newIndexInPage === -1) {
+                    // Fallback for safety, e.g. if anchor was the item being moved.
+                    newIndexInPage = pages[toOriginalPageIndex].bookmarks.length;
+                }
+
+                // 4. Insert the item at the new position.
+                pages[toOriginalPageIndex].bookmarks.splice(newIndexInPage, 0, itemToMove);
 
                 saveData();
-                render();
+                setTimeout(render, 0);
             }
         });
         sortableInstances.push(instance);
