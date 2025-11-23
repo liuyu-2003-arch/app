@@ -1,0 +1,30 @@
+[
+  {
+    "title": "个人收藏",
+    "bookmarks": [
+      {
+        "title": "Bilibili",
+        "url": "https://www.bilibili.com",
+        "icon": "https://favicon.vemetric.com/www.bilibili.com",
+        "style": "full"
+      },
+      {
+        "title": "Youtube",
+        "url": "https://youtube.com",
+        "icon": "https://img.logo.dev/youtube.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      }
+    ]
+  },
+  {
+    "title": "常用工具",
+    "bookmarks": [
+      {
+        "title": "GitHub",
+        "url": "https://github.com",
+        "icon": "https://manifest.im/icon/github.com",
+        "style": "full"
+      }
+    ]
+  }
+]
