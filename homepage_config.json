@@ -6,144 +6,64 @@
         "title": "Notion",
         "url": "https://notion.so",
         "icon": "https://manifest.im/icon/notion.so",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocggo4bac346wo"
       },
       {
         "title": "Youtube",
         "url": "https://youtube.com",
         "icon": "https://img.logo.dev/youtube.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgxukg2md4ees"
       },
       {
         "title": "Bilibili",
         "url": "https://www.bilibili.com",
         "icon": "https://favicon.vemetric.com/www.bilibili.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgnkd4wlcily"
       },
       {
         "title": "Douban",
         "url": "https://douban.com",
         "icon": "https://img.logo.dev/douban.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocg6ksem70at97"
       },
       {
         "title": "Google",
         "url": "https://Google.com",
         "icon": "https://cdn.brandfetch.io/google.com?c=1idVW8VN57Jat7AexnZ",
-        "style": "white"
+        "style": "white",
+        "id": "mibooocgctd6k15mfsq"
       },
       {
         "title": "Chatgpt",
         "url": "https://chatgpt.com",
         "icon": "https://manifest.im/icon/chatgpt.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgw6rzqbut0o9"
       },
       {
         "title": "Sora",
         "url": "https://sora.chatgpt.com",
         "icon": "https://manifest.im/icon/sora.chatgpt.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocg577ak6khszh"
       },
       {
         "title": "Grok",
         "url": "https://grok.com/",
         "icon": "https://cdn.brandfetch.io/grok.com?c=1idVW8VN57Jat7AexnZ",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgvnfgrg3hxed"
       },
       {
         "title": "Gemini",
         "url": "https://gemini.google.com/app",
         "icon": "https://manifest.im/icon/gemini.google.com",
-        "style": "fit"
-      }
-    ]
-  },
-  {
-    "title": "常用工具",
-    "bookmarks": [
-      {
-        "title": "Subeasy",
-        "url": "https://subeasy.ai",
-        "icon": "https://subeasy.ai/favicon.ico",
-        "style": "white"
-      },
-      {
-        "title": "yt-dlp",
-        "url": "https://yt-dlp.324893.xyz/",
-        "icon": "https://manifest.im/icon/yt-dlp.324893.xyz",
-        "style": "full"
-      },
-      {
-        "title": "Cobalt",
-        "url": "https://cobalt.tools/",
-        "icon": "https://manifest.im/icon/cobalt.tools",
-        "style": "full"
-      },
-      {
-        "title": "Tingwu",
-        "url": "https://tingwu.aliyun.com/home",
-        "icon": "https://favicon.vemetric.com/tingwu.aliyun.com",
-        "style": "fit"
-      },
-      {
-        "title": "Aliyundrive",
-        "url": "https://aliyundrive.com",
-        "icon": "https://manifest.im/icon/aliyundrive.com",
-        "style": "full"
-      },
-      {
-        "title": "Yun",
-        "url": "https://yun.139.com",
-        "icon": "https://manifest.im/icon/yun.139.com",
-        "style": "full"
-      },
-      {
-        "title": "Appstorrent",
-        "url": "https://appstorrent.ru/",
-        "icon": "https://manifest.im/icon/appstorrent.ru",
-        "style": "full"
-      },
-      {
-        "title": "Macked",
-        "url": "https://macked.app/",
-        "icon": "https://manifest.im/icon/macked.app",
-        "style": "fit"
-      },
-      {
-        "title": "Shadowsocks",
-        "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
-        "icon": "https://img.logo.dev/secure.shadowsocks.au?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full"
-      },
-      {
-        "title": "Spotify",
-        "url": "https://open.spotify.com/",
-        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full"
-      },
-      {
-        "title": "Gmail",
-        "url": "https://mail.google.com/mail/u/0/",
-        "icon": "https://manifest.im/icon/mail.google.com",
-        "style": "white"
-      },
-      {
-        "title": "Google Earth",
-        "url": "https://earth.google.com/",
-        "icon": "https://manifest.im/icon/earth.google.com",
-        "style": "white"
-      },
-      {
-        "title": "Whisper",
-        "url": "https://whisper.324893.xyz/",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=5ubfma",
-        "style": "full"
-      },
-      {
-        "title": "FFmpeg",
-        "url": "https://ffmpeg.324893.xyz/",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=o4k7i",
-        "style": "full"
+        "style": "fit",
+        "id": "mibooocg1p2kmlhqsbu"
       }
     ]
   },
@@ -154,84 +74,97 @@
         "title": "Dedao",
         "url": "https://www.dedao.cn/bought",
         "icon": "https://manifest.im/icon/www.dedao.cn",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocg6ifsz8svimu"
       },
       {
         "title": "Wikipedia",
         "url": "https://zh.wikipedia.org/wiki/Wikipedia:%E9%A6%96%E9%A1%B5",
         "icon": "https://manifest.im/icon/zh.wikipedia.org",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgrih9u7wmtw"
       },
       {
         "title": "NY Times",
         "url": "https://m.cn.nytimes.com/",
         "icon": "https://manifest.im/icon/m.cn.nytimes.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgrdyluefobsl"
       },
       {
         "title": "BBC",
         "url": "https://www.bbc.com/zhongwen/simp",
         "icon": "https://cdn.brandfetch.io/www.bbc.com?c=1idVW8VN57Jat7AexnZ",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgnxpaibktu1o"
       },
       {
         "title": "Grabcad",
         "url": "https://grabcad.com/library",
         "icon": "https://img.logo.dev/grabcad.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocguwmdw2mja1r"
       },
       {
         "title": "iFixit",
         "url": "https://zh.ifixit.com/Teardown",
         "icon": "https://img.logo.dev/zh.ifixit.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocg1w4hodlnmca"
       },
       {
         "title": "Z-library",
         "url": "https://z-library.sk/",
         "icon": "https://manifest.im/icon/z-library.sk",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocgrw5l7r8p99a"
       },
       {
         "title": "Google Art",
         "url": "https://artsandculture.google.com/",
         "icon": "https://manifest.im/icon/artsandculture.google.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgnga9eg221z"
       },
       {
         "title": "Daily Art",
         "url": "https://art.324893.xyz/",
         "icon": "https://api.dicebear.com/9.x/shapes/svg?seed=temrrr",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgjwmrwo41bjf"
       }
     ]
   },
   {
-    "title": "影视",
+    "title": "影视音乐",
     "bookmarks": [
       {
         "title": "Cilixiong",
         "url": "https://www.cilixiong.org/movie/",
         "icon": "https://manifest.im/icon/www.cilixiong.org",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocg9qj52goaju"
       },
       {
         "title": "Alipansou",
         "url": "https://alipansou.com/",
         "icon": "https://favicon.vemetric.com/alipansou.com",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocgaaeujkkssn"
       },
       {
         "title": "Upyunso",
         "url": "https://www.upyunso.com/",
         "icon": "https://img.logo.dev/www.upyunso.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocgkq3nblf1gna"
       },
       {
         "title": "91panta",
         "url": "https://91panta.cn/",
-        "icon": "https://91panta.cn/favicon.ico",
-        "style": "fit"
+        "icon": "https://api.dicebear.com/9.x/identicon/svg?seed=nowf5",
+        "style": "full",
+        "id": "mibooocgwqjkcliv0ed"
       }
     ]
   },
@@ -242,25 +175,132 @@
         "title": "GitHub",
         "url": "https://github.com",
         "icon": "https://manifest.im/icon/github.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgiovtru2rogh"
       },
       {
         "title": "Vercel",
         "url": "https://vercel.com",
         "icon": "https://manifest.im/icon/vercel.com",
-        "style": "full"
+        "style": "full",
+        "id": "mibooocgumwvwh70wn"
       },
       {
         "title": "Cloudflare",
         "url": "https://www.cloudflare.com/zh-cn/",
         "icon": "https://manifest.im/icon/www.cloudflare.com",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocgttju5attj7a"
       },
       {
         "title": "Us-west-1",
         "url": "https://us-west-1.run.claw.cloud/",
         "icon": "https://img.logo.dev/us-west-1.run.claw.cloud?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "fit"
+        "style": "fit",
+        "id": "mibooocgll1d4ucyf9n"
+      }
+    ]
+  },
+  {
+    "title": "常用工具",
+    "bookmarks": [
+      {
+        "title": "Subeasy",
+        "url": "https://subeasy.ai",
+        "icon": "https://subeasy.ai/favicon.ico",
+        "style": "white",
+        "id": "mibooocg3d08h37yjom"
+      },
+      {
+        "title": "yt-dlp",
+        "url": "https://yt-dlp.324893.xyz/",
+        "icon": "https://manifest.im/icon/yt-dlp.324893.xyz",
+        "style": "full",
+        "id": "mibooocg4udfj48jcqn"
+      },
+      {
+        "title": "Cobalt",
+        "url": "https://cobalt.tools/",
+        "icon": "https://manifest.im/icon/cobalt.tools",
+        "style": "full",
+        "id": "mibooocggle4a072qf6"
+      },
+      {
+        "title": "Tingwu",
+        "url": "https://tingwu.aliyun.com/home",
+        "icon": "https://favicon.vemetric.com/tingwu.aliyun.com",
+        "style": "fit",
+        "id": "mibooocgvqiaku0c1ai"
+      },
+      {
+        "title": "Aliyundrive",
+        "url": "https://aliyundrive.com",
+        "icon": "https://manifest.im/icon/aliyundrive.com",
+        "style": "full",
+        "id": "mibooocg1asoj080xgu"
+      },
+      {
+        "title": "Yun",
+        "url": "https://yun.139.com",
+        "icon": "https://manifest.im/icon/yun.139.com",
+        "style": "full",
+        "id": "mibooocgomou5m0ra8c"
+      },
+      {
+        "title": "Appstorrent",
+        "url": "https://appstorrent.ru/",
+        "icon": "https://manifest.im/icon/appstorrent.ru",
+        "style": "full",
+        "id": "mibooocg96pozsobsnu"
+      },
+      {
+        "title": "Macked",
+        "url": "https://macked.app/",
+        "icon": "https://manifest.im/icon/macked.app",
+        "style": "fit",
+        "id": "mibooocgngqpn1mmbz"
+      },
+      {
+        "title": "Shadowsocks",
+        "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
+        "icon": "https://img.logo.dev/secure.shadowsocks.au?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full",
+        "id": "mibooocg2z1qv5lcu7y"
+      },
+      {
+        "title": "Spotify",
+        "url": "https://open.spotify.com/",
+        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full",
+        "id": "mibooocgxj44jon0jy"
+      },
+      {
+        "title": "Gmail",
+        "url": "https://mail.google.com/mail/u/0/",
+        "icon": "https://manifest.im/icon/mail.google.com",
+        "style": "white",
+        "id": "mibooocgv5kxh73xmms"
+      },
+      {
+        "title": "Google Earth",
+        "url": "https://earth.google.com/",
+        "icon": "https://manifest.im/icon/earth.google.com",
+        "style": "white",
+        "id": "mibooocgdf1559a699m"
+      },
+      {
+        "title": "Whisper",
+        "url": "https://whisper.324893.xyz/",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=5ubfma",
+        "style": "full",
+        "id": "mibooocgldbnk47twx"
+      },
+      {
+        "title": "FFmpeg",
+        "url": "https://ffmpeg.324893.xyz/",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=o4k7i",
+        "style": "full",
+        "id": "mibooocgt61tw8dhqj"
       }
     ]
   }
