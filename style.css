@@ -2,18 +2,18 @@
     --card-size: 80px;
     --radius: 18px;
     --gap: 30px;
+    --row-count: 8;
+    --page-width: calc(var(--row-count) * (var(--card-size) + var(--gap)) - var(--gap));
 }
 
 body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
-    overflow-y: auto; overflow-x: hidden;
+    overflow: hidden;
     display: flex; flex-direction: column; align-items: center;
-    /* 修改：改回 5vh，保持视觉平衡 */
-    padding-top: 5vh;
-    padding-bottom: 120px;
     box-sizing: border-box;
+    visibility: hidden; /* Default hidden to prevent flicker */
 }
 
 .background-layer {
@@ -27,14 +27,70 @@ body {
     transition: background-color 0.5s ease;
 }
 
-.container { width: 90%; max-width: 1200px; padding: 10px; }
-.grid { display: flex; flex-wrap: wrap; gap: var(--gap); justify-content: center; padding: 20px; }
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 6vh; /* 电脑端保持这个高度 */
+    padding-bottom: 0;
+    box-sizing: border-box;
+}
+
+.bookmark-swiper {
+    width: 100%;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.bookmark-swiper-wrapper {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s ease-out;
+    will-change: transform;
+}
+
+.bookmark-page {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    padding-top: 0;
+    overflow-y: auto;
+}
+
+.bookmark-page-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--card-size));
+    gap: var(--gap);
+    justify-content: flex-start;
+    width: var(--page-width);
+    max-width: 90%;
+    align-content: flex-start;
+    padding-bottom: 50px; /* Add some padding at the bottom */
+}
+
+.page-title {
+    grid-column: 1 / -1;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    padding: 5px;
+    border-radius: 8px;
+}
 
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
     transition: transform 0.2s;
     -webkit-tap-highlight-color: transparent;
+    will-change: transform;
 }
 .bookmark-item:hover { transform: scale(1.05); }
 
@@ -64,11 +120,14 @@ body {
 }
 
 @keyframes shake {
-    0% { transform: rotate(0deg); } 25% { transform: rotate(2deg); }
-    50% { transform: rotate(0deg); } 75% { transform: rotate(-2deg); }
+    0% { transform: rotate(0deg); } 25% { transform: rotate(1.5deg); }
+    50% { transform: rotate(0deg); } 75% { transform: rotate(-1.5deg); }
     100% { transform: rotate(0deg); }
 }
-.is-editing .bookmark-item { animation: shake 0.25s infinite ease-in-out; cursor: grab; }
+.is-editing .bookmark-item:not(.sortable-drag):not(.sortable-ghost) { 
+    animation: shake 0.3s infinite ease-in-out; 
+    cursor: grab; 
+}
 
 .delete-btn {
     position: absolute; top: -8px; left: -8px; width: 22px; height: 22px;
@@ -77,6 +136,23 @@ body {
     display: none; z-index: 10; cursor: pointer;
 }
 .is-editing .delete-btn { display: block; }
+
+.sortable-ghost {
+    opacity: 0.2;
+    background: #cce5ff;
+    border-radius: var(--radius);
+}
+.sortable-ghost .bookmark-title, .sortable-ghost .icon-box {
+    opacity: 0.5;
+}
+
+.sortable-drag {
+    opacity: 1 !important;
+    transform: scale(1.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    z-index: 999;
+    transition: all 0.2s ease-out;
+}
 
 .edit-trigger-area {
     position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;
@@ -116,9 +192,10 @@ body {
 
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    width: 420px;
+    min-width: 420px;
+    max-width: 800px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
-    animation: popUp 0.3s ease; max-width: 90%;
+    animation: popUp 0.3s ease;
 }
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -134,28 +211,55 @@ body {
 }
 
 .preview-section {
-    flex: 0 0 115px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     border-right: 1px solid #e0e0e0;
     padding-right: 15px;
+    flex-shrink: 0;
 }
-.preview-label { margin-top: 12px; font-size: 12px; color: #999; }
 
 .candidate-section {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.style-select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.style-option {
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: #e9e9eb;
+    color: #555;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.style-option:hover {
+    background: #dcdce0;
+}
+
+.style-option.active {
+    background: #007AFF;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,122,255,0.2);
 }
 
 .candidate-grid {
     display: grid;
-    grid-template-columns: repeat(3, 44px);
-    grid-template-rows: repeat(3, 44px);
+    grid-template-columns: repeat(5, 44px);
+    grid-template-rows: repeat(2, 44px);
     gap: 10px;
 }
 
@@ -182,18 +286,171 @@ body {
     font-size: 13px; color: #666; width: 65px; text-align: right; flex-shrink: 0; font-weight: 500;
 }
 .modal-content input[type="text"] {
-    flex: 1; padding: 8px 12px; border: 1px solid #e0e0e0;
-    border-radius: 10px; background: #f9f9f9; font-size: 14px;
-    outline: none; transition: border-color 0.2s;
+    flex: 1; 
+    border: 1px solid #e0e0e0;
+    border-radius: 10px; 
+    background: #f9f9f9; 
+    font-size: 14px;
+    outline: none; 
+    transition: border-color 0.2s;
+    padding: 12px;
 }
-.modal-content input:focus { border-color: #007AFF; background: white; }
+.modal-content input[type="text"]:focus {
+    border-color: #007AFF; 
+    background: white;
+}
 
-.style-select {
-    display: flex; gap: 20px; justify-content: center; padding-top: 5px;
+.page-options-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    overflow-x: auto;
 }
-.radio-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; cursor: pointer; }
-.radio-label input { width: auto; margin: 0; accent-color: #007AFF; }
+
+.page-option {
+    padding: 12px;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: #e9e9eb;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    white-space: nowrap;
+}
+
+.page-option:hover {
+    background-color: #dcdce0;
+}
+
+.page-option.active {
+    background-color: #007AFF;
+    color: white;
+    font-weight: 600;
+    border-color: #007AFF;
+}
+
 
 .modal-actions { display: flex; gap: 10px; margin-top: 5px; }
-.modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; background: #eee; font-size: 15px; font-weight: 600; }
+.modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 12px; cursor: pointer; background: #eee; font-size: 14px; font-weight: 600; }
 .modal-actions button.primary { background: #007AFF; color: white; }
+
+.pagination-dots {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+}
+
+.pagination-dots.visible {
+    opacity: 1;
+}
+
+.pagination-dots .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    transition: background 0.3s;
+}
+
+.pagination-dots .dot.active {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.page-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.page-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: #f5f7f9;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: none;
+    transition: all 0.3s ease-out;
+}
+.page-list-item.fading-out {
+    opacity: 0;
+    transform: scale(0.9);
+    margin-bottom: -40px; /* Adjust to prevent layout jump */
+}
+.page-list-item:last-child {
+    margin-bottom: 0;
+}
+.page-list-item.sortable-ghost {
+    opacity: 0.4;
+    background: #cce5ff;
+}
+
+.drag-handle {
+    cursor: grab;
+    padding: 0 10px;
+    color: #999;
+}
+
+.page-title-input {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 5px;
+    outline: none;
+}
+.page-title-input:focus {
+    background: white;
+}
+
+.delete-page-list-btn {
+    background: transparent;
+    border: none;
+    color: #ff4d4d;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 10px;
+}
+.delete-page-list-btn:hover {
+    color: #cc0000;
+}
+
+/* --- 重点修改的手机端部分 --- */
+@media (max-width: 768px) {
+    .container {
+        /* 在手机上，强制将顶部距离改小，从 6vh 变为 3vh */
+        padding-top: 3vh;
+    }
+
+    .bookmark-page {
+        /* 去除之前的累积间距 */
+        padding-top: 0;
+    }
+
+    .bookmark-page-content {
+        justify-content: center;
+    }
+
+    .page-title {
+        text-align: center;
+    }
+
+    .pagination-dots {
+        /* 防止小圆点遮挡文字，稍微调整位置 */
+        bottom: 40px;
+    }
+}
