@@ -15,6 +15,7 @@ let prevTranslate = 0;
 let animationID;
 let isWheeling = false;
 let dotsTimer = null;
+let wheelTimeout = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.body.style.visibility = 'hidden';
@@ -130,7 +131,6 @@ function createVisualPages() {
 
 
 function initTheme() {
-    // 修改这里：默认颜色改为参考图的淡紫色 #e4d0e5
     const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
     document.querySelector('.background-layer').style.backgroundColor = savedColor;
     const swatches = document.querySelectorAll('.swatch');
@@ -151,7 +151,7 @@ function changeTheme(color, element) {
 function rgbToHex(col) {
     if(col.charAt(0)=='#') return col;
     let rgb = col.match(/\d+/g);
-    if(!rgb) return '#e4d0e5'; // 默认返回值也改一下，虽然极少用到
+    if(!rgb) return '#e4d0e5';
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
 
@@ -255,14 +255,11 @@ function renderPaginationDots() {
         const dot = document.createElement('div');
         dot.className = 'dot';
 
-        // 1. 设置激活状态
         if (i === currentPage) dot.classList.add('active');
 
-        // 2. 添加提示文字
         const pageTitle = visualPages[i].title || `第 ${i + 1} 页`;
         dot.setAttribute('data-title', pageTitle);
 
-        // 3. 添加点击跳转事件
         dot.onclick = (e) => {
             e.stopPropagation();
             currentPage = i;
@@ -286,28 +283,57 @@ function initSwiper() {
     swiper.addEventListener('wheel', handleWheel, { passive: false });
 }
 
+/* --- 核心修改：优化触控板体验 (防回弹 + 限制单页) --- */
 function handleWheel(e) {
     e.preventDefault();
-    if (isWheeling) return;
 
-    if (Math.abs(e.deltaX) > 20) {
-        let pageChanged = false;
-        if (e.deltaX > 1 && currentPage < visualPages.length - 1) {
-            currentPage++;
-            pageChanged = true;
-        } else if (e.deltaX < -1 && currentPage > 0) {
-            currentPage--;
-            pageChanged = true;
-        }
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
 
-        if (pageChanged) {
-            isWheeling = true;
-            updateSwiperPosition(true);
-            renderPaginationDots();
-            showPaginationDots();
-            setTimeout(() => { isWheeling = false; }, 500);
+    // 1. 禁用过渡动画，实现实时跟手
+    swiperWrapper.style.transition = 'none';
+
+    // 2. 实时更新位移
+    currentTranslate -= e.deltaX;
+
+    // 3. 应用位移
+    setSwiperPosition();
+    showPaginationDots();
+
+    // 4. 防抖：检测滚动结束 (手指离开或停止)
+    clearTimeout(wheelTimeout);
+    wheelTimeout = setTimeout(() => {
+        // 计算当前基于位移的理论页码 (小数)
+        const movedIndex = -currentTranslate / swiperWidth;
+
+        // 计算与当前固定页面的偏移量
+        const diff = movedIndex - currentPage;
+
+        let targetPage = currentPage;
+
+        // 阈值判断：改为 0.15 (15%)，即只要拖动超过 15% 的距离，松手就自动翻页
+        // 这样解决了"拖一半松手弹回去"的问题
+        if (diff > 0.15) {
+            targetPage = currentPage + 1;
+        } else if (diff < -0.15) {
+            targetPage = currentPage - 1;
         }
-    }
+        // 否则 targetPage 保持不变 (吸附回原位)
+
+        // 关键：限制每次只能翻一页 (防止惯性飞过好几页)
+        // 确保 targetPage 只能是 currentPage - 1, currentPage, 或 currentPage + 1
+        if (targetPage > currentPage + 1) targetPage = currentPage + 1;
+        if (targetPage < currentPage - 1) targetPage = currentPage - 1;
+
+        // 边界检查
+        targetPage = Math.max(0, Math.min(visualPages.length - 1, targetPage));
+
+        // 执行翻页
+        currentPage = targetPage;
+        updateSwiperPosition(true); // 启用动画吸附过去
+        renderPaginationDots();
+
+    }, 60); // 60ms 延迟，既能保证连续跟手，又能快速响应停止
 }
 
 function dragStart(e) {
@@ -339,19 +365,22 @@ function dragEnd(e) {
     cancelAnimationFrame(animationID);
 
     const movedBy = currentTranslate - prevTranslate;
-    let pageChanged = false;
-    if (movedBy < -50 && currentPage < visualPages.length - 1) {
-        currentPage++;
-        pageChanged = true;
-    }
-    if (movedBy > 50 && currentPage > 0) {
-        currentPage--;
-        pageChanged = true;
+    const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
+
+    // 同样的逻辑应用到鼠标/触摸拖拽上：
+    // 降低阈值，增加跟手感
+    let targetPage = currentPage;
+    if (movedBy < -swiperWidth * 0.15 && currentPage < visualPages.length - 1) {
+        targetPage++;
+    } else if (movedBy > swiperWidth * 0.15 && currentPage > 0) {
+        targetPage--;
     }
 
+    currentPage = targetPage;
     updateSwiperPosition(true);
     renderPaginationDots();
-    if (pageChanged) showPaginationDots();
+    // if (pageChanged) showPaginationDots(); // 只要拖拽结束都更新点，不需要额外判断
+    showPaginationDots();
 }
 
 function getPositionX(e) {
@@ -525,15 +554,10 @@ function generateIconCandidates(urlVal) {
     }
     renderRandomButtons(list);
     const sources = [
-        // 1. Manifest
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
-        // 2. Vemetric
         { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
-        // 3. Logo.dev
         { name: 'Logo.dev', url: `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png` },
-        // 4. Brandfetch
         { name: 'Brandfetch', url: `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ` },
-        // 5. Direct (/favicon.ico)
         { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` }
     ];
     for (let i = sources.length - 1; i >= 0; i--) {
@@ -561,7 +585,7 @@ function renderRandomButtons(container) {
         { type: 'random-identicon', icon: '🧩', name: '像素' },
         { type: 'random-emoji', icon: '😀', name: '表情' },
         { type: 'random-bottts', icon: '🤖', name: '机器人' },
-        { type: 'random-avataaars', icon: '🧑', name: '人物' } // 新增: 人物头像
+        { type: 'random-avataaars', icon: '🧑', name: '人物' }
     ];
     randomTypes.forEach(rnd => {
         const item = document.createElement('div');
@@ -574,7 +598,7 @@ function renderRandomButtons(container) {
             if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
             else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
             else if(rnd.type === 'random-bottts') url = `https://api.dicebear.com/9.x/bottts/svg?seed=${seed}`;
-            else if(rnd.type === 'random-avataaars') url = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`; // 新增处理逻辑
+            else if(rnd.type === 'random-avataaars') url = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`;
             else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
             document.getElementById('input-icon').value = url;
             updatePreview();
