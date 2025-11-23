@@ -3,9 +3,9 @@
     "title": "个人收藏",
     "bookmarks": [
       {
-        "title": "Bilibili",
-        "url": "https://www.bilibili.com",
-        "icon": "https://favicon.vemetric.com/www.bilibili.com",
+        "title": "Notion",
+        "url": "https://notion.so",
+        "icon": "https://manifest.im/icon/notion.so",
         "style": "full"
       },
       {
@@ -13,6 +13,24 @@
         "url": "https://youtube.com",
         "icon": "https://img.logo.dev/youtube.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "full"
+      },
+      {
+        "title": "Bilibili",
+        "url": "https://www.bilibili.com",
+        "icon": "https://favicon.vemetric.com/www.bilibili.com",
+        "style": "full"
+      },
+      {
+        "title": "Douban",
+        "url": "https://douban.com",
+        "icon": "https://img.logo.dev/douban.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "fit"
+      },
+      {
+        "title": "Google",
+        "url": "https://Google.com",
+        "icon": "https://cdn.brandfetch.io/google.com?c=1idVW8VN57Jat7AexnZ",
+        "style": "white"
       }
     ]
   },
@@ -20,10 +38,73 @@
     "title": "常用工具",
     "bookmarks": [
       {
+        "title": "Vercel",
+        "url": "https://vercel.com",
+        "icon": "https://manifest.im/icon/vercel.com",
+        "style": "full"
+      },
+      {
         "title": "GitHub",
         "url": "https://github.com",
         "icon": "https://manifest.im/icon/github.com",
         "style": "full"
+      },
+      {
+        "title": "Subeasy",
+        "url": "https://subeasy.ai",
+        "icon": "https://subeasy.ai/favicon.ico",
+        "style": "white"
+      },
+      {
+        "title": "yt-dlp",
+        "url": "https://yt-dlp.324893.xyz/",
+        "icon": "https://manifest.im/icon/yt-dlp.324893.xyz",
+        "style": "full"
+      },
+      {
+        "title": "Cobalt",
+        "url": "https://cobalt.tools/",
+        "icon": "https://manifest.im/icon/cobalt.tools",
+        "style": "full"
+      },
+      {
+        "title": "Tingwu",
+        "url": "https://tingwu.aliyun.com/home",
+        "icon": "https://favicon.vemetric.com/tingwu.aliyun.com",
+        "style": "fit"
+      },
+      {
+        "title": "Aliyundrive",
+        "url": "https://aliyundrive.com",
+        "icon": "https://manifest.im/icon/aliyundrive.com",
+        "style": "full"
+      },
+      {
+        "title": "Yun",
+        "url": "https://yun.139.com",
+        "icon": "https://manifest.im/icon/yun.139.com",
+        "style": "full"
+      }
+    ]
+  },
+  {
+    "title": "学习资料",
+    "bookmarks": []
+  },
+  {
+    "title": "影视",
+    "bookmarks": [
+      {
+        "title": "Cilixiong",
+        "url": "https://www.cilixiong.org/movie/",
+        "icon": "https://manifest.im/icon/www.cilixiong.org",
+        "style": "full"
+      },
+      {
+        "title": "Alipansou",
+        "url": "https://alipansou.com/",
+        "icon": "https://favicon.vemetric.com/alipansou.com",
+        "style": "fit"
       }
     ]
   }
