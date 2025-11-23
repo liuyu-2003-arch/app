@@ -155,6 +155,9 @@ function rgbToHex(col) {
 }
 
 function render() {
+    const oldScrollTops = [];
+    document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
+    
     createVisualPages();
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
     swiperWrapper.innerHTML = '';
@@ -220,6 +223,9 @@ function render() {
 
         pageEl.appendChild(content);
         swiperWrapper.appendChild(pageEl);
+        if(oldScrollTops[visualPageIndex]) {
+            pageEl.scrollTop = oldScrollTops[visualPageIndex];
+        }
     });
 
     if (currentPage >= visualPages.length) currentPage = Math.max(0, visualPages.length - 1);
@@ -357,6 +363,33 @@ function updateSwiperPosition(withTransition = true) {
     setSwiperPosition();
 }
 
+function selectStyle(element) {
+    document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+    updatePreview();
+}
+
+function selectPage(element) {
+    document.querySelectorAll('.page-option').forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+}
+
+function renderPageOptions(selectedPageIndex) {
+    const container = document.getElementById('page-options-container');
+    container.innerHTML = '';
+    pages.forEach((page, index) => {
+        const option = document.createElement('div');
+        option.className = 'page-option';
+        option.textContent = page.title || `第 ${index + 1} 页`;
+        option.dataset.index = index;
+        option.onclick = () => selectPage(option);
+        if (index === selectedPageIndex) {
+            option.classList.add('active');
+        }
+        container.appendChild(option);
+    });
+}
+
 function openModal(pageIndex = -1, bookmarkIndex = -1) {
     currentEditInfo = { pageIndex, bookmarkIndex };
     const modal = document.getElementById('modal');
@@ -364,35 +397,32 @@ function openModal(pageIndex = -1, bookmarkIndex = -1) {
     const titleInput = document.getElementById('input-title');
     const urlInput = document.getElementById('input-url');
     const iconInput = document.getElementById('input-icon');
-    const radios = document.getElementsByName('icon-style');
-    const pageSelector = document.getElementById('input-page');
-    
-    pageSelector.innerHTML = '';
-    pages.forEach((page, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = page.title || `第 ${index + 1} 页`;
-        pageSelector.appendChild(option);
-    });
+
+    let currentStyle = 'full';
+    let currentPageIndex = 0;
 
     if (pageIndex >= 0 && bookmarkIndex >= 0) {
         const item = pages[pageIndex].bookmarks[bookmarkIndex];
         titleInput.value = item.title;
         urlInput.value = item.url;
         iconInput.value = item.icon || "";
-        for(let r of radios) {
-            if(r.value === (item.style || 'full')) r.checked = true;
-        }
-        pageSelector.value = pageIndex;
+        currentStyle = item.style || 'full';
+        currentPageIndex = pageIndex;
+        autoFillInfo();
     } else {
         const currentVisualPage = visualPages[currentPage];
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
-        radios[0].checked = true;
-        pageSelector.value = currentVisualPage ? currentVisualPage.originalPageIndex : 0;
+        currentPageIndex = currentVisualPage ? currentVisualPage.originalPageIndex : 0;
+        document.getElementById('icon-candidates').innerHTML = '';
     }
 
+    document.querySelectorAll('.style-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.style === currentStyle);
+    });
+    
+    renderPageOptions(currentPageIndex);
     updatePreview();
 }
 
@@ -438,7 +468,7 @@ function renderPageList() {
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-page-list-btn';
             deleteBtn.textContent = '×';
-            deleteBtn.onclick = () => deletePage(index);
+            deleteBtn.onclick = (e) => deletePage(e, index);
             li.appendChild(deleteBtn);
         }
 
@@ -459,7 +489,12 @@ function renderPageList() {
 }
 
 function generateIconCandidates(urlVal) {
-    if (!urlVal || !urlVal.includes('.') || urlVal.length < 4) return;
+    const list = document.getElementById('icon-candidates');
+    list.innerHTML = '';
+    if (!urlVal || !urlVal.includes('.') || urlVal.length < 4) {
+        renderRandomButtons(list);
+        return;
+    }
     let safeUrl = urlVal;
     if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
     let domain = "", protocol = "https:";
@@ -468,8 +503,10 @@ function generateIconCandidates(urlVal) {
         domain = urlObj.hostname;
         protocol = urlObj.protocol;
         if (domain.endsWith('.')) domain = domain.slice(0, -1);
-    } catch(e) { return; }
-    const list = document.getElementById('icon-candidates');
+    } catch(e) { 
+        renderRandomButtons(list);
+        return; 
+    }
     renderRandomButtons(list);
     const sources = [
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
@@ -499,11 +536,11 @@ function generateIconCandidates(urlVal) {
 }
 
 function renderRandomButtons(container) {
-    container.innerHTML = '';
     const randomTypes = [
         { type: 'random-shapes', icon: '🎲', name: '几何' },
         { type: 'random-identicon', icon: '🧩', name: '像素' },
-        { type: 'random-emoji', icon: '😀', name: '表情' }
+        { type: 'random-emoji', icon: '😀', name: '表情' },
+        { type: 'random-bottts', icon: '🤖', name: '机器人' }
     ];
     randomTypes.forEach(rnd => {
         const item = document.createElement('div');
@@ -515,6 +552,7 @@ function renderRandomButtons(container) {
             let url = '';
             if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
             else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
+            else if(rnd.type === 'random-bottts') url = `https://api.dicebear.com/9.x/bottts/svg?seed=${seed}`;
             else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
             document.getElementById('input-icon').value = url;
             updatePreview();
@@ -559,32 +597,33 @@ function autoFillInfo() {
 function updatePreview() {
     const titleVal = document.getElementById('input-title').value || "标题预览";
     const iconVal = document.getElementById('input-icon').value;
-    const styleVal = document.querySelector('input[name="icon-style"]:checked').value;
+    const styleEl = document.querySelector('.style-option.active');
+    const styleVal = styleEl ? styleEl.dataset.style : 'full';
+
     const previewCard = document.getElementById('preview-card');
     const previewImg = document.getElementById('preview-img');
     const previewText = document.getElementById('preview-text');
     const previewTitle = document.getElementById('preview-title');
+    
     previewTitle.innerText = titleVal;
     previewCard.classList.remove('style-white', 'style-fit');
     if (styleVal === 'white') previewCard.classList.add('style-white');
     else if (styleVal === 'fit') previewCard.classList.add('style-fit');
+    
     const firstChar = titleVal.charAt(0).toUpperCase() || "A";
     previewText.innerText = firstChar;
+
     if (iconVal) {
         previewImg.src = iconVal;
-        previewImg.classList.remove('hidden');
-        previewText.classList.add('hidden');
-        previewImg.onload = () => {
-            previewImg.classList.remove('hidden');
-            previewText.classList.add('hidden');
-        };
+        previewImg.style.display = 'block';
+        previewText.style.display = 'none';
         previewImg.onerror = () => {
-            previewImg.classList.add('hidden');
-            previewText.classList.remove('hidden');
+            previewImg.style.display = 'none';
+            previewText.style.display = 'flex';
         };
     } else {
-        previewImg.classList.add('hidden');
-        previewText.classList.remove('hidden');
+        previewImg.style.display = 'none';
+        previewText.style.display = 'flex';
     }
 }
 
@@ -592,8 +631,10 @@ function saveBookmark() {
     const title = document.getElementById('input-title').value;
     let url = document.getElementById('input-url').value;
     const icon = document.getElementById('input-icon').value;
-    const style = document.querySelector('input[name="icon-style"]:checked').value;
-    const newPageIndex = parseInt(document.getElementById('input-page').value);
+    const styleEl = document.querySelector('.style-option.active');
+    const style = styleEl ? styleEl.dataset.style : 'full';
+    const pageEl = document.querySelector('.page-option.active');
+    const newPageIndex = pageEl ? parseInt(pageEl.dataset.index) : 0;
 
     if (!title || !url) { alert('标题和网址是必填的'); return; }
     if (!url.startsWith('http')) url = 'https://' + url;
@@ -647,22 +688,25 @@ function addPage() {
     }
 }
 
-function deletePage(pageIndex) {
+function deletePage(e, pageIndex) {
     if (pages[pageIndex].bookmarks.length > 0) {
         alert("请先移除或移动此页面的所有书签才能删除页面。");
         return;
     }
 
-    if (!confirm(`确定要删除 "${pages[pageIndex].title}" 吗？`)) return;
-    
-    pages.splice(pageIndex, 1);
-    saveData();
-    
-    if (currentPage >= pages.length) {
-        currentPage = Math.max(0, pages.length - 1);
-    }
-    render();
-    renderPageList();
+    const listItem = e.target.closest('.page-list-item');
+    listItem.classList.add('fading-out');
+
+    setTimeout(() => {
+        pages.splice(pageIndex, 1);
+        saveData();
+        
+        if (currentPage >= pages.length) {
+            currentPage = Math.max(0, pages.length - 1);
+        }
+        render(); // Re-render main view
+        renderPageList(); // Re-render page list in modal
+    }, 300); // Match animation duration
 }
 
 function initSortable() {
@@ -671,10 +715,31 @@ function initSortable() {
     document.querySelectorAll('.bookmark-page-content').forEach(content => {
         const instance = new Sortable(content, {
             group: 'shared-bookmarks',
-            animation: 150, // Use Sortable.js animation
+            animation: 150,
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
+            forceFallback: true,
             onEnd: function (evt) {
+                const itemEl = evt.item;
+                const newRect = itemEl.getBoundingClientRect();
+                const fallbackEl = document.querySelector('.sortable-drag');
+                
+                if (fallbackEl) {
+                    const oldRect = fallbackEl.getBoundingClientRect();
+                    const dx = oldRect.left - newRect.left;
+                    const dy = oldRect.top - newRect.top;
+
+                    requestAnimationFrame(() => {
+                        itemEl.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+                        itemEl.style.transition = 'transform 0s';
+                        
+                        requestAnimationFrame(() => {
+                            itemEl.style.transform = 'translate3d(0, 0, 0)';
+                            itemEl.style.transition = 'transform 0.25s ease-out';
+                        });
+                    });
+                }
+
                 // Create a flat map of all bookmarks by ID for easy lookup
                 const bookmarkMap = new Map();
                 pages.forEach(page => {
@@ -687,7 +752,6 @@ function initSortable() {
                 const newPages = [];
                 const pageElements = document.querySelectorAll('.bookmark-page');
                 
-                // Ensure newPages has the same structure as original pages
                 pages.forEach((p, i) => {
                     newPages[i] = { ...p, bookmarks: [] };
                 });
@@ -699,19 +763,15 @@ function initSortable() {
                     bookmarkElements.forEach(itemEl => {
                         const bookmarkId = itemEl.dataset.id;
                         const bookmark = bookmarkMap.get(bookmarkId);
-                        if (bookmark) {
+                        if (bookmark && newPages[originalPageIndex]) {
                             newPages[originalPageIndex].bookmarks.push(bookmark);
                         }
                     });
                 });
 
-                // Replace old pages data with the new, sorted data
-                pages = newPages;
+                pages = newPages.filter(p => p.title); // Clean up any undefined pages
                 
                 saveData();
-                
-                // We must re-calculate the visual pages as the underlying data has changed
-                // But we don't call render() to avoid animation interruption
                 createVisualPages();
             }
         });

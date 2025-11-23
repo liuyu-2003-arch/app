@@ -56,10 +56,14 @@
                         </div>
                         <div id="preview-title" class="bookmark-title">标题预览</div>
                     </div>
-                    <div class="preview-label">效果预览</div>
                 </div>
                 <div class="candidate-section">
                     <div id="icon-candidates" class="candidate-grid"></div>
+                    <div class="style-select-group">
+                        <div class="style-option" data-style="full" onclick="selectStyle(this)">铺满</div>
+                        <div class="style-option" data-style="fit" onclick="selectStyle(this)">适中</div>
+                        <div class="style-option" data-style="white" onclick="selectStyle(this)">留白</div>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
@@ -77,22 +81,8 @@
                 </div>
                 <div class="input-row">
                     <span class="input-label">所在页面</span>
-                    <select id="input-page"></select>
+                    <div id="page-options-container" class="page-options-container"></div>
                 </div>
-            </div>
-            <div class="style-select">
-                <label class="radio-label">
-                    <input type="radio" name="icon-style" value="full" checked onchange="updatePreview()">
-                    <span>铺满</span>
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="icon-style" value="fit" onchange="updatePreview()">
-                    <span>适中</span>
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="icon-style" value="white" onchange="updatePreview()">
-                    <span>留白</span>
-                </label>
             </div>
             <div class="modal-actions">
                 <button onclick="closeModal()">取消</button>

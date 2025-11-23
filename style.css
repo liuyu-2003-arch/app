@@ -60,6 +60,7 @@ body {
     justify-content: center;
     box-sizing: border-box;
     padding-top: 0;
+    overflow-y: auto;
 }
 
 .bookmark-page-content {
@@ -70,6 +71,7 @@ body {
     width: var(--page-width);
     max-width: 90%;
     align-content: flex-start;
+    padding-bottom: 50px; /* Add some padding at the bottom */
 }
 
 .page-title {
@@ -88,6 +90,7 @@ body {
     width: var(--card-size); cursor: pointer; position: relative;
     transition: transform 0.2s;
     -webkit-tap-highlight-color: transparent;
+    will-change: transform;
 }
 .bookmark-item:hover { transform: scale(1.05); }
 
@@ -117,11 +120,14 @@ body {
 }
 
 @keyframes shake {
-    0% { transform: rotate(0deg); } 25% { transform: rotate(2deg); }
-    50% { transform: rotate(0deg); } 75% { transform: rotate(-2deg); }
+    0% { transform: rotate(0deg); } 25% { transform: rotate(1.5deg); }
+    50% { transform: rotate(0deg); } 75% { transform: rotate(-1.5deg); }
     100% { transform: rotate(0deg); }
 }
-.is-editing .bookmark-item:not(.sortable-drag) { animation: shake 0.25s infinite ease-in-out; cursor: grab; }
+.is-editing .bookmark-item:not(.sortable-drag):not(.sortable-ghost) { 
+    animation: shake 0.3s infinite ease-in-out; 
+    cursor: grab; 
+}
 
 .delete-btn {
     position: absolute; top: -8px; left: -8px; width: 22px; height: 22px;
@@ -132,16 +138,20 @@ body {
 .is-editing .delete-btn { display: block; }
 
 .sortable-ghost {
-    opacity: 0.4;
+    opacity: 0.2;
     background: #cce5ff;
     border-radius: var(--radius);
 }
+.sortable-ghost .bookmark-title, .sortable-ghost .icon-box {
+    opacity: 0.5;
+}
 
 .sortable-drag {
-    opacity: 0.9;
-    transform: scale(1.1);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    opacity: 1 !important;
+    transform: scale(1.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
     z-index: 999;
+    transition: all 0.2s ease-out;
 }
 
 .edit-trigger-area {
@@ -182,9 +192,10 @@ body {
 
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    width: 420px;
+    min-width: 420px;
+    max-width: 800px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
-    animation: popUp 0.3s ease; max-width: 90%;
+    animation: popUp 0.3s ease;
 }
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -200,28 +211,55 @@ body {
 }
 
 .preview-section {
-    flex: 0 0 115px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     border-right: 1px solid #e0e0e0;
     padding-right: 15px;
+    flex-shrink: 0;
 }
-.preview-label { margin-top: 12px; font-size: 12px; color: #999; }
 
 .candidate-section {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.style-select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.style-option {
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: #e9e9eb;
+    color: #555;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.style-option:hover {
+    background: #dcdce0;
+}
+
+.style-option.active {
+    background: #007AFF;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,122,255,0.2);
 }
 
 .candidate-grid {
     display: grid;
-    grid-template-columns: repeat(3, 44px);
-    grid-template-rows: repeat(3, 44px);
+    grid-template-columns: repeat(5, 44px);
+    grid-template-rows: repeat(2, 44px);
     gap: 10px;
 }
 
@@ -247,21 +285,58 @@ body {
 .input-label {
     font-size: 13px; color: #666; width: 65px; text-align: right; flex-shrink: 0; font-weight: 500;
 }
-.modal-content input[type="text"], .modal-content select {
-    flex: 1; padding: 8px 12px; border: 1px solid #e0e0e0;
-    border-radius: 10px; background: #f9f9f9; font-size: 14px;
-    outline: none; transition: border-color 0.2s;
+.modal-content input[type="text"] {
+    flex: 1; 
+    border: 1px solid #e0e0e0;
+    border-radius: 10px; 
+    background: #f9f9f9; 
+    font-size: 14px;
+    outline: none; 
+    transition: border-color 0.2s;
+    padding: 12px;
 }
-.modal-content input:focus, .modal-content select:focus { border-color: #007AFF; background: white; }
+.modal-content input[type="text"]:focus {
+    border-color: #007AFF; 
+    background: white;
+}
 
-.style-select {
-    display: flex; gap: 10px; justify-content: center; padding-top: 5px;
+.page-options-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    overflow-x: auto;
 }
-.radio-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; cursor: pointer; }
-.radio-label input { width: auto; margin: 0; accent-color: #007AFF; }
+
+.page-option {
+    padding: 12px;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: #e9e9eb;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    white-space: nowrap;
+}
+
+.page-option:hover {
+    background-color: #dcdce0;
+}
+
+.page-option.active {
+    background-color: #007AFF;
+    color: white;
+    font-weight: 600;
+    border-color: #007AFF;
+}
+
 
 .modal-actions { display: flex; gap: 10px; margin-top: 5px; }
-.modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; background: #eee; font-size: 15px; font-weight: 600; }
+.modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 12px; cursor: pointer; background: #eee; font-size: 14px; font-weight: 600; }
 .modal-actions button.primary { background: #007AFF; color: white; }
 
 .pagination-dots {
@@ -306,7 +381,13 @@ body {
     background: #f5f7f9;
     border-radius: 10px;
     margin-bottom: 10px;
-    border: 1px solid #e0e0e0;
+    border: none;
+    transition: all 0.3s ease-out;
+}
+.page-list-item.fading-out {
+    opacity: 0;
+    transform: scale(0.9);
+    margin-bottom: -40px; /* Adjust to prevent layout jump */
 }
 .page-list-item:last-child {
     margin-bottom: 0;
@@ -329,10 +410,10 @@ body {
     font-size: 16px;
     padding: 5px;
     border-radius: 5px;
+    outline: none;
 }
 .page-title-input:focus {
     background: white;
-    outline: 1px solid #007AFF;
 }
 
 .delete-page-list-btn {
