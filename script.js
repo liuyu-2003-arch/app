@@ -43,8 +43,8 @@ async function loadBookmarks() {
 }
 
 function calculateItemsPerPage() {
-    const page = document.querySelector('.bookmark-page');
-    if (!page) { // Fallback for initial load
+    const content = document.querySelector('.bookmark-page-content');
+    if (!content) { // Fallback for initial load
         const containerWidth = window.innerWidth * 0.9;
         const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 80;
         const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 30;
@@ -52,9 +52,9 @@ function calculateItemsPerPage() {
         return Math.max(1, itemsPerRow * 4);
     }
 
-    const pageStyles = getComputedStyle(page);
-    const pageHeight = page.clientHeight - parseFloat(pageStyles.paddingTop) - parseFloat(pageStyles.paddingBottom);
-    const pageWidth = page.clientWidth - parseFloat(pageStyles.paddingLeft) - parseFloat(pageStyles.paddingRight);
+    const contentStyles = getComputedStyle(content);
+    const pageHeight = content.clientHeight - parseFloat(contentStyles.paddingTop) - parseFloat(contentStyles.paddingBottom);
+    const pageWidth = content.clientWidth - parseFloat(contentStyles.paddingLeft) - parseFloat(contentStyles.paddingRight);
     const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 80;
     const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 30;
     const itemHeight = cardSize + 20; // title height approx
@@ -102,6 +102,9 @@ function render() {
     const tempPage = document.createElement('div');
     tempPage.className = 'bookmark-page';
     tempPage.style.visibility = 'hidden';
+    const tempContent = document.createElement('div');
+    tempContent.className = 'bookmark-page-content';
+    tempPage.appendChild(tempContent);
     swiperWrapper.appendChild(tempPage);
     itemsPerPage = calculateItemsPerPage();
     swiperWrapper.removeChild(tempPage);
@@ -113,6 +116,9 @@ function render() {
         const page = document.createElement('div');
         page.className = 'bookmark-page';
         page.dataset.pageIndex = i;
+        const content = document.createElement('div');
+        content.className = 'bookmark-page-content';
+        page.appendChild(content);
         swiperWrapper.appendChild(page);
     }
 
@@ -120,6 +126,7 @@ function render() {
         const pageIndex = Math.floor(index / itemsPerPage);
         const page = swiperWrapper.children[pageIndex];
         if (!page) return;
+        const content = page.querySelector('.bookmark-page-content');
 
         const div = document.createElement('div');
         let styleClass = '';
@@ -159,7 +166,7 @@ function render() {
             </div>
             <div class="bookmark-title">${item.title}</div>
         `;
-        page.appendChild(div);
+        content.appendChild(div);
     });
 
     if (currentPage >= totalPages) {
@@ -513,35 +520,34 @@ function initSortable() {
     sortableInstances.forEach(instance => instance.destroy());
     sortableInstances = [];
 
-    pages.forEach((page, pageIndex) => {
-        const instance = new Sortable(page, {
+    pages.forEach((page) => {
+        const content = page.querySelector('.bookmark-page-content');
+        const instance = new Sortable(content, {
             group: 'shared',
             animation: 350,
             ghostClass: 'sortable-ghost',
             delay: 100,
             onEnd: function (evt) {
-                const fromPageIndex = parseInt(evt.from.dataset.pageIndex);
-                const toPageIndex = parseInt(evt.to.dataset.pageIndex);
-                const oldItemIndex = (fromPageIndex * itemsPerPage) + evt.oldIndex;
+                const fromPage = evt.from.closest('.bookmark-page');
+                const toPage = evt.to.closest('.bookmark-page');
+                const fromPageIndex = parseInt(fromPage.dataset.pageIndex);
+                const toPageIndex = parseInt(toPage.dataset.pageIndex);
                 
-                const item = bookmarks.splice(oldItemIndex, 1)[0];
+                const oldGlobalIndex = (fromPageIndex * itemsPerPage) + evt.oldIndex;
+                
+                const item = bookmarks.splice(oldGlobalIndex, 1)[0];
 
-                const toPageItems = Array.from(evt.to.children).filter(el => el !== evt.item);
-                let newItemIndex;
-
-                if (evt.newIndex < toPageItems.length) {
-                    const referenceItemIndex = parseInt(toPageItems[evt.newIndex].dataset.index);
-                    const referenceBookmark = bookmarks.find((b, i) => i === referenceItemIndex);
-                    newItemIndex = bookmarks.indexOf(referenceBookmark);
-                } else if (toPageItems.length > 0) {
-                    const lastItemIndex = parseInt(toPageItems[toPageItems.length - 1].dataset.index);
-                    const lastBookmark = bookmarks.find((b, i) => i === lastItemIndex);
-                    newItemIndex = bookmarks.indexOf(lastBookmark) + 1;
+                let newGlobalIndex;
+                if (evt.newIndex < evt.to.children.length) {
+                    const referenceItem = evt.to.children[evt.newIndex];
+                    const referenceGlobalIndex = parseInt(referenceItem.dataset.index);
+                    const insertionIndexInBookmarks = bookmarks.findIndex((bm, i) => i === referenceGlobalIndex);
+                    newGlobalIndex = insertionIndexInBookmarks;
                 } else {
-                    newItemIndex = toPageIndex * itemsPerPage;
+                    newGlobalIndex = (toPageIndex * itemsPerPage) + evt.to.children.length;
                 }
                 
-                bookmarks.splice(newItemIndex, 0, item);
+                bookmarks.splice(newGlobalIndex, 0, item);
 
                 render();
             }
