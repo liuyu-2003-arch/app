@@ -90,11 +90,10 @@ body {
 }
 
 .bookmark-page-content {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, var(--card-size));
     gap: var(--gap);
+    justify-content: center;
     width: 100%;
     flex-grow: 1;
 }
@@ -352,13 +351,13 @@ body {
 }
 
 @media (max-width: 768px) {
-    .page-container {
-        padding-top: 8vh; /* Increased top padding */
+    .bookmark-page {
+        padding-top: 6vh; /* Reduced top padding */
     }
     .bookmark-page-content {
-        justify-content: flex-start; /* Left-align icons */
+        justify-content: center; /* Center the grid container's content (the items) */
     }
     .pagination-dots {
-        bottom: 60px; /* Move dots down */
+        bottom: 50px; /* Move dots further down */
     }
 }
