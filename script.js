@@ -48,7 +48,7 @@ function migrateData(oldData) {
     const newPages = [];
     const pageTitles = oldData.pageTitles || ["个人收藏", "常用工具", "学习资源"];
     let bookmarks = oldData.bookmarks || oldData;
-    
+
     // Ensure bookmarks is an array
     if (!Array.isArray(bookmarks)) bookmarks = [];
 
@@ -157,7 +157,7 @@ function rgbToHex(col) {
 function render() {
     const oldScrollTops = [];
     document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
-    
+
     createVisualPages();
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
     swiperWrapper.innerHTML = '';
@@ -172,7 +172,7 @@ function render() {
 
         const content = document.createElement('div');
         content.className = 'bookmark-page-content';
-        
+
         const title = document.createElement('h2');
         title.className = 'page-title';
         title.textContent = vPage.title || '新页面';
@@ -248,12 +248,28 @@ function showPaginationDots() {
 function renderPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     dotsContainer.innerHTML = '';
-    if (visualPages.length <= 1) return;
+    // if (visualPages.length <= 1) return; // 只有一页时也可以显示，方便调试
 
     for (let i = 0; i < visualPages.length; i++) {
         const dot = document.createElement('div');
         dot.className = 'dot';
+
+        // 1. 设置激活状态
         if (i === currentPage) dot.classList.add('active');
+
+        // 2. 添加提示文字
+        const pageTitle = visualPages[i].title || `第 ${i + 1} 页`;
+        dot.setAttribute('data-title', pageTitle);
+        dot.title = pageTitle;
+
+        // 3. 添加点击跳转事件
+        dot.onclick = (e) => {
+            e.stopPropagation();
+            currentPage = i;
+            updateSwiperPosition(true);
+            renderPaginationDots();
+        };
+
         dotsContainer.appendChild(dot);
     }
 }
