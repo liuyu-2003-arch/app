@@ -13,6 +13,7 @@ let currentTranslate = 0;
 let prevTranslate = 0;
 let animationID;
 let isWheeling = false;
+let dotsTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.body.style.visibility = 'hidden';
@@ -29,7 +30,7 @@ function migrateData(oldData) {
     const itemsPerPage = 32; // 8x4 grid
     const newPages = [];
     const pageTitles = oldData.pageTitles || ["个人收藏", "常用工具", "学习资源"];
-    const bookmarks = oldData.bookmarks || oldData; // Handle both old config and very old flat array
+    const bookmarks = oldData.bookmarks || oldData;
 
     const totalPages = Math.max(pageTitles.length, Math.ceil(bookmarks.length / itemsPerPage));
 
@@ -47,7 +48,6 @@ function loadData() {
     if (storedData) {
         pages = JSON.parse(storedData);
     } else {
-        // Fallback for migration from old format
         const oldBookmarks = localStorage.getItem('bookmarks');
         const oldPageTitles = localStorage.getItem('pageTitles');
         if (oldBookmarks) {
@@ -193,6 +193,17 @@ function render() {
     if (isEditing) initSortable();
 }
 
+function showPaginationDots() {
+    const dotsContainer = document.getElementById('pagination-dots');
+    if (!dotsContainer || pages.length <= 1) return;
+
+    dotsContainer.classList.add('visible');
+    clearTimeout(dotsTimer);
+    dotsTimer = setTimeout(() => {
+        dotsContainer.classList.remove('visible');
+    }, 2000);
+}
+
 function renderPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     dotsContainer.innerHTML = '';
@@ -236,6 +247,7 @@ function handleWheel(e) {
             isWheeling = true;
             updateSwiperPosition(true);
             renderPaginationDots();
+            showPaginationDots();
             setTimeout(() => { isWheeling = false; }, 500);
         }
     }
@@ -268,11 +280,21 @@ function dragEnd(e) {
     if (!isDragging) return;
     isDragging = false;
     cancelAnimationFrame(animationID);
+
     const movedBy = currentTranslate - prevTranslate;
-    if (movedBy < -50 && currentPage < pages.length - 1) currentPage++;
-    if (movedBy > 50 && currentPage > 0) currentPage--;
+    let pageChanged = false;
+    if (movedBy < -50 && currentPage < pages.length - 1) {
+        currentPage++;
+        pageChanged = true;
+    }
+    if (movedBy > 50 && currentPage > 0) {
+        currentPage--;
+        pageChanged = true;
+    }
+    
     updateSwiperPosition(true);
     renderPaginationDots();
+    if (pageChanged) showPaginationDots();
 }
 
 function getPositionX(e) {
@@ -544,9 +566,11 @@ function deletePage(pageIndex) {
 
 function initSortable() {
     if (!isEditing) return;
+
+    // Sort bookmarks within and between pages
     document.querySelectorAll('.bookmark-page-content').forEach(content => {
         const instance = new Sortable(content, {
-            group: 'shared',
+            group: 'shared-bookmarks',
             animation: 350,
             ghostClass: 'sortable-ghost',
             delay: 100,
@@ -563,6 +587,23 @@ function initSortable() {
         });
         sortableInstances.push(instance);
     });
+
+    // Sort pages
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    const pageSortable = new Sortable(swiperWrapper, {
+        group: 'pages',
+        animation: 350,
+        handle: '.page-header',
+        filter: '.page-title, .delete-page-btn',
+        preventOnFilter: true,
+        onEnd: function (evt) {
+            const [movedPage] = pages.splice(evt.oldIndex, 1);
+            pages.splice(evt.newIndex, 0, movedPage);
+            saveData();
+            render();
+        }
+    });
+    sortableInstances.push(pageSortable);
 }
 
 function deleteBookmark(e, pageIndex, bookmarkIndex) {
