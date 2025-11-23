@@ -293,10 +293,14 @@ body {
     font-size: 14px;
     outline: none; 
     transition: border-color 0.2s;
-    padding: 12px;
+
+    /* 高度统一修改 */
+    height: 44px;
+    padding: 0 12px;
+    box-sizing: border-box;
 }
 .modal-content input[type="text"]:focus {
-    border-color: #007AFF; 
+    border-color: #007AFF;
     background: white;
 }
 
@@ -312,8 +316,15 @@ body {
 }
 
 .page-option {
-    padding: 12px;
-    text-align: center;
+    /* 样式与输入框高度统一 */
+    height: 44px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -429,15 +440,14 @@ body {
     color: #cc0000;
 }
 
-/* --- 重点修改的手机端部分 --- */
+/* --- 手机端适配：修正顶部间距 --- */
 @media (max-width: 768px) {
     .container {
-        /* 修改：在手机上增加顶部间距，80px 足够避开状态栏 */
+        /* 在手机上增加顶部间距，80px 足够避开状态栏 */
         padding-top: 80px;
     }
 
     .bookmark-page {
-        /* 去除之前的累积间距 */
         padding-top: 0;
     }
 
@@ -450,7 +460,6 @@ body {
     }
 
     .pagination-dots {
-        /* 防止小圆点遮挡文字，稍微调整位置 */
         bottom: 40px;
     }
 }
