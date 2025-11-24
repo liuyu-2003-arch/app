@@ -212,6 +212,13 @@
         "icon": "https://img.logo.dev/us-west-1.run.claw.cloud?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "fit",
         "id": "mibooocgll1d4ucyf9n"
+      },
+      {
+        "id": "mid9okof7qugkre384m",
+        "title": "Ai Studio",
+        "url": "https://aistudio.google.com/",
+        "icon": "https://favicon.vemetric.com/aistudio.google.com",
+        "style": "full"
       }
     ]
   },
