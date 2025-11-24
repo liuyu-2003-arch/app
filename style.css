@@ -337,28 +337,39 @@ body {
 /* --- 手机端适配 --- */
 @media (max-width: 768px) {
     .container {
-        padding-top: 50px;
+        padding-top: 50px; /* 避开刘海屏 */
     }
 
     .bookmark-page {
         padding-top: 0;
+        /* 父容器保持居中即可，内容由内部控制 */
     }
 
     .bookmark-page-content {
-        /* 修改 1：改为左对齐 (原为 center) */
+        /* 【关键修改 1：左对齐】 */
+        /* 原来是 center，导致图标强制居中。改为 flex-start 即可左对齐 */
         justify-content: flex-start;
 
-        /* 修改 2：减小网格间距 (原为继承桌面的 30px)，这也会减小标题和第一排图标的间距 */
+        /* 【关键修改 2：减小间距】 */
+        /* 原来继承了全局的 30px，导致标题和图标距离过远 */
+        /* 这里改为 10px 或 15px，能大幅缩减标题与第一排图标的距离 */
         gap: 15px;
+
+        /* 稍微增加一点宽度占比，让左对齐更明显 */
+        max-width: 92%;
     }
 
     .page-title {
-        text-align: center;
-        /* 修改 3：去除标题下方的额外边距 (原为 10px)，让图标更紧凑 */
+        /* 【关键修改 3：标题左对齐】 */
+        /* 如果希望标题也像电脑端一样靠左，就改为 left */
+        text-align: left;
+
+        /* 【关键修改 4：消除额外边距】 */
+        /* 网格本身已有 gap，不需要额外的 margin 了 */
         margin-bottom: 0;
 
-        /* 额外微调：如果觉得还是不够近，可以加一点负边距，例如 -5px */
-        /* margin-bottom: -5px; */
+        /* 稍微往左对齐一点视觉边缘 */
+        padding-left: 4px;
     }
 
     .pagination-dots {
