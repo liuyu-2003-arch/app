@@ -337,7 +337,7 @@ body {
 /* --- 手机端适配 --- */
 @media (max-width: 768px) {
     .container {
-        padding-top: 40px; /* 避开刘海屏 */
+        padding-top: 45px; /* 避开刘海屏 */
     }
 
     .bookmark-page {
