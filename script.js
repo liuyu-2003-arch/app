@@ -281,32 +281,75 @@ function initSwiper() {
     swiper.addEventListener('wheel', handleWheel, { passive: false });
 }
 
+// 全局变量区域需要确保有这个变量 (在 script.js 顶部确认一下，如果没有就补上)
+// let isWheeling = false;
+
 function handleWheel(e) {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
     e.preventDefault();
+    showPaginationDots();
 
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
     const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
 
     swiperWrapper.style.transition = 'none';
-    currentTranslate -= e.deltaX;
 
+    // 【修改点1】降低灵敏度 (阻尼)
+    // 从 0.8 改为 0.5。这意味着手指滑 100px，页面只动 50px。
+    // 这样能有效防止惯性太大导致的误判“大幅度滑动”。
+    const friction = 0.5;
+
+    const elasticity = 0.8;
+
+    let delta = e.deltaX * friction;
+    let nextTranslate = currentTranslate - delta;
+
+    // 边界处理
+    const maxTranslate = 0;
+    const minTranslate = -(visualPages.length - 1) * swiperWidth;
+
+    if (nextTranslate > maxTranslate) {
+        nextTranslate = maxTranslate + (nextTranslate - maxTranslate) * elasticity;
+    } else if (nextTranslate < minTranslate) {
+        nextTranslate = minTranslate + (nextTranslate - minTranslate) * elasticity;
+    }
+
+    currentTranslate = nextTranslate;
     setSwiperPosition();
-    showPaginationDots();
 
     clearTimeout(wheelTimeout);
     wheelTimeout = setTimeout(() => {
-        const movedIndex = -currentTranslate / swiperWidth;
-        const diff = movedIndex - currentPage;
+        const originPos = currentPage * -swiperWidth;
+        const moveOffset = currentTranslate - originPos;
+
+        // 【修改点2】调整判定阈值
+
+        // 普通翻页：保持 5% (轻轻滑就能翻页)
+        const flipThreshold = swiperWidth * 0.05;
+
+        // 急速跳转：改为 60% (swiperWidth * 0.6)
+        // 配合上面的低阻尼，现在你需要真的“用力长滑”大半个屏幕才能触发直达
+        const jumpThreshold = swiperWidth * 1.5;
+
         let targetPage = currentPage;
 
-        if (diff > 0.15) {
+        // 1. 先判断大幅度跳转
+        if (moveOffset < -jumpThreshold) {
+            targetPage = visualPages.length - 1; // 去最后一页
+        }
+        else if (moveOffset > jumpThreshold) {
+            targetPage = 0; // 去第一页
+        }
+        // 2. 再判断普通翻页
+        else if (moveOffset < -flipThreshold) {
             targetPage = currentPage + 1;
-        } else if (diff < -0.15) {
+        }
+        else if (moveOffset > flipThreshold) {
             targetPage = currentPage - 1;
         }
-
-        if (targetPage > currentPage + 1) targetPage = currentPage + 1;
-        if (targetPage < currentPage - 1) targetPage = currentPage - 1;
+        else {
+            targetPage = currentPage;
+        }
 
         targetPage = Math.max(0, Math.min(visualPages.length - 1, targetPage));
 
@@ -381,7 +424,10 @@ function updateSwiperPosition(withTransition = true) {
     currentTranslate = currentPage * -swiperWidth;
     prevTranslate = currentTranslate;
     if (withTransition) {
-        swiperWrapper.style.transition = 'transform 0.3s ease-out';
+        // 【修改这里】
+        // 原来是 0.3s (300毫秒)
+        // 改成 0.2s 或 0.15s 会感觉更快、更干脆
+        swiperWrapper.style.transition = 'transform 0.2s ease-out';
     }
     setSwiperPosition();
 }
