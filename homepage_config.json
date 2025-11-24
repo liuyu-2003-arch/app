@@ -315,6 +315,76 @@
         "icon": "https://manifest.im/icon/earth.google.com",
         "style": "white",
         "id": "mibooocgdf1559a699m"
+      },
+      {
+        "id": "midbiokxdv5uxsy1mn",
+        "title": "Meetings",
+        "url": "https://meetings.feishu.cn/minutes/me",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=c8z6",
+        "style": "full"
+      },
+      {
+        "id": "midbjml0cwdmvbm878d",
+        "title": "Colab",
+        "url": "https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb#scrollTo=PromptsTop",
+        "icon": "https://favicon.vemetric.com/colab.research.google.com",
+        "style": "fit"
+      },
+      {
+        "id": "midbkac2i1z91czdrka",
+        "title": "Leonardo",
+        "url": "https://app.leonardo.ai/",
+        "icon": "https://cdn.brandfetch.io/app.leonardo.ai?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "id": "midblx03va5dbtxzc8c",
+        "title": "Feishu",
+        "url": "https://www.feishu.cn/",
+        "icon": "https://img.logo.dev/www.feishu.cn?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "fit"
+      },
+      {
+        "id": "midbmnvnqubzzyg6p",
+        "title": "Hundun",
+        "url": "https://www.hundun.cn/",
+        "icon": "https://img.logo.dev/www.hundun.cn?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "midbn4v8lri899hmq1p",
+        "title": "X",
+        "url": "https://x.com/home",
+        "icon": "https://favicon.vemetric.com/x.com",
+        "style": "full"
+      },
+      {
+        "id": "midbnlfyt7tv9ul7im",
+        "title": "Quora",
+        "url": "https://www.quora.com/",
+        "icon": "https://img.logo.dev/www.quora.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "midbojdqrj8sg41r0is",
+        "title": "Tumblr",
+        "url": "https://www.tumblr.com/",
+        "icon": "https://cdn.brandfetch.io/www.tumblr.com?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "id": "midbp7ge6h9l75ik51m",
+        "title": "Instagram",
+        "url": "https://www.instagram.com/",
+        "icon": "https://manifest.im/icon/www.instagram.com",
+        "style": "full"
+      },
+      {
+        "id": "midbpzg8nshztny6y9g",
+        "title": "Pinterest",
+        "url": "https://pinterest.com",
+        "icon": "https://cdn.brandfetch.io/pinterest.com?c=1idVW8VN57Jat7AexnZ",
+        "style": "fit"
       }
     ]
   }
