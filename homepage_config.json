@@ -32,15 +32,15 @@
       },
       {
         "title": "Subeasy",
-        "url": "https://subeasy.ai",
+        "url": "https://www.subeasy.ai/workspace",
         "icon": "https://subeasy.ai/favicon.ico",
         "style": "white",
         "id": "mibooocg3d08h37yjom"
       },
       {
         "title": "Douban",
-        "url": "https://douban.com",
-        "icon": "https://img.logo.dev/douban.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "url": "https://movie.douban.com/",
+        "icon": "https://cdn.brandfetch.io/movie.douban.com?c=1idVW8VN57Jat7AexnZ",
         "style": "fit",
         "id": "mibooocg6ksem70at97"
       },
