@@ -385,6 +385,13 @@
         "url": "https://pinterest.com",
         "icon": "https://cdn.brandfetch.io/pinterest.com?c=1idVW8VN57Jat7AexnZ",
         "style": "fit"
+      },
+      {
+        "id": "midbsfzo5wxg064euv7",
+        "title": "Drive",
+        "url": "https://drive.google.com/drive/my-drive",
+        "icon": "https://api.dicebear.com/9.x/bottts/svg?seed=kgnc2m",
+        "style": "fit"
       }
     ]
   }
