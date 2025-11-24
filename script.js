@@ -913,33 +913,60 @@ function handleImport(event) {
 
 function initKeyboardControl() {
     document.addEventListener('keydown', (e) => {
-        // 1. 防冲突检测：如果用户正在输入框(input)或文本域(textarea)里打字，
-        // 按方向键应该是移动光标，而不是翻页，所以直接忽略。
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return;
-        }
+        // 1. 防冲突检测
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
 
-        // 2. 检测组合键：如果按住了 Ctrl/Alt/Meta/Shift，通常是浏览器快捷键，不拦截
-        if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
-            return;
-        }
+        const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
+
+        // 设定回弹幅度：屏幕宽度的 20%
+        // 这个幅度能模仿触控板拉到头的感觉，既明显又不会太夸张
+        const bounceOffset = swiperWidth * 0.2;
 
         if (e.key === 'ArrowLeft') {
-            // --- 向左翻页 ---
+            // --- 向左操作 ---
             if (currentPage > 0) {
                 currentPage--;
-                updateSwiperPosition(true); // true 表示启用平滑动画
+                updateSwiperPosition(true);
                 renderPaginationDots();
-                showPaginationDots(); // 显示底部指示点提供反馈
+                showPaginationDots();
+            } else {
+                // 已经在第一页，还按左键 -> 触发向右回弹 (正值)
+                triggerKeyboardBounce(bounceOffset);
             }
         } else if (e.key === 'ArrowRight') {
-            // --- 向右翻页 ---
+            // --- 向右操作 ---
             if (currentPage < visualPages.length - 1) {
                 currentPage++;
                 updateSwiperPosition(true);
                 renderPaginationDots();
                 showPaginationDots();
+            } else {
+                // 已经在最后一页，还按右键 -> 触发向左回弹 (负值)
+                triggerKeyboardBounce(-bounceOffset);
             }
         }
     });
+}
+
+// 新增：专门处理键盘回弹动画的函数
+function triggerKeyboardBounce(offset) {
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
+
+    // 计算当前原本应该在的位置
+    const baseTranslate = currentPage * -swiperWidth;
+
+    // 1. 拉出阶段 (Out): 快速且线性，模拟受力拉动
+    // 0.15s 完成拉出动作
+    swiperWrapper.style.transition = 'transform 0.15s cubic-bezier(0.215, 0.610, 0.355, 1.000)';
+    swiperWrapper.style.transform = `translateX(${baseTranslate + offset}px)`;
+
+    // 2. 回弹阶段 (Back): 带有弹性的贝塞尔曲线，模拟橡皮筋松手
+    // 150ms 后开始回弹
+    setTimeout(() => {
+        // 0.4s 回弹，cubic-bezier 模拟物理回弹的抖动感
+        swiperWrapper.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        swiperWrapper.style.transform = `translateX(${baseTranslate}px)`;
+    }, 150);
 }
