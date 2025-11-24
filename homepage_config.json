@@ -99,6 +99,13 @@
         "icon": "https://manifest.im/icon/vercel.com",
         "style": "full",
         "id": "mibooocgumwvwh70wn"
+      },
+      {
+        "id": "micsydpfc4fivqf8npg",
+        "title": "Telegram",
+        "url": "https://web.telegram.org/a/",
+        "icon": "https://img.logo.dev/web.telegram.org?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
       }
     ]
   },
