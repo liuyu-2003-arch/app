@@ -106,6 +106,13 @@
         "url": "https://web.telegram.org/a/",
         "icon": "https://img.logo.dev/web.telegram.org?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "full"
+      },
+      {
+        "title": "Gmail",
+        "url": "https://mail.google.com/mail/u/0/",
+        "icon": "https://manifest.im/icon/mail.google.com",
+        "style": "white",
+        "id": "mibooocgv5kxh73xmms"
       }
     ]
   },
@@ -193,6 +200,13 @@
         "icon": "https://api.dicebear.com/9.x/identicon/svg?seed=nowf5",
         "style": "full",
         "id": "mibooocgwqjkcliv0ed"
+      },
+      {
+        "title": "Spotify",
+        "url": "https://open.spotify.com/",
+        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full",
+        "id": "mibooocgxj44jon0jy"
       }
     ]
   },
@@ -226,6 +240,13 @@
     "title": "常用工具",
     "bookmarks": [
       {
+        "title": "Shadowsocks",
+        "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
+        "icon": "https://img.logo.dev/secure.shadowsocks.au?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full",
+        "id": "mibooocg2z1qv5lcu7y"
+      },
+      {
         "title": "yt-dlp",
         "url": "https://yt-dlp.324893.xyz/",
         "icon": "https://manifest.im/icon/yt-dlp.324893.xyz",
@@ -238,6 +259,20 @@
         "icon": "https://manifest.im/icon/cobalt.tools",
         "style": "full",
         "id": "mibooocggle4a072qf6"
+      },
+      {
+        "title": "Whisper",
+        "url": "https://whisper.324893.xyz/",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=5ubfma",
+        "style": "full",
+        "id": "mibooocgldbnk47twx"
+      },
+      {
+        "title": "FFmpeg",
+        "url": "https://ffmpeg.324893.xyz/",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=o4k7i",
+        "style": "full",
+        "id": "mibooocgt61tw8dhqj"
       },
       {
         "title": "Tingwu",
@@ -275,46 +310,11 @@
         "id": "mibooocgngqpn1mmbz"
       },
       {
-        "title": "Shadowsocks",
-        "url": "https://secure.shadowsocks.au/aff.php?aff=78994",
-        "icon": "https://img.logo.dev/secure.shadowsocks.au?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full",
-        "id": "mibooocg2z1qv5lcu7y"
-      },
-      {
-        "title": "Spotify",
-        "url": "https://open.spotify.com/",
-        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full",
-        "id": "mibooocgxj44jon0jy"
-      },
-      {
-        "title": "Gmail",
-        "url": "https://mail.google.com/mail/u/0/",
-        "icon": "https://manifest.im/icon/mail.google.com",
-        "style": "white",
-        "id": "mibooocgv5kxh73xmms"
-      },
-      {
         "title": "Google Earth",
         "url": "https://earth.google.com/",
         "icon": "https://manifest.im/icon/earth.google.com",
         "style": "white",
         "id": "mibooocgdf1559a699m"
-      },
-      {
-        "title": "Whisper",
-        "url": "https://whisper.324893.xyz/",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=5ubfma",
-        "style": "full",
-        "id": "mibooocgldbnk47twx"
-      },
-      {
-        "title": "FFmpeg",
-        "url": "https://ffmpeg.324893.xyz/",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=o4k7i",
-        "style": "full",
-        "id": "mibooocgt61tw8dhqj"
       }
     ]
   }
