@@ -335,44 +335,54 @@ body {
 }
 
 /* --- 手机端适配 --- */
+/* --- 手机端适配 --- */
 @media (max-width: 768px) {
     .container {
-        padding-top: 45px; /* 避开刘海屏 */
+        /* 避开手机顶部状态栏/刘海 */
+        padding-top: 50px;
     }
 
     .bookmark-page {
         padding-top: 0;
-        /* 父容器保持居中即可，内容由内部控制 */
     }
 
     .bookmark-page-content {
-        /* 【关键修改 1：左对齐】 */
-        /* 原来是 center，导致图标强制居中。改为 flex-start 即可左对齐 */
+        /* 图标左对齐 */
         justify-content: flex-start;
 
-        /* 【关键修改 2：减小间距】 */
-        /* 原来继承了全局的 30px，导致标题和图标距离过远 */
-        /* 这里改为 10px 或 15px，能大幅缩减标题与第一排图标的距离 */
+        /* 减小网格间距，拉近标题与图标的距离 */
         gap: 15px;
 
-        /* 稍微增加一点宽度占比，让左对齐更明显 */
+        /* 稍微增加宽度占比，让左对齐更明显 */
         max-width: 92%;
+
+        /* 增加底部空间，确保最后一行图标不被分页点遮挡 */
+        padding-bottom: 80px;
     }
 
     .page-title {
-        /* 【关键修改 3：标题左对齐】 */
-        /* 如果希望标题也像电脑端一样靠左，就改为 left */
+        /* 标题左对齐，与图标对齐 */
         text-align: left;
 
-        /* 【关键修改 4：消除额外边距】 */
-        /* 网格本身已有 gap，不需要额外的 margin 了 */
+        /* 去除额外边距，因为网格 gap 已经够了 */
         margin-bottom: 0;
 
-        /* 稍微往左对齐一点视觉边缘 */
+        /* 稍微往左修正视觉边缘 */
         padding-left: 4px;
     }
 
     .pagination-dots {
         bottom: 40px;
+    }
+
+    /* --- 新增：手机端禁止编辑 --- */
+    /* 隐藏右下角的编辑笔按钮 */
+    .edit-trigger-area {
+        display: none !important;
+    }
+
+    /* 隐藏编辑控制栏（防止意外触发） */
+    .edit-controls {
+        display: none !important;
     }
 }
