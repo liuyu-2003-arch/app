@@ -101,7 +101,7 @@ function saveData() {
 function createVisualPages() {
     visualPages = [];
     const isMobile = window.innerWidth < 768;
-    const chunkSize = isMobile ? 12 : 32;
+    const chunkSize = isMobile ? 16 : 32;
 
     pages.forEach((page, originalPageIndex) => {
         if (page.bookmarks.length === 0 && isEditing) {
