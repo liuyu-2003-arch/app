@@ -337,8 +337,6 @@ body {
 /* --- 手机端适配 --- */
 @media (max-width: 768px) {
     .container {
-        /* 原来是 80px，改为 30px */
-        /* 这样既能避开大部分手机的状态栏/灵动岛，又能让图标整体上移 */
         padding-top: 50px;
     }
 
@@ -347,13 +345,20 @@ body {
     }
 
     .bookmark-page-content {
-        justify-content: center;
+        /* 修改 1：改为左对齐 (原为 center) */
+        justify-content: flex-start;
+
+        /* 修改 2：减小网格间距 (原为继承桌面的 30px)，这也会减小标题和第一排图标的间距 */
+        gap: 15px;
     }
 
     .page-title {
         text-align: center;
-        /* 可以微调标题下方的间距，让图标离标题近一点点，显得更紧凑 */
-        margin-bottom: 10px;
+        /* 修改 3：去除标题下方的额外边距 (原为 10px)，让图标更紧凑 */
+        margin-bottom: 0;
+
+        /* 额外微调：如果觉得还是不够近，可以加一点负边距，例如 -5px */
+        /* margin-bottom: -5px; */
     }
 
     .pagination-dots {
