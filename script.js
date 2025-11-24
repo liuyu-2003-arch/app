@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initTheme();
     initSwiper();
+    // 【新增】初始化键盘控制
+    initKeyboardControl();
+
     window.addEventListener('resize', () => {
         render();
         updateSwiperPosition(false);
@@ -906,4 +909,37 @@ function handleImport(event) {
         }
     };
     reader.readAsText(file);
+}
+
+function initKeyboardControl() {
+    document.addEventListener('keydown', (e) => {
+        // 1. 防冲突检测：如果用户正在输入框(input)或文本域(textarea)里打字，
+        // 按方向键应该是移动光标，而不是翻页，所以直接忽略。
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        // 2. 检测组合键：如果按住了 Ctrl/Alt/Meta/Shift，通常是浏览器快捷键，不拦截
+        if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
+            return;
+        }
+
+        if (e.key === 'ArrowLeft') {
+            // --- 向左翻页 ---
+            if (currentPage > 0) {
+                currentPage--;
+                updateSwiperPosition(true); // true 表示启用平滑动画
+                renderPaginationDots();
+                showPaginationDots(); // 显示底部指示点提供反馈
+            }
+        } else if (e.key === 'ArrowRight') {
+            // --- 向右翻页 ---
+            if (currentPage < visualPages.length - 1) {
+                currentPage++;
+                updateSwiperPosition(true);
+                renderPaginationDots();
+                showPaginationDots();
+            }
+        }
+    });
 }
