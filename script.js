@@ -818,16 +818,18 @@ function deletePage(e, pageIndex) {
 }
 
 function initSortable() {
+    // 只有在编辑模式下才启用拖拽排序
     if (!isEditing) return;
 
     document.querySelectorAll('.bookmark-page-content').forEach(content => {
         const instance = new Sortable(content, {
-            group: 'shared-bookmarks',
-            animation: 350, // 核心修改：变慢，让排挤动画更优雅 (原 150)
+            group: 'shared-bookmarks', // 允许在不同页面间拖拽
+            animation: 350,            // 动画时长，慢一点更有质感
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
-            forceFallback: true,
+            forceFallback: true,       // 强制使用自定义拖拽层，对移动端兼容更好
             onEnd: function (evt) {
+                // --- 1. 处理拖拽回弹动画 (保持原有逻辑) ---
                 const itemEl = evt.item;
                 const newRect = itemEl.getBoundingClientRect();
                 const fallbackEl = document.querySelector('.sortable-drag');
@@ -843,14 +845,14 @@ function initSortable() {
 
                         requestAnimationFrame(() => {
                             itemEl.style.transform = 'translate3d(0, 0, 0)';
-                            // 核心修改：从 0.25s 改为 0.35s，并使用 cubic-bezier
-                            // 这种曲线模拟了“快速移动后缓慢吸附”的物理质感
                             itemEl.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)';
                         });
                     });
                 }
 
-                // Create a flat map of all bookmarks by ID for easy lookup
+                // --- 2. 核心逻辑：根据 DOM 顺序重建 pages 数据 ---
+
+                // 先建立一个 Map 方便通过 ID 查找书签对象
                 const bookmarkMap = new Map();
                 pages.forEach(page => {
                     page.bookmarks.forEach(bookmark => {
@@ -858,31 +860,44 @@ function initSortable() {
                     });
                 });
 
-                // Create a new pages structure based on the DOM
+                // 准备新的页面结构
                 const newPages = [];
                 const pageElements = document.querySelectorAll('.bookmark-page');
-                
+
+                // 初始化 newPages 结构（保留标题等信息）
                 pages.forEach((p, i) => {
                     newPages[i] = { ...p, bookmarks: [] };
                 });
 
+                // 遍历现在的 DOM 元素，按顺序填入 newPages
                 pageElements.forEach(pageEl => {
                     const originalPageIndex = parseInt(pageEl.dataset.originalPageIndex);
                     const bookmarkElements = pageEl.querySelectorAll('.bookmark-item');
-                    
+
                     bookmarkElements.forEach(itemEl => {
                         const bookmarkId = itemEl.dataset.id;
                         const bookmark = bookmarkMap.get(bookmarkId);
+
+                        // 将书签放入对应的新位置
+                        // 注意：这里处理了跨页拖拽的情况
                         if (bookmark && newPages[originalPageIndex]) {
                             newPages[originalPageIndex].bookmarks.push(bookmark);
                         }
                     });
                 });
 
-                pages = newPages.filter(p => p.title); // Clean up any undefined pages
-                
-                saveData();
-                createVisualPages();
+                // 过滤掉异常数据并更新全局 pages
+                pages = newPages.filter(p => p.title);
+
+                saveData();           // 保存到 localStorage
+                createVisualPages();  // 更新虚拟分页结构
+
+                // --- 3. 【关键修复】强制重新渲染 ---
+                // 必须重新执行 render()，否则 DOM 上的 onclick 事件绑定的还是旧索引
+                // 使用 setTimeout 让 Sortable 先完成内部清理，避免冲突
+                setTimeout(() => {
+                    render();
+                }, 10);
             }
         });
         sortableInstances.push(instance);
