@@ -379,10 +379,23 @@ function dragStart(e) {
 function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
-        if (Math.abs(currentPosition - startPos) > 15) {
+        const diff = currentPosition - startPos; // 计算手指移动距离
+
+        // 1. 判断是否超过 10px 的“静默区”
+        if (Math.abs(diff) > 10) {
             hasDragged = true;
         }
-        currentTranslate = prevTranslate + currentPosition - startPos;
+
+        // 【关键修复在这里】
+        // 只有当 hasDragged 变成 true 之后，才允许更新 currentTranslate。
+        // 这样，当你只是点击（移动距离 < 10px）时，swiper 纹丝不动，
+        // 浏览器就会乖乖触发 Click 事件，而不是把它当成滑动取消掉。
+        if (hasDragged) {
+            currentTranslate = prevTranslate + diff;
+
+            // 阻止系统默认滚动（让横滑体验更顺滑）
+            if (e.cancelable) e.preventDefault();
+        }
     }
 }
 
