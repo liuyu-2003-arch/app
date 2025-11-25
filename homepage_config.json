@@ -216,6 +216,41 @@
         "url": "https://makerworld.com/zh/3d-models",
         "icon": "https://manifest.im/icon/makerworld.com",
         "style": "full"
+      },
+      {
+        "id": "mier00w64evkxux8ox1",
+        "title": "Yixi",
+        "url": "https://yixi.tv/",
+        "icon": "https://img.logo.dev/yixi.tv?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "mier1cka1b7ultueupk",
+        "title": "Coursera",
+        "url": "https://www.coursera.org/",
+        "icon": "https://cdn.brandfetch.io/www.coursera.org?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "id": "mier7s1fxwut51nfihe",
+        "title": "Indeed",
+        "url": "https://indeed.com",
+        "icon": "https://img.logo.dev/indeed.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "mierd8xtx9xbyzlog49",
+        "title": "KLX",
+        "url": "https://www.vistopia.com.cn/",
+        "icon": "https://img.logo.dev/www.vistopia.com.cn?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "mierexpald47s750ijg",
+        "title": "Ted",
+        "url": "https://www.ted.com/",
+        "icon": "https://manifest.im/icon/www.ted.com",
+        "style": "full"
       }
     ]
   },
@@ -228,6 +263,13 @@
         "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "full",
         "id": "mibooocgxj44jon0jy"
+      },
+      {
+        "id": "mierh5ixzlwjat320s8",
+        "title": "Podcasts",
+        "url": "https://podcasts.apple.com/",
+        "icon": "https://favicon.vemetric.com/podcasts.apple.com",
+        "style": "full"
       },
       {
         "id": "miepihi6f38igqpkny7",
@@ -373,6 +415,13 @@
         "id": "mibooocgvqiaku0c1ai"
       },
       {
+        "id": "midbiokxdv5uxsy1mn",
+        "title": "Meetings",
+        "url": "https://meetings.feishu.cn/minutes/me",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=c8z6",
+        "style": "full"
+      },
+      {
         "title": "Aliyundrive",
         "url": "https://aliyundrive.com",
         "icon": "https://manifest.im/icon/aliyundrive.com",
@@ -380,8 +429,15 @@
         "id": "mibooocg1asoj080xgu"
       },
       {
+        "id": "mieqrq52yyo8inlb9j",
+        "title": "iCloud",
+        "url": "https://www.icloud.com/",
+        "icon": "https://img.logo.dev/www.icloud.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
         "id": "midbsfzo5wxg064euv7",
-        "title": "Drive",
+        "title": "Google Drive",
         "url": "https://drive.google.com/drive/my-drive",
         "icon": "https://api.dicebear.com/9.x/bottts/svg?seed=kgnc2m",
         "style": "fit"
@@ -406,13 +462,6 @@
         "icon": "https://manifest.im/icon/macked.app",
         "style": "fit",
         "id": "mibooocgngqpn1mmbz"
-      },
-      {
-        "id": "midbiokxdv5uxsy1mn",
-        "title": "Meetings",
-        "url": "https://meetings.feishu.cn/minutes/me",
-        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=c8z6",
-        "style": "full"
       },
       {
         "id": "midblx03va5dbtxzc8c",
@@ -468,6 +517,20 @@
         "title": "Snopes",
         "url": "https://www.snopes.com/",
         "icon": "https://img.logo.dev/www.snopes.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "mier91rpip3ylnctvxc",
+        "title": "Taobao",
+        "url": "https://www.taobao.com/",
+        "icon": "https://img.logo.dev/www.taobao.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "mier9ghssxaq8lpkbe",
+        "title": "JD",
+        "url": "https://www.jd.com/",
+        "icon": "https://img.logo.dev/www.jd.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "full"
       }
     ]
