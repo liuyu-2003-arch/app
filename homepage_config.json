@@ -113,11 +113,25 @@
         "icon": "https://manifest.im/icon/mail.google.com",
         "style": "white",
         "id": "mibooocgv5kxh73xmms"
+      },
+      {
+        "id": "miepx4j9ab58h1vr5k6",
+        "title": "Perplexity",
+        "url": "https://www.perplexity.ai/",
+        "icon": "https://cdn.brandfetch.io/www.perplexity.ai?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "id": "miepy2ln1a4dj0jx0wtg",
+        "title": "Claude",
+        "url": "https://claude.ai/",
+        "icon": "https://favicon.vemetric.com/claude.ai",
+        "style": "full"
       }
     ]
   },
   {
-    "title": "学习资料",
+    "title": "学习工具",
     "bookmarks": [
       {
         "title": "Wikipedia",
@@ -167,12 +181,68 @@
         "icon": "https://api.dicebear.com/9.x/shapes/svg?seed=temrrr",
         "style": "full",
         "id": "mibooocgjwmrwo41bjf"
+      },
+      {
+        "id": "midbmnvnqubzzyg6p",
+        "title": "Hundun",
+        "url": "https://www.hundun.cn/",
+        "icon": "https://img.logo.dev/www.hundun.cn?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
+      {
+        "id": "midbn4v8lri899hmq1p",
+        "title": "X",
+        "url": "https://x.com/home",
+        "icon": "https://favicon.vemetric.com/x.com",
+        "style": "full"
+      },
+      {
+        "id": "midbkac2i1z91czdrka",
+        "title": "Leonardo",
+        "url": "https://app.leonardo.ai/",
+        "icon": "https://cdn.brandfetch.io/app.leonardo.ai?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "id": "miepvyzft0h6yv1eo6",
+        "title": "Weread",
+        "url": "https://weread.qq.com/",
+        "icon": "https://favicon.vemetric.com/weread.qq.com",
+        "style": "full"
+      },
+      {
+        "id": "mieq34u7fw4sgcx1ho",
+        "title": "Makerworld",
+        "url": "https://makerworld.com/zh/3d-models",
+        "icon": "https://manifest.im/icon/makerworld.com",
+        "style": "full"
       }
     ]
   },
   {
-    "title": "影视音乐",
+    "title": "影音娱乐",
     "bookmarks": [
+      {
+        "title": "Spotify",
+        "url": "https://open.spotify.com/",
+        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full",
+        "id": "mibooocgxj44jon0jy"
+      },
+      {
+        "id": "miepihi6f38igqpkny7",
+        "title": "The Movie DB",
+        "url": "https://www.themoviedb.org/",
+        "icon": "https://favicon.vemetric.com/www.themoviedb.org",
+        "style": "full"
+      },
+      {
+        "id": "miepe028guvn7z5j6p",
+        "title": "Imdb",
+        "url": "https://www.imdb.com/",
+        "icon": "https://img.logo.dev/www.imdb.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
+      },
       {
         "title": "Cilixiong",
         "url": "https://www.cilixiong.org/movie/",
@@ -202,11 +272,18 @@
         "id": "mibooocgwqjkcliv0ed"
       },
       {
-        "title": "Spotify",
-        "url": "https://open.spotify.com/",
-        "icon": "https://img.logo.dev/open.spotify.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full",
-        "id": "mibooocgxj44jon0jy"
+        "id": "miepmql63atcrh9hyhm",
+        "title": "Google Aliyun",
+        "url": "https://www.google.com/search?q=https://www.aliyundrive.com+%E8%82%96%E7%94%B3%E5%85%8B%E7%9A%84%E6%95%91%E8%B5%8E&newwindow=1&sxsrf=AJOqlzVJfRSCMuz4Ah-SfKHmcjXjgivccw:1679122128936&ei=0F4VZNzSOKeNur8P3LWm-A4&ved=0ahUKEwjc-p2w8eT9AhWnhu4BHdyaCe8Q4dUDCBA&uact=5&oq=https://www.aliyundrive.com+%E8%82%96%E7%94%B3%E5%85%8B%E7%9A%84%E6%95%91%E8%B5%8E&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIFCAAQogQyBQgAEKIESgQIQRgAUABY7iFgtydoAXAAeACAAZwCiAGOBJIBAzItMpgBAKABAqABAcABAQ&sclient=gws-wiz-serp",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=qfl3v",
+        "style": "full"
+      },
+      {
+        "id": "miepo5oz2u7te1vfafg",
+        "title": "Magnet",
+        "url": "https://www.google.com/search?q=magnet%3A%3Fxt%3D+%E9%98%BF%E4%B8%BD%E5%A1%94&newwindow=1&sca_esv=742aa62f8b445c9b&sxsrf=AE3TifPE9YmGGnR5OM3S-gYeC8E6WAl7iA%3A1764083296126&ei=YMYlac6zB82xhbIPyZuYuQg&ved=0ahUKEwjO4-Cxyo2RAxXNWEEAHckNJocQ4dUDCBE&uact=5&oq=magnet%3A%3Fxt%3D+%E9%98%BF%E4%B8%BD%E5%A1%94&gs_lp=Egxnd3Mtd2l6LXNlcnAiFW1hZ25ldDo_eHQ9IOmYv-S4veWhlEjyP1DKFFi-PXABeACQAQOYAbYIoAHOKaoBCzMtNC4xLjEuMi4xuAEDyAEA-AEBmAIAoAIAmAMAiAYBkgcAoAfLA7IHALgHAMIHAMgHAA&sclient=gws-wiz-serp",
+        "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=ervqsq",
+        "style": "full"
       }
     ]
   },
@@ -233,11 +310,25 @@
         "url": "https://aistudio.google.com/",
         "icon": "https://favicon.vemetric.com/aistudio.google.com",
         "style": "full"
+      },
+      {
+        "id": "midbjml0cwdmvbm878d",
+        "title": "Colab",
+        "url": "https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb#scrollTo=PromptsTop",
+        "icon": "https://favicon.vemetric.com/colab.research.google.com",
+        "style": "fit"
+      },
+      {
+        "id": "miepzfavq34y5q5cvf",
+        "title": "Studio",
+        "url": "https://studio.firebase.google.com/",
+        "icon": "https://favicon.vemetric.com/studio.firebase.google.com",
+        "style": "fit"
       }
     ]
   },
   {
-    "title": "常用工具",
+    "title": "其他工具",
     "bookmarks": [
       {
         "title": "Shadowsocks",
@@ -289,6 +380,13 @@
         "id": "mibooocg1asoj080xgu"
       },
       {
+        "id": "midbsfzo5wxg064euv7",
+        "title": "Drive",
+        "url": "https://drive.google.com/drive/my-drive",
+        "icon": "https://api.dicebear.com/9.x/bottts/svg?seed=kgnc2m",
+        "style": "fit"
+      },
+      {
         "title": "Yun",
         "url": "https://yun.139.com",
         "icon": "https://manifest.im/icon/yun.139.com",
@@ -310,31 +408,10 @@
         "id": "mibooocgngqpn1mmbz"
       },
       {
-        "title": "Google Earth",
-        "url": "https://earth.google.com/",
-        "icon": "https://manifest.im/icon/earth.google.com",
-        "style": "white",
-        "id": "mibooocgdf1559a699m"
-      },
-      {
         "id": "midbiokxdv5uxsy1mn",
         "title": "Meetings",
         "url": "https://meetings.feishu.cn/minutes/me",
         "icon": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=c8z6",
-        "style": "full"
-      },
-      {
-        "id": "midbjml0cwdmvbm878d",
-        "title": "Colab",
-        "url": "https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb#scrollTo=PromptsTop",
-        "icon": "https://favicon.vemetric.com/colab.research.google.com",
-        "style": "fit"
-      },
-      {
-        "id": "midbkac2i1z91czdrka",
-        "title": "Leonardo",
-        "url": "https://app.leonardo.ai/",
-        "icon": "https://cdn.brandfetch.io/app.leonardo.ai?c=1idVW8VN57Jat7AexnZ",
         "style": "full"
       },
       {
@@ -343,20 +420,6 @@
         "url": "https://www.feishu.cn/",
         "icon": "https://img.logo.dev/www.feishu.cn?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
         "style": "fit"
-      },
-      {
-        "id": "midbmnvnqubzzyg6p",
-        "title": "Hundun",
-        "url": "https://www.hundun.cn/",
-        "icon": "https://img.logo.dev/www.hundun.cn?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
-        "style": "full"
-      },
-      {
-        "id": "midbn4v8lri899hmq1p",
-        "title": "X",
-        "url": "https://x.com/home",
-        "icon": "https://favicon.vemetric.com/x.com",
-        "style": "full"
       },
       {
         "id": "midbnlfyt7tv9ul7im",
@@ -387,11 +450,25 @@
         "style": "fit"
       },
       {
-        "id": "midbsfzo5wxg064euv7",
-        "title": "Drive",
-        "url": "https://drive.google.com/drive/my-drive",
-        "icon": "https://api.dicebear.com/9.x/bottts/svg?seed=kgnc2m",
-        "style": "fit"
+        "title": "Google Earth",
+        "url": "https://earth.google.com/",
+        "icon": "https://manifest.im/icon/earth.google.com",
+        "style": "white",
+        "id": "mibooocgdf1559a699m"
+      },
+      {
+        "id": "mieprd26n7b0gckwp8",
+        "title": "Archive",
+        "url": "https://archive.org/",
+        "icon": "https://cdn.brandfetch.io/archive.org?c=1idVW8VN57Jat7AexnZ",
+        "style": "full"
+      },
+      {
+        "id": "mieptqfyamvjno7268q",
+        "title": "Snopes",
+        "url": "https://www.snopes.com/",
+        "icon": "https://img.logo.dev/www.snopes.com?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png",
+        "style": "full"
       }
     ]
   }
