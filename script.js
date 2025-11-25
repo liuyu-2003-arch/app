@@ -404,14 +404,36 @@ function dragEnd(e) {
     isDragging = false;
     cancelAnimationFrame(animationID);
 
+    // 1. 核心修复：如果是“点击”而不是“拖拽”，手动触发跳转
+    // 只有在是触摸事件(changedTouches) 且 没有发生大幅拖拽(!hasDragged) 时才触发
+    if (!hasDragged && e.type === 'touchend') {
+        // 找到被点击的图标元素
+        const targetItem = e.target.closest('.bookmark-item');
+        // 确保不是在编辑模式，也不是点击了删除按钮
+        if (targetItem && !isEditing && !e.target.classList.contains('delete-btn')) {
+            const bookmarkId = targetItem.dataset.id;
+            // 遍历数据找到对应的 URL
+            for (const page of pages) {
+                const bookmark = page.bookmarks.find(b => b.id === bookmarkId);
+                if (bookmark && bookmark.url) {
+                    window.location.href = bookmark.url;
+                    return; // 跳转后直接结束，防止后续逻辑冲突
+                }
+            }
+        }
+    }
+
     const movedBy = currentTranslate - prevTranslate;
     const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
 
     let targetPage = currentPage;
-    if (movedBy < -swiperWidth * 0.15 && currentPage < visualPages.length - 1) {
-        targetPage++;
-    } else if (movedBy > swiperWidth * 0.15 && currentPage > 0) {
-        targetPage--;
+    // 只有当真正发生拖拽时，才计算翻页
+    if (hasDragged) {
+        if (movedBy < -swiperWidth * 0.15 && currentPage < visualPages.length - 1) {
+            targetPage++;
+        } else if (movedBy > swiperWidth * 0.15 && currentPage > 0) {
+            targetPage--;
+        }
     }
 
     currentPage = targetPage;
