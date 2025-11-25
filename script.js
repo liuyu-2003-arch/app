@@ -379,7 +379,7 @@ function dragStart(e) {
 function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
-        if (Math.abs(currentPosition - startPos) > 5) {
+        if (Math.abs(currentPosition - startPos) > 15) {
             hasDragged = true;
         }
         currentTranslate = prevTranslate + currentPosition - startPos;

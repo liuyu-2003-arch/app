@@ -56,6 +56,8 @@ body {
     width: 100%;
     overflow: hidden;
     flex-grow: 1;
+    /* [修复] 禁止浏览器处理水平手势，避免滑动书签时触发系统级手势或卡顿 */
+    touch-action: pan-y;
 }
 
 .bookmark-swiper-wrapper {
