@@ -15,12 +15,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
     <div class="background-layer"></div>
+
+    <div id="toast-container" class="toast-container"></div>
 
     <div class="user-trigger-area">
         <div class="user-fab" onclick="toggleAuthModal()">
@@ -153,17 +153,10 @@
     <input type="file" id="import-file-input" style="display: none;" accept=".json">
 
     <script src="script.js"></script>
-
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW failed: ', err));
             });
         }
     </script>

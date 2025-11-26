@@ -13,10 +13,10 @@ body {
     overflow: hidden;
     display: flex; flex-direction: column; align-items: center;
     box-sizing: border-box;
-    visibility: hidden; /* Default hidden to prevent flicker */
+    visibility: hidden;
 }
 
-/* --- 背景层重构 --- */
+/* --- 背景层 --- */
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
     background-color: #e4d0e5;
@@ -31,69 +31,44 @@ body {
 }
 
 .container {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 6vh;
-    padding-bottom: 0;
-    box-sizing: border-box;
+    width: 100%; height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    padding-top: 6vh; padding-bottom: 0; box-sizing: border-box;
 }
 
 .bookmark-swiper {
-    width: 100%;
-    overflow: hidden;
-    flex-grow: 1;
-    touch-action: pan-y; /* 核心：优化触摸体验，只允许垂直滚动 */
+    width: 100%; overflow: hidden; flex-grow: 1;
+    touch-action: pan-y; /* 优化触摸，只允许垂直滚动，禁止水平手势冲突 */
 }
 
 .bookmark-swiper-wrapper {
-    display: flex;
-    height: 100%;
-    transition: transform 0.3s ease-out;
-    will-change: transform;
+    display: flex; height: 100%;
+    transition: transform 0.3s ease-out; will-change: transform;
 }
 
 .bookmark-page {
-    flex-shrink: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    box-sizing: border-box;
-    padding-top: 0;
-    overflow-y: auto;
+    flex-shrink: 0; width: 100%; height: 100%;
+    display: flex; align-items: flex-start; justify-content: center;
+    box-sizing: border-box; padding-top: 0; overflow-y: auto;
 }
 
 .bookmark-page-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, var(--card-size));
-    gap: var(--gap);
-    justify-content: flex-start;
-    width: var(--page-width);
-    max-width: 90%;
-    align-content: flex-start;
-    padding-bottom: 50px;
+    display: grid; grid-template-columns: repeat(auto-fill, var(--card-size));
+    gap: var(--gap); justify-content: flex-start;
+    width: var(--page-width); max-width: 90%;
+    align-content: flex-start; padding-bottom: 50px;
 }
 
 .page-title {
-    grid-column: 1 / -1;
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 5px 0;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-    padding: 5px;
-    border-radius: 8px;
+    grid-column: 1 / -1; font-size: 24px; font-weight: 600; color: #333;
+    margin: 0 0 5px 0; text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    padding: 5px; border-radius: 8px;
 }
 
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
-    transition: transform 0.2s;
-    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s; -webkit-tap-highlight-color: transparent;
     will-change: transform;
 }
 .bookmark-item:hover { transform: scale(1.05); }
@@ -106,7 +81,6 @@ body {
     position: relative;
 }
 .icon-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-
 .bookmark-item.style-fit .icon-box img { width: 85%; height: 85%; object-fit: contain; }
 .bookmark-item.style-white .icon-box img { width: 60%; height: 60%; object-fit: contain; }
 
@@ -123,17 +97,11 @@ body {
     font-weight: 500; text-shadow: 0 1px 2px rgba(255,255,255,0.8);
 }
 
-/* --- iOS 风格随机抖动动画 --- */
 @keyframes ios-jiggle {
-    0% { transform: rotate(-1.5deg); }
-    50% { transform: rotate(1.5deg); }
-    100% { transform: rotate(-1.5deg); }
+    0% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } 100% { transform: rotate(-1.5deg); }
 }
-
 .is-editing .bookmark-item:not(.sortable-drag):not(.sortable-ghost) {
-    animation: ios-jiggle 0.25s infinite ease-in-out;
-    cursor: grab;
-    transform-origin: center center;
+    animation: ios-jiggle 0.25s infinite ease-in-out; cursor: grab; transform-origin: center center;
 }
 .is-editing .bookmark-item:nth-child(2n) { animation-duration: 0.26s; animation-delay: -0.05s; }
 .is-editing .bookmark-item:nth-child(3n) { animation-duration: 0.24s; animation-delay: -0.12s; }
@@ -142,14 +110,12 @@ body {
 
 .sortable-ghost { opacity: 0.2; background: #cce5ff; border-radius: var(--radius); }
 .sortable-ghost .bookmark-title, .sortable-ghost .icon-box { opacity: 0.5; }
-
 .sortable-drag {
     opacity: 1 !important; transform: scale(1.15); box-shadow: 0 20px 40px rgba(0,0,0,0.25);
     z-index: 9999 !important; cursor: grabbing; transition: none !important;
 }
 
 @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
 .delete-btn {
     position: absolute; top: -8px; left: -8px; width: 22px; height: 22px;
     background: rgba(150, 150, 150, 0.9); color: white; border-radius: 50%;
@@ -159,7 +125,6 @@ body {
 }
 .is-editing .delete-btn { display: block; }
 
-/* --- 通用UI样式 --- */
 .edit-trigger-area {
     position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;
     display: flex; align-items: center; justify-content: center; z-index: 100;
@@ -172,7 +137,25 @@ body {
 }
 .edit-trigger-area:hover .edit-fab { opacity: 1; transform: scale(1); }
 
-/* --- 用户登录按钮样式 --- */
+/* --- 顶部提示条 (Toast) 样式 --- */
+.toast-container {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none; width: 90%; max-width: 400px;
+}
+.toast {
+    background: rgba(0, 0, 0, 0.85); color: white; padding: 12px 24px;
+    border-radius: 30px; font-size: 14px; font-weight: 500;
+    backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center; opacity: 0; transform: translateY(-20px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: auto;
+}
+.toast.visible { opacity: 1; transform: translateY(0) scale(1); }
+.toast.success { background: rgba(52, 199, 89, 0.9); }
+.toast.error { background: rgba(255, 59, 48, 0.9); }
+
+/* 用户按钮 */
 .user-trigger-area {
     position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
     z-index: 100; display: flex; align-items: center; justify-content: center;
@@ -185,6 +168,7 @@ body {
 .user-fab:hover { transform: scale(1.1); background: rgba(0,0,0,0.6); }
 .user-fab.logged-in { background: #34C759; }
 
+/* 编辑控制栏 */
 .edit-controls {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
@@ -195,6 +179,7 @@ body {
 .edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
 .edit-controls button.done-btn { background: #007AFF; color: white; }
 
+/* 调色盘 */
 .theme-swatches { display: flex; gap: 8px; padding-right: 10px; border-right: 1px solid #ddd; }
 .swatch {
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
@@ -203,12 +188,12 @@ body {
 .swatch:hover { transform: scale(1.1); }
 .swatch.active { border-color: #333; transform: scale(1.1); }
 
+/* 弹窗样式 */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;
     z-index: 200; backdrop-filter: blur(5px);
 }
-
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
     min-width: 420px; max-width: 800px;
@@ -216,7 +201,6 @@ body {
     animation: popUp 0.3s ease;
 }
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
 .modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; }
 
 .modal-top-split { display: flex; gap: 15px; background: #f5f7f9; padding: 15px; border-radius: 16px; align-items: stretch; }
