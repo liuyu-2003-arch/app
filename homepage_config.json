@@ -366,6 +366,13 @@
         "url": "https://studio.firebase.google.com/",
         "icon": "https://favicon.vemetric.com/studio.firebase.google.com",
         "style": "fit"
+      },
+      {
+        "id": "mif9j57y2dhvyfldk1q",
+        "title": "Supabase",
+        "url": "https://supabase.com/",
+        "icon": "https://favicon.vemetric.com/supabase.com",
+        "style": "full"
       }
     ]
   },
