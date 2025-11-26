@@ -99,9 +99,27 @@ async function handleRegister() {
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return alert("请输入邮箱和密码");
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    else alert("注册成功！请检查邮箱验证（部分设置下可直接登录）");
+    // 1. 检查 supabase 是否初始化
+    if (!supabase) {
+        return alert("连接失败：请在 script.js 顶部填入正确的 Supabase URL 和 Key");
+    }
+
+    try {
+        // 2. 发起注册请求
+        const { data, error } = await supabase.auth.signUp({ email, password });
+
+        if (error) {
+            // 如果 Supabase 返回业务错误 (如邮箱已存在，密码太短)
+            alert("注册失败：" + error.message);
+        } else {
+            // 成功
+            alert("注册请求已发送！\n如果 Supabase 开启了邮箱验证，请去邮箱点确认链接。\n如果未开启验证，现在可以直接登录了。");
+        }
+    } catch (err) {
+        // 3. 捕获网络错误 (如 URL 填错导致的网络不通)
+        console.error("注册发生意外错误:", err);
+        alert("网络连接错误：请检查控制台 (F12) 或确认 API URL 是否填写正确。");
+    }
 }
 
 async function handleLogin() {
@@ -109,9 +127,22 @@ async function handleLogin() {
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return alert("请输入邮箱和密码");
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert("登录失败：" + error.message);
-    else document.getElementById('auth-modal').classList.add('hidden');
+    if (!supabase) {
+        return alert("连接失败：请在 script.js 顶部填入正确的 Supabase URL 和 Key");
+    }
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+            alert("登录失败：" + error.message);
+        } else {
+            document.getElementById('auth-modal').classList.add('hidden');
+            // 登录成功会自动触发 onAuthStateChange 更新 UI，无需手动 alert
+        }
+    } catch (err) {
+        console.error("登录发生意外错误:", err);
+        alert("网络连接错误：请检查 API URL 配置。");
+    }
 }
 
 async function handleLogout() {
