@@ -95,30 +95,37 @@ function toggleAuthModal() {
 }
 
 async function handleRegister() {
+    // 1. 诊断：检查 SDK 是否加载
+    if (typeof createClient === 'undefined') {
+        return alert("【严重错误】Supabase SDK 未加载！\n\n原因：index.html 文件里没有引入 supabase-js 库，或者网络加载失败。\n\n解决方法：请检查 index.html 是否包含 <script src='...supabase-js...'></script>");
+    }
+
+    // 2. 诊断：检查配置是否填写
+    // 注意：这里检查的是变量值，不是变量名
+    if (!SUPABASE_URL || SUPABASE_URL.includes("你的项目ID")) {
+         return alert("【配置错误】URL 未填写或填写的还是默认值。\n\n当前读取到的 URL 是：" + SUPABASE_URL);
+    }
+
+    // 3. 尝试初始化（如果之前初始化失败了）
+    if (!supabase) {
+        try {
+            supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) {
+            return alert("【初始化错误】SDK 加载了，但启动失败：\n" + e.message);
+        }
+    }
+
+    // 4. 正式发起注册
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return alert("请输入邮箱和密码");
 
-    // 1. 检查 supabase 是否初始化
-    if (!supabase) {
-        return alert("连接失败：请在 script.js 顶部填入正确的 Supabase URL 和 Key");
-    }
-
     try {
-        // 2. 发起注册请求
         const { data, error } = await supabase.auth.signUp({ email, password });
-
-        if (error) {
-            // 如果 Supabase 返回业务错误 (如邮箱已存在，密码太短)
-            alert("注册失败：" + error.message);
-        } else {
-            // 成功
-            alert("注册请求已发送！\n如果 Supabase 开启了邮箱验证，请去邮箱点确认链接。\n如果未开启验证，现在可以直接登录了。");
-        }
+        if (error) alert("注册失败：" + error.message);
+        else alert("注册请求已发送！请去邮箱确认（如果没开启验证则可直接登录）。");
     } catch (err) {
-        // 3. 捕获网络错误 (如 URL 填错导致的网络不通)
-        console.error("注册发生意外错误:", err);
-        alert("网络连接错误：请检查控制台 (F12) 或确认 API URL 是否填写正确。");
+        alert("网络连接错误：" + err.message);
     }
 }
 
