@@ -5,12 +5,14 @@ const SUPABASE_URL = 'https://ossrsfyqbrzeauzksvpv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zc3JzZnlxYnJ6ZWF1emtzdnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMDgwMDksImV4cCI6MjA3OTY4NDAwOX0.IwEfjxM_wNBf2DXDC9ue8X6ztSOJV2rEN1vrQqv7eqI';
 
 // 初始化 Supabase 客户端
-let supabase = null;
+let supabaseClient = null;
 let currentUser = null;
 
-if (typeof createClient !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
+// 【核心修复】正确检测 SDK 是否加载
+if (window.supabase && window.supabase.createClient) {
     try {
-        supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log("Supabase 初始化成功");
     } catch (e) {
         console.error("Supabase 初始化失败:", e);
     }
@@ -42,13 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initSwiper();
     initKeyboardControl();
 
-    // 初始化 Auth，它内部会自动调用 loadData
-    if (supabase) {
+    // 初始化 Auth
+    if (supabaseClient) {
         initAuth().then(() => {
-             // 如果没登录，initAuth 不会触发 loadData，所以这里手动触发一次保底
              if (!currentUser) loadData();
         });
     } else {
+        // 如果 SDK 没加载成功，直接读本地数据，不阻塞页面
+        console.warn("SDK 未就绪，进入离线模式");
         loadData();
     }
 
@@ -61,12 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Auth 相关功能 ---
 async function initAuth() {
-    if (!supabase) return;
+    if (!supabaseClient) return;
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     updateUserStatus(session?.user);
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
         updateUserStatus(session?.user);
     });
 }
@@ -82,7 +85,7 @@ function updateUserStatus(user) {
         document.getElementById('current-email').innerText = user.email;
         if(authActions) authActions.style.display = 'none';
         if(infoPanel) infoPanel.classList.remove('hidden');
-        loadData(); // 登录成功后拉取数据
+        loadData();
     } else {
         fab.classList.remove('logged-in');
         if(authActions) authActions.style.display = 'flex';
@@ -95,37 +98,24 @@ function toggleAuthModal() {
 }
 
 async function handleRegister() {
-    // 1. 诊断：检查 SDK 是否加载
-    if (typeof createClient === 'undefined') {
-        return alert("【严重错误】Supabase SDK 未加载！\n\n原因：index.html 文件里没有引入 supabase-js 库，或者网络加载失败。\n\n解决方法：请检查 index.html 是否包含 <script src='...supabase-js...'></script>");
+    // 【诊断修复】
+    if (!window.supabase || !window.supabase.createClient) {
+         return alert("Supabase SDK 依然未加载。\n请确保 index.html 里引用了 supabase-js，且网络正常。");
+    }
+    if (!supabaseClient) {
+        return alert("SDK 已加载，但初始化失败。请检查控制台报错。");
     }
 
-    // 2. 诊断：检查配置是否填写
-    // 注意：这里检查的是变量值，不是变量名
-    if (!SUPABASE_URL || SUPABASE_URL.includes("你的项目ID")) {
-         return alert("【配置错误】URL 未填写或填写的还是默认值。\n\n当前读取到的 URL 是：" + SUPABASE_URL);
-    }
-
-    // 3. 尝试初始化（如果之前初始化失败了）
-    if (!supabase) {
-        try {
-            supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch(e) {
-            return alert("【初始化错误】SDK 加载了，但启动失败：\n" + e.message);
-        }
-    }
-
-    // 4. 正式发起注册
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return alert("请输入邮箱和密码");
 
     try {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) alert("注册失败：" + error.message);
-        else alert("注册请求已发送！请去邮箱确认（如果没开启验证则可直接登录）。");
-    } catch (err) {
-        alert("网络连接错误：" + err.message);
+        else alert("注册请求已发送！\n请去邮箱确认（如果没开启验证则可直接登录）。");
+    } catch(e) {
+        alert("网络请求出错：" + e.message);
     }
 }
 
@@ -134,26 +124,15 @@ async function handleLogin() {
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return alert("请输入邮箱和密码");
 
-    if (!supabase) {
-        return alert("连接失败：请在 script.js 顶部填入正确的 Supabase URL 和 Key");
-    }
+    if (!supabaseClient) return alert("连接失败：SDK 未初始化");
 
-    try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            alert("登录失败：" + error.message);
-        } else {
-            document.getElementById('auth-modal').classList.add('hidden');
-            // 登录成功会自动触发 onAuthStateChange 更新 UI，无需手动 alert
-        }
-    } catch (err) {
-        console.error("登录发生意外错误:", err);
-        alert("网络连接错误：请检查 API URL 配置。");
-    }
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) alert("登录失败：" + error.message);
+    else document.getElementById('auth-modal').classList.add('hidden');
 }
 
 async function handleLogout() {
-    await supabase.auth.signOut();
+    if (supabaseClient) await supabaseClient.auth.signOut();
     document.getElementById('auth-modal').classList.add('hidden');
     alert("已退出登录，切换回本地模式");
     loadData();
@@ -163,9 +142,9 @@ async function handleLogout() {
 
 async function loadData() {
     // 1. 如果已登录，优先从云端加载
-    if (currentUser && supabase) {
+    if (currentUser && supabaseClient) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('user_configs')
                 .select('config_data')
                 .eq('user_id', currentUser.id)
@@ -175,7 +154,7 @@ async function loadData() {
                 console.log("从云端加载数据成功");
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
-                localStorage.setItem('pagedData', JSON.stringify(pages)); // 备份到本地
+                localStorage.setItem('pagedData', JSON.stringify(pages));
                 render();
                 document.body.style.visibility = 'visible';
                 return;
@@ -218,8 +197,8 @@ async function saveData() {
     localStorage.setItem('pagedData', JSON.stringify(pages));
 
     // 2. 云端保存
-    if (currentUser && supabase) {
-        const { error } = await supabase
+    if (currentUser && supabaseClient) {
+        const { error } = await supabaseClient
             .from('user_configs')
             .upsert({
                 user_id: currentUser.id,
@@ -231,8 +210,7 @@ async function saveData() {
     }
 }
 
-// --- 基础工具函数 ---
-
+// --- 基础工具函数 (保持不变) ---
 function generateUniqueId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -343,7 +321,6 @@ function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // 点击事件：在非编辑模式下，点击逻辑由 dragEnd 接管
             div.onclick = (e) => {
                 if (isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
@@ -370,7 +347,7 @@ function render() {
     if (isEditing) initSortable();
 }
 
-// --- Swiper 核心逻辑 (含触摸修复) ---
+// --- Swiper 核心逻辑 ---
 
 function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
@@ -378,9 +355,9 @@ function initSwiper() {
     swiper.addEventListener('touchstart', dragStart, { passive: true });
     swiper.addEventListener('mouseup', dragEnd);
     swiper.addEventListener('mouseleave', dragEnd);
-    swiper.addEventListener('touchend', dragEnd); // 关键事件
+    swiper.addEventListener('touchend', dragEnd);
     swiper.addEventListener('mousemove', drag);
-    swiper.addEventListener('touchmove', drag, { passive: false }); // passive: false 允许 preventDefault
+    swiper.addEventListener('touchmove', drag, { passive: false });
     swiper.addEventListener('wheel', handleWheel, { passive: false });
 }
 
@@ -401,16 +378,12 @@ function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
         const diff = currentPosition - startPos;
-
-        // 核心修复：只有移动超过 10px 才视为拖拽，否则视为潜在的点击
         if (Math.abs(diff) > 10) {
             hasDragged = true;
         }
-
-        // 只有被判定为拖拽后，才移动背景
         if (hasDragged) {
             currentTranslate = prevTranslate + diff;
-            if (e.cancelable) e.preventDefault(); // 阻止浏览器默认滚动
+            if (e.cancelable) e.preventDefault();
         }
     }
 }
@@ -420,7 +393,6 @@ function dragEnd(e) {
     isDragging = false;
     cancelAnimationFrame(animationID);
 
-    // 核心修复：手动处理触摸点击跳转
     if (!hasDragged && e.type === 'touchend') {
         const targetItem = e.target.closest('.bookmark-item');
         if (targetItem && !isEditing && !e.target.classList.contains('delete-btn')) {
@@ -514,7 +486,6 @@ function handleWheel(e) {
 }
 
 // --- 分页点 ---
-
 function showPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     if (!dotsContainer || visualPages.length <= 1) return;
@@ -542,7 +513,6 @@ function renderPaginationDots() {
 }
 
 // --- 编辑与模态框逻辑 ---
-
 function selectStyle(element) {
     document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active'));
     element.classList.add('active');
@@ -889,8 +859,6 @@ function initSortable() {
                 pages = newPages.filter(p => p.title);
                 saveData();
                 createVisualPages();
-
-                // 核心修复：拖拽后强制重绘，防止数据不一致
                 setTimeout(() => { render(); }, 10);
             }
         });
