@@ -24,9 +24,10 @@
 
     <div class="user-trigger-area">
         <div class="user-fab" onclick="toggleAuthModal()">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+            <svg id="user-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="white">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
+            <img id="user-avatar-img" src="" style="display: none;" alt="User Avatar">
         </div>
     </div>
 
@@ -121,7 +122,9 @@
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content" style="max-width: 320px;">
             <h3 id="auth-title">登录 / 注册</h3>
-            <p style="font-size: 12px; color: #666; text-align: center; margin-top: -10px;">登录后可跨设备同步配置</p>
+            <p style="font-size: 12px; color: #666; text-align: center; margin-top: -10px;">选择一个头像 (注册或更新资料时生效)</p>
+
+            <div id="avatar-selector" class="avatar-grid"></div>
 
             <div class="form-group">
                 <div class="input-row">
@@ -136,7 +139,7 @@
 
             <div class="modal-actions">
                 <button onclick="handleLogin()">登录</button>
-                <button class="primary" onclick="handleRegister()">注册</button>
+                <button class="primary" onclick="handleRegister()">注册 / 更新</button>
             </div>
 
             <div id="user-info-panel" class="hidden" style="text-align: center; width: 100%;">

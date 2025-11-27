@@ -7,6 +7,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // 初始化 Supabase 客户端
 let supabaseClient = null;
 let currentUser = null;
+let selectedAvatarUrl = ''; // 新增：保存当前选中的头像URL
 
 // 检测 SDK 是否加载
 if (window.supabase && window.supabase.createClient) {
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initSwiper();
     initKeyboardControl();
+    renderAvatarSelector(); // 初始化头像选择器
 
     // 初始化 Auth
     if (supabaseClient) {
@@ -60,6 +62,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
+
+// --- 新增：头像选择逻辑 ---
+function renderAvatarSelector() {
+    const container = document.getElementById('avatar-selector');
+    container.innerHTML = '';
+
+    // 生成 5 个随机头像
+    const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear'];
+
+    seeds.forEach(seed => {
+        // 使用 DiceBear API 生成头像
+        const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed + Math.random()}`;
+
+        const div = document.createElement('div');
+        div.className = 'avatar-option';
+        div.innerHTML = `<img src="${url}">`;
+
+        div.onclick = () => {
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+            selectedAvatarUrl = url;
+        };
+
+        container.appendChild(div);
+    });
+
+    // 默认选中第一个
+    if (container.firstChild) container.firstChild.click();
+}
 
 // --- 新增：优雅的提示框 (Toast) ---
 function showToast(message, type = 'normal') {
@@ -91,18 +122,43 @@ async function initAuth() {
 function updateUserStatus(user) {
     currentUser = user;
     const fab = document.querySelector('.user-fab');
+    const svgIcon = document.getElementById('user-icon-svg');
+    const imgIcon = document.getElementById('user-avatar-img');
     const authActions = document.querySelector('.modal-actions');
     const infoPanel = document.getElementById('user-info-panel');
 
     if (user) {
         fab.classList.add('logged-in');
         document.getElementById('current-email').innerText = user.email;
-        if(authActions) authActions.style.display = 'none';
+
+        // 获取用户头像
+        const avatarUrl = user.user_metadata?.avatar_url;
+        if (avatarUrl) {
+            imgIcon.src = avatarUrl;
+            imgIcon.style.display = 'block';
+            svgIcon.style.display = 'none';
+        } else {
+            imgIcon.style.display = 'none';
+            svgIcon.style.display = 'block';
+            svgIcon.setAttribute('fill', '#333');
+        }
+
+        if(authActions) authActions.style.display = 'flex';
+        const regBtn = authActions.querySelector('.primary');
+        if(regBtn) regBtn.textContent = "更新头像";
+
         if(infoPanel) infoPanel.classList.remove('hidden');
         loadData();
     } else {
         fab.classList.remove('logged-in');
+        imgIcon.style.display = 'none';
+        svgIcon.style.display = 'block';
+        svgIcon.setAttribute('fill', 'white');
+
         if(authActions) authActions.style.display = 'flex';
+        const regBtn = authActions.querySelector('.primary');
+        if(regBtn) regBtn.textContent = "注册";
+
         if(infoPanel) infoPanel.classList.add('hidden');
     }
 }
@@ -112,17 +168,46 @@ function toggleAuthModal() {
 }
 
 async function handleRegister() {
-    if (!window.supabase || !window.supabase.createClient) return showToast("SDK 未加载，请检查网络", "error");
     if (!supabaseClient) return showToast("SDK 初始化失败", "error");
 
+    // 如果用户已登录，则变成“更新资料”模式
+    if (currentUser) {
+        if (!selectedAvatarUrl) return showToast("请先选择一个头像", "error");
+
+        const { data, error } = await supabaseClient.auth.updateUser({
+            data: { avatar_url: selectedAvatarUrl }
+        });
+
+        if (error) {
+            showToast("更新失败: " + error.message, "error");
+        } else {
+            showToast("头像更新成功！", "success");
+            document.getElementById('auth-modal').classList.add('hidden');
+            updateUserStatus(data.user);
+        }
+        return;
+    }
+
+    // --- 正常的注册流程 ---
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return showToast("请输入邮箱和密码", "error");
 
     try {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) showToast(error.message, "error");
-        else showToast("注册邮件已发送！请去邮箱确认", "success");
+        const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { avatar_url: selectedAvatarUrl } // 注册时写入头像
+            }
+        });
+
+        if (error) {
+            showToast(error.message, "error");
+        } else {
+            showToast("注册成功！请去邮箱确认", "success");
+            document.getElementById('auth-modal').classList.add('hidden'); // 注册成功自动关闭
+        }
     } catch(e) {
         showToast("网络请求出错: " + e.message, "error");
     }
@@ -255,7 +340,7 @@ function rgbToHex(col) {
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
 
-// --- 核心渲染函数 (修复了点击逻辑) ---
+// --- 核心渲染函数 ---
 function render() {
     const oldScrollTops = [];
     document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
@@ -289,12 +374,10 @@ function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // 【关键修复】恢复了桌面端的点击跳转逻辑
             div.onclick = (e) => {
                 if (isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // 如果不是拖拽操作，则进行跳转
                     if (!hasDragged) window.location.href = item.url;
                 }
             };
@@ -317,7 +400,7 @@ function render() {
     if (isEditing) initSortable();
 }
 
-// --- Swiper 逻辑 (含拖拽/触摸修复) ---
+// --- Swiper 逻辑 ---
 function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
     swiper.addEventListener('mousedown', dragStart);
@@ -342,7 +425,6 @@ function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
         const diff = currentPosition - startPos;
-        // 修复：10px 阈值，防止误触
         if (Math.abs(diff) > 10) hasDragged = true;
         if (hasDragged) {
             currentTranslate = prevTranslate + diff;
@@ -356,7 +438,6 @@ function dragEnd(e) {
     isDragging = false;
     cancelAnimationFrame(animationID);
 
-    // 修复：触摸结束时手动跳转，解决 iOS/Android 触摸兼容性
     if (!hasDragged && e.type === 'touchend') {
         const targetItem = e.target.closest('.bookmark-item');
         if (targetItem && !isEditing && !e.target.classList.contains('delete-btn')) {

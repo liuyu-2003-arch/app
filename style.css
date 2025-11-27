@@ -38,7 +38,7 @@ body {
 
 .bookmark-swiper {
     width: 100%; overflow: hidden; flex-grow: 1;
-    touch-action: pan-y; /* 优化触摸，只允许垂直滚动，禁止水平手势冲突 */
+    touch-action: pan-y; /* 触摸修复：只允许垂直滚动 */
 }
 
 .bookmark-swiper-wrapper {
@@ -155,18 +155,46 @@ body {
 .toast.success { background: rgba(52, 199, 89, 0.9); }
 .toast.error { background: rgba(255, 59, 48, 0.9); }
 
-/* 用户按钮 */
+/* --- 用户按钮 (隐形交互优化) --- */
 .user-trigger-area {
-    position: fixed; top: 20px; right: 20px; width: 40px; height: 40px;
-    z-index: 100; display: flex; align-items: center; justify-content: center;
+    position: fixed; top: 0; right: 0;
+    width: 100px; height: 100px; /* 增大感应区域，方便鼠标靠近 */
+    z-index: 100; display: flex; align-items: flex-start; justify-content: flex-end;
+    padding: 20px; box-sizing: border-box;
 }
+
 .user-fab {
-    width: 36px; height: 36px; background: rgba(0,0,0,0.3); border-radius: 50%;
+    width: 36px; height: 36px;
+    background: rgba(0,0,0,0.3); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; backdrop-filter: blur(5px); transition: transform 0.2s;
+    cursor: pointer; backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+
+    /* 默认隐藏，鼠标移入区域显示 */
+    opacity: 0; transform: scale(0.8);
+    overflow: hidden; /* 确保头像图片不溢出 */
 }
-.user-fab:hover { transform: scale(1.1); background: rgba(0,0,0,0.6); }
-.user-fab.logged-in { background: #34C759; }
+
+/* 当鼠标移入右上角区域时，显示按钮 */
+.user-trigger-area:hover .user-fab { opacity: 1; transform: scale(1); }
+.user-fab:hover { background: rgba(0,0,0,0.6); transform: scale(1.1); }
+
+/* 登录后背景变白，为了显示彩色头像 */
+.user-fab.logged-in { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.user-fab img { width: 100%; height: 100%; object-fit: cover; }
+
+/* --- 头像选择器样式 --- */
+.avatar-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px;
+}
+.avatar-option {
+    width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.2s;
+    background: #f0f0f0; overflow: hidden;
+}
+.avatar-option img { width: 100%; height: 100%; }
+.avatar-option:hover { transform: scale(1.1); }
+.avatar-option.selected { border-color: #007AFF; box-shadow: 0 0 0 2px rgba(0,122,255,0.3); }
 
 /* 编辑控制栏 */
 .edit-controls {
