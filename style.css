@@ -38,7 +38,7 @@ body {
 
 .bookmark-swiper {
     width: 100%; overflow: hidden; flex-grow: 1;
-    touch-action: pan-y; /* 触摸修复：只允许垂直滚动 */
+    touch-action: pan-y;
 }
 
 .bookmark-swiper-wrapper {
@@ -158,7 +158,7 @@ body {
 /* --- 用户按钮 (隐形交互优化) --- */
 .user-trigger-area {
     position: fixed; top: 0; right: 0;
-    width: 100px; height: 100px; /* 增大感应区域，方便鼠标靠近 */
+    width: 100px; height: 100px;
     z-index: 100; display: flex; align-items: flex-start; justify-content: flex-end;
     padding: 20px; box-sizing: border-box;
 }
@@ -169,24 +169,29 @@ body {
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; backdrop-filter: blur(5px);
     transition: all 0.3s ease;
-
-    /* 默认隐藏，鼠标移入区域显示 */
     opacity: 0; transform: scale(0.8);
-    overflow: hidden; /* 确保头像图片不溢出 */
+    overflow: hidden;
 }
 
-/* 当鼠标移入右上角区域时，显示按钮 */
 .user-trigger-area:hover .user-fab { opacity: 1; transform: scale(1); }
 .user-fab:hover { background: rgba(0,0,0,0.6); transform: scale(1.1); }
-
-/* 登录后背景变白，为了显示彩色头像 */
 .user-fab.logged-in { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 .user-fab img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- 头像选择器样式 --- */
-.avatar-grid {
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px;
+/* --- 社交登录按钮样式 --- */
+.social-login-section { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+.social-icons { display: flex; gap: 25px; justify-content: center; }
+.social-btn {
+    width: 48px; height: 48px; border-radius: 50%; border: 1px solid #e0e0e0; background: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+.social-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #d0d0d0; }
+.social-btn svg { width: 24px; height: 24px; }
+.auth-divider { width: 100%; display: flex; align-items: center; justify-content: center; margin: 10px 0 20px 0; color: #999; font-size: 12px; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
+
+/* --- 头像选择器样式 --- */
+.avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
 .avatar-option {
     width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;

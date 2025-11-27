@@ -7,7 +7,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // 初始化 Supabase 客户端
 let supabaseClient = null;
 let currentUser = null;
-let selectedAvatarUrl = ''; // 新增：保存当前选中的头像URL
+let selectedAvatarUrl = '';
 
 // 检测 SDK 是否加载
 if (window.supabase && window.supabase.createClient) {
@@ -63,39 +63,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
-// --- 新增：头像选择逻辑 ---
+// --- 头像选择逻辑 ---
 function renderAvatarSelector() {
     const container = document.getElementById('avatar-selector');
     container.innerHTML = '';
-
-    // 生成 5 个随机头像
     const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear'];
-
     seeds.forEach(seed => {
-        // 使用 DiceBear API 生成头像
         const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed + Math.random()}`;
-
         const div = document.createElement('div');
         div.className = 'avatar-option';
         div.innerHTML = `<img src="${url}">`;
-
         div.onclick = () => {
             document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
             div.classList.add('selected');
             selectedAvatarUrl = url;
         };
-
         container.appendChild(div);
     });
-
-    // 默认选中第一个
     if (container.firstChild) container.firstChild.click();
 }
 
-// --- 新增：优雅的提示框 (Toast) ---
+// --- 优雅的提示框 (Toast) ---
 function showToast(message, type = 'normal') {
     const container = document.getElementById('toast-container');
-    if (!container) return alert(message); // 保底
+    if (!container) return alert(message);
 
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -167,20 +158,36 @@ function toggleAuthModal() {
     document.getElementById('auth-modal').classList.remove('hidden');
 }
 
+// 社交登录
+async function handleOAuthLogin(provider) {
+    if (!supabaseClient) return showToast("SDK 未初始化", "error");
+
+    showToast(`正在前往 ${provider} 认证...`, "normal");
+
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: provider,
+            options: {
+                redirectTo: window.location.href, // 登录成功跳回当前页面
+                queryParams: { access_type: 'offline', prompt: 'consent' },
+            }
+        });
+        if (error) throw error;
+    } catch (e) {
+        console.error("OAuth Error:", e);
+        showToast("登录请求失败: " + e.message, "error");
+    }
+}
+
 async function handleRegister() {
     if (!supabaseClient) return showToast("SDK 初始化失败", "error");
 
-    // 如果用户已登录，则变成“更新资料”模式
+    // 更新资料模式
     if (currentUser) {
         if (!selectedAvatarUrl) return showToast("请先选择一个头像", "error");
-
-        const { data, error } = await supabaseClient.auth.updateUser({
-            data: { avatar_url: selectedAvatarUrl }
-        });
-
-        if (error) {
-            showToast("更新失败: " + error.message, "error");
-        } else {
+        const { data, error } = await supabaseClient.auth.updateUser({ data: { avatar_url: selectedAvatarUrl } });
+        if (error) showToast("更新失败: " + error.message, "error");
+        else {
             showToast("头像更新成功！", "success");
             document.getElementById('auth-modal').classList.add('hidden');
             updateUserStatus(data.user);
@@ -188,25 +195,19 @@ async function handleRegister() {
         return;
     }
 
-    // --- 正常的注册流程 ---
+    // 注册模式
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return showToast("请输入邮箱和密码", "error");
 
     try {
         const { data, error } = await supabaseClient.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { avatar_url: selectedAvatarUrl } // 注册时写入头像
-            }
+            email, password, options: { data: { avatar_url: selectedAvatarUrl } }
         });
-
-        if (error) {
-            showToast(error.message, "error");
-        } else {
+        if (error) showToast(error.message, "error");
+        else {
             showToast("注册成功！请去邮箱确认", "success");
-            document.getElementById('auth-modal').classList.add('hidden'); // 注册成功自动关闭
+            document.getElementById('auth-modal').classList.add('hidden');
         }
     } catch(e) {
         showToast("网络请求出错: " + e.message, "error");
@@ -340,7 +341,7 @@ function rgbToHex(col) {
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
 
-// --- 核心渲染函数 ---
+// --- 核心渲染函数 (修复了点击逻辑) ---
 function render() {
     const oldScrollTops = [];
     document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
@@ -374,6 +375,7 @@ function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
+            // 【点击/跳转修复】
             div.onclick = (e) => {
                 if (isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
@@ -400,7 +402,7 @@ function render() {
     if (isEditing) initSortable();
 }
 
-// --- Swiper 逻辑 ---
+// --- Swiper 逻辑 (含拖拽/触摸修复) ---
 function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
     swiper.addEventListener('mousedown', dragStart);
@@ -425,6 +427,7 @@ function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
         const diff = currentPosition - startPos;
+        // 修复：10px 阈值，防止误触
         if (Math.abs(diff) > 10) hasDragged = true;
         if (hasDragged) {
             currentTranslate = prevTranslate + diff;
@@ -438,6 +441,7 @@ function dragEnd(e) {
     isDragging = false;
     cancelAnimationFrame(animationID);
 
+    // 修复：触摸结束时手动跳转
     if (!hasDragged && e.type === 'touchend') {
         const targetItem = e.target.closest('.bookmark-item');
         if (targetItem && !isEditing && !e.target.classList.contains('delete-btn')) {
