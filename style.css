@@ -14,7 +14,6 @@ body {
     display: flex; flex-direction: column; align-items: center;
     box-sizing: border-box;
     visibility: hidden;
-    /* 简单适配深色模式文字颜色，JS会动态修改 */
     transition: color 0.3s ease;
 }
 
@@ -41,7 +40,7 @@ body {
 /* --- 滑动区域 (触摸修复核心) --- */
 .bookmark-swiper {
     width: 100%; overflow: hidden; flex-grow: 1;
-    touch-action: pan-y; /* 只允许垂直滚动，防止横滑手势被浏览器劫持 */
+    touch-action: pan-y;
 }
 
 .bookmark-swiper-wrapper {
@@ -130,9 +129,7 @@ body {
 }
 .is-editing .delete-btn { display: block; }
 
-/* 右下角编辑按钮样式已移除 */
-
-/* 编辑控制栏 */
+/* 编辑控制栏 (底部弹出) */
 .edit-controls {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: white; padding: 15px 25px; border-radius: 20px;
@@ -177,6 +174,7 @@ body {
 .toast.error { background: rgba(255, 59, 48, 0.9); }
 
 /* --- 用户按钮 (Login Button) --- */
+/* 右上角的触发区域，鼠标放上去才显示按钮 */
 .user-trigger-area {
     position: fixed; top: 0; right: 0;
     width: 100px; height: 100px;
@@ -184,28 +182,28 @@ body {
     padding: 20px; box-sizing: border-box;
 }
 
+/* 按钮主体，默认透明 opacity: 0 */
 .user-fab {
     width: 36px; height: 36px;
     background: rgba(0,0,0,0.3); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; backdrop-filter: blur(5px);
     transition: all 0.3s ease;
-    /* 默认状态：隐藏 */
     opacity: 0; transform: scale(0.8);
     overflow: hidden;
 }
 
-/* 交互优化：只有鼠标移入触发区域时才显示 */
+/* 交互核心：hover 父容器时，按钮变不透明 */
 .user-trigger-area:hover .user-fab {
     opacity: 1;
     transform: scale(1);
 }
 
-/* 登录后样式：只保留背景色变化，去掉强制显示 */
+/* 登录后样式：背景变白，去掉默认灰色底，但保持默认隐藏逻辑 */
 .user-fab.logged-in {
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    /* 删除了 opacity: 1; 和 transform: scale(1); 以实现自动隐藏 */
+    /* 注意：这里不写 opacity: 1，让它继承默认的 0，从而实现登录后也自动隐藏 */
 }
 
 .user-fab:hover { background: rgba(0,0,0,0.6); transform: scale(1.1); }
@@ -245,7 +243,7 @@ body {
 .menu-icon { font-size: 16px; width: 20px; text-align: center; color: #787774; }
 .menu-label { font-size: 11px; color: #999; font-weight: 600; padding: 8px 16px 4px; text-transform: uppercase; }
 
-/* --- 社交登录按钮样式 (圆球) --- */
+/* --- 社交登录按钮 --- */
 .social-login-section { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
 .social-icons { display: flex; gap: 25px; justify-content: center; }
 .social-btn {
@@ -257,7 +255,7 @@ body {
 .auth-divider { width: 100%; display: flex; align-items: center; justify-content: center; margin: 10px 0 20px 0; color: #999; font-size: 12px; }
 .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
 
-/* --- 头像选择器样式 --- */
+/* --- 头像选择器 --- */
 .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
 .avatar-option {
     width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
@@ -283,7 +281,6 @@ body {
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; margin-top: 10px; }
 
-/* 右上角关闭按钮 */
 .close-modal-btn {
     position: absolute; top: 15px; right: 15px;
     background: transparent; border: none; font-size: 28px; line-height: 1;
@@ -361,7 +358,6 @@ body {
     .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
     .page-title { text-align: left; margin-bottom: 0; padding-left: 4px; }
     .pagination-dots { bottom: 40px; }
-    /* 移除之前的 edit-trigger-area 样式覆盖 */
-    .edit-controls { display: none !important; }
+    .edit-controls { display: none !important; } /* 移动端不显示底部编辑栏，这部分逻辑与之前保持一致 */
     .user-trigger-area { top: 10px; right: 10px; }
 }

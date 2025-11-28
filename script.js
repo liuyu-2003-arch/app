@@ -135,7 +135,6 @@ function updateUserStatus(user) {
     }
 }
 
-// 核心逻辑：点击头像
 function toggleAuthModal() {
     if (currentUser) {
         const menu = document.getElementById('user-dropdown');
@@ -149,16 +148,19 @@ function toggleAuthModal() {
     }
 }
 
-// 新增：菜单点击“编辑模式”
+// 【新增功能】处理菜单中的“编辑模式”点击
 function handleMenuEdit() {
     const menu = document.getElementById('user-dropdown');
-    if (menu) menu.classList.remove('active');
+    // 1. 关闭下拉菜单
+    if (menu) {
+        menu.classList.remove('active');
+    }
+    // 2. 开启编辑模式 (这会弹出底部的 edit-controls)
     toggleEditMode(true);
 }
 
 function quickChangeTheme(color) {
     changeTheme(color);
-    // 简单适配深色模式字体
     document.body.style.color = (color === '#1a1a1a') ? '#fff' : '#333';
 }
 
