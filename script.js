@@ -1,33 +1,20 @@
-// ============================================
-// 【配置区域】已填入你的 Supabase 信息
-// ============================================
 const SUPABASE_URL = 'https://ossrsfyqbrzeauzksvpv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zc3JzZnlxYnJ6ZWF1emtzdnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMDgwMDksImV4cCI6MjA3OTY4NDAwOX0.IwEfjxM_wNBf2DXDC9ue8X6ztSOJV2rEN1vrQqv7eqI';
 
-// 初始化 Supabase 客户端
 let supabaseClient = null;
 let currentUser = null;
 let selectedAvatarUrl = '';
 
-// 检测 SDK 是否加载
 if (window.supabase && window.supabase.createClient) {
-    try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log("Supabase 初始化成功");
-    } catch (e) {
-        console.error("Supabase 初始化失败:", e);
-    }
+    try { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { console.error(e); }
 }
 
-// 全局变量
 let pages = [];
 let visualPages = [];
 let isEditing = false;
 let sortableInstances = [];
 let currentEditInfo = { pageIndex: -1, bookmarkIndex: -1 };
 let autoFillTimer = null;
-
-// Swiper state
 let currentPage = 0;
 let isDragging = false;
 let hasDragged = false;
@@ -40,32 +27,33 @@ let wheelTimeout = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.body.style.visibility = 'hidden';
-
     initTheme();
     initSwiper();
     initKeyboardControl();
     renderAvatarSelector();
 
-    // 初始化 Auth
-    if (supabaseClient) {
-        initAuth().then(() => {
-             if (!currentUser) loadData();
-        });
-    } else {
-        console.warn("SDK 未就绪，进入离线模式");
-        loadData();
-    }
-
-    window.addEventListener('resize', () => {
-        render();
-        updateSwiperPosition(false);
+    // 点击外部关闭菜单
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('user-dropdown');
+        const fab = document.querySelector('.user-fab');
+        if (menu && menu.classList.contains('active')) {
+            if (!menu.contains(e.target) && !fab.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        }
     });
+
+    if (supabaseClient) {
+        initAuth().then(() => { if (!currentUser) loadData(); });
+    } else { loadData(); }
+
+    window.addEventListener('resize', () => { render(); updateSwiperPosition(false); });
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
-// --- 头像选择逻辑 ---
 function renderAvatarSelector() {
     const container = document.getElementById('avatar-selector');
+    if(!container) return;
     container.innerHTML = '';
     const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear'];
     seeds.forEach(seed => {
@@ -83,43 +71,26 @@ function renderAvatarSelector() {
     if (container.firstChild) container.firstChild.click();
 }
 
-// --- 优雅的提示框 (Toast) ---
 function showToast(message, type = 'normal') {
     const container = document.getElementById('toast-container');
     if (!container) return alert(message);
-
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-
     container.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('visible'));
-    setTimeout(() => {
-        toast.classList.remove('visible');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// --- Auth 相关功能 ---
 async function initAuth() {
     if (!supabaseClient) return;
-
-    // 1. 读取 Session
     const { data: { session } } = await supabaseClient.auth.getSession();
-
-    // 2. 处理 OAuth 回调清理 URL
     if (window.location.hash && window.location.hash.includes('access_token')) {
         window.history.replaceState(null, '', window.location.pathname);
         showToast("第三方登录成功！", "success");
     }
-
-    // 3. 更新界面
     updateUserStatus(session?.user);
-
-    // 4. 监听状态
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
-        updateUserStatus(session?.user);
-    });
+    supabaseClient.auth.onAuthStateChange((_event, session) => { updateUserStatus(session?.user); });
 }
 
 function updateUserStatus(user) {
@@ -127,22 +98,16 @@ function updateUserStatus(user) {
     const fab = document.querySelector('.user-fab');
     const svgIcon = document.getElementById('user-icon-svg');
     const imgIcon = document.getElementById('user-avatar-img');
+    const formGroup = document.querySelector('.form-group');
+    const socialSection = document.querySelector('.social-login-section');
+    const divider = document.querySelector('.auth-divider');
+    const loginBtn = document.querySelector('.modal-actions button:not(.primary)');
+    const actionBtn = document.querySelector('.modal-actions .primary');
+    const modalTitle = document.getElementById('auth-title');
     const infoPanel = document.getElementById('user-info-panel');
 
-    // 获取需要控制显隐的 UI 元素
-    const formGroup = document.querySelector('.form-group'); // 邮箱密码框
-    const socialSection = document.querySelector('.social-login-section'); // 社交登录
-    const divider = document.querySelector('.auth-divider'); // 分割线
-    const loginBtn = document.querySelector('.modal-actions button:not(.primary)'); // 登录按钮
-    const actionBtn = document.querySelector('.modal-actions .primary'); // 注册/保存按钮
-    const modalTitle = document.getElementById('auth-title');
-
     if (user) {
-        // --- 登录状态 ---
         fab.classList.add('logged-in');
-        document.getElementById('current-email').innerText = user.email;
-
-        // 显示头像
         const avatarUrl = user.user_metadata?.avatar_url;
         if (avatarUrl) {
             imgIcon.src = avatarUrl;
@@ -153,128 +118,94 @@ function updateUserStatus(user) {
             svgIcon.style.display = 'block';
             svgIcon.setAttribute('fill', '#333');
         }
-
-        // 【核心修改】隐藏不需要的元素
-        if(formGroup) formGroup.style.display = 'none';
-        if(socialSection) socialSection.style.display = 'none';
-        if(divider) divider.style.display = 'none';
-        if(loginBtn) loginBtn.style.display = 'none';
-
-        // 修改剩余按钮的文案
-        if(actionBtn) actionBtn.textContent = "保存新头像";
-        if(modalTitle) modalTitle.textContent = "个人资料";
-
         if(infoPanel) infoPanel.classList.remove('hidden');
         loadData();
     } else {
-        // --- 未登录状态 ---
         fab.classList.remove('logged-in');
         imgIcon.style.display = 'none';
         svgIcon.style.display = 'block';
         svgIcon.setAttribute('fill', 'white');
-
-        // 【核心修改】恢复显示
         if(formGroup) formGroup.style.display = 'flex';
         if(socialSection) socialSection.style.display = 'flex';
         if(divider) divider.style.display = 'flex';
         if(loginBtn) loginBtn.style.display = 'block';
-
-        if(actionBtn) actionBtn.textContent = "注册";
+        if(actionBtn) actionBtn.textContent = "注册 / 更新";
         if(modalTitle) modalTitle.textContent = "登录 / 注册";
-
         if(infoPanel) infoPanel.classList.add('hidden');
     }
 }
 
+// 核心逻辑：点击头像
 function toggleAuthModal() {
-    document.getElementById('auth-modal').classList.remove('hidden');
+    if (currentUser) {
+        const menu = document.getElementById('user-dropdown');
+        document.getElementById('menu-user-name').innerText = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+        document.getElementById('menu-user-email').innerText = currentUser.email;
+        const avatar = currentUser.user_metadata?.avatar_url;
+        document.getElementById('menu-user-avatar').src = avatar || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
+        menu.classList.toggle('active');
+    } else {
+        document.getElementById('auth-modal').classList.remove('hidden');
+    }
 }
 
-// 社交登录
+function quickChangeTheme(color) {
+    changeTheme(color);
+    // 简单适配深色模式字体
+    document.body.style.color = (color === '#1a1a1a') ? '#fff' : '#333';
+}
+
 async function handleOAuthLogin(provider) {
     if (!supabaseClient) return showToast("SDK 未初始化", "error");
-
     showToast(`正在前往 ${provider} 认证...`, "normal");
-
     try {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: provider,
-            options: {
-                redirectTo: window.location.href,
-                queryParams: { access_type: 'offline', prompt: 'consent' },
-            }
+            options: { redirectTo: window.location.href, queryParams: { access_type: 'offline', prompt: 'consent' } }
         });
         if (error) throw error;
-    } catch (e) {
-        console.error("OAuth Error:", e);
-        showToast("登录请求失败: " + e.message, "error");
-    }
+    } catch (e) { showToast("登录失败: " + e.message, "error"); }
 }
 
 async function handleRegister() {
-    if (!supabaseClient) return showToast("SDK 初始化失败", "error");
-
-    // 更新资料模式 (已登录)
+    if (!supabaseClient) return showToast("SDK Error", "error");
     if (currentUser) {
-        if (!selectedAvatarUrl) return showToast("请先选择一个头像", "error");
-
-        const { data, error } = await supabaseClient.auth.updateUser({
-            data: { avatar_url: selectedAvatarUrl }
-        });
-
-        if (error) {
-            showToast("更新失败: " + error.message, "error");
-        } else {
-            showToast("头像更新成功！", "success");
-            // 这里不关闭弹窗，方便用户看效果，或者可以加上:
-            // document.getElementById('auth-modal').classList.add('hidden');
-            updateUserStatus(data.user);
-        }
+        if (!selectedAvatarUrl) return showToast("请先选择头像", "error");
+        const { data, error } = await supabaseClient.auth.updateUser({ data: { avatar_url: selectedAvatarUrl } });
+        if (error) showToast(error.message, "error");
+        else { showToast("更新成功", "success"); document.getElementById('auth-modal').classList.add('hidden'); updateUserStatus(data.user); }
         return;
     }
-
-    // 注册模式 (未登录)
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    if(!email || !password) return showToast("请输入邮箱和密码", "error");
-
+    if(!email || !password) return showToast("请输入邮箱密码", "error");
     try {
-        const { data, error } = await supabaseClient.auth.signUp({
-            email, password, options: { data: { avatar_url: selectedAvatarUrl } }
-        });
+        const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { avatar_url: selectedAvatarUrl } } });
         if (error) showToast(error.message, "error");
-        else {
-            showToast("注册成功！请去邮箱确认", "success");
-            document.getElementById('auth-modal').classList.add('hidden');
-        }
-    } catch(e) {
-        showToast("网络请求出错: " + e.message, "error");
-    }
+        else { showToast("注册成功，请查收邮件", "success"); document.getElementById('auth-modal').classList.add('hidden'); }
+    } catch(e) { showToast(e.message, "error"); }
 }
 
 async function handleLogin() {
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    if(!email || !password) return showToast("请输入邮箱和密码", "error");
-    if (!supabaseClient) return showToast("连接失败：SDK 未初始化", "error");
-
+    if(!email || !password) return showToast("请输入信息", "error");
+    if (!supabaseClient) return showToast("SDK Error", "error");
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) showToast("登录失败：" + error.message, "error");
-    else {
-        showToast("登录成功！", "success");
-        document.getElementById('auth-modal').classList.add('hidden');
-    }
+    if (error) showToast(error.message, "error");
+    else { showToast("登录成功", "success"); document.getElementById('auth-modal').classList.add('hidden'); }
 }
 
 async function handleLogout() {
     if (supabaseClient) await supabaseClient.auth.signOut();
-    document.getElementById('auth-modal').classList.add('hidden');
+    document.getElementById('user-dropdown').classList.remove('active');
     showToast("已退出登录", "normal");
     loadData();
 }
 
-// --- 数据加载与保存 ---
-
+// ... (以下 loadData, saveData, render, swiper 等保持原有逻辑不变，直接粘贴即可) ...
+// 为节省篇幅，这里请保留你之前文件中 loadData 及之后的全部代码
+// 必须保留的函数：loadData, saveData, generateUniqueId, ensureBookmarkIds, migrateData, createVisualPages, initTheme, changeTheme, rgbToHex, render, initSwiper, dragStart, drag, dragEnd, getPositionX, animation, setSwiperPosition, updateSwiperPosition, handleWheel, showPaginationDots, renderPaginationDots, selectStyle, selectPage, renderPageOptions, openModal, closeModal, openPageEditModal, closePageEditModal, renderPageList, generateIconCandidates, renderRandomButtons, autoFillInfo, updatePreview, saveBookmark, toggleEditMode, addPage, deletePage, initSortable, deleteBookmark, exportConfig, importConfig, handleImport, initKeyboardControl, triggerKeyboardBounce
 async function loadData() {
     if (currentUser && supabaseClient) {
         try {
@@ -293,7 +224,6 @@ async function loadData() {
             }
         } catch (e) { console.error("云端加载失败", e); }
     }
-
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
@@ -327,7 +257,6 @@ async function saveData() {
     }
 }
 
-// --- 工具函数 ---
 function generateUniqueId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 function ensureBookmarkIds(pages) {
     pages.forEach(page => page.bookmarks.forEach(bookmark => { if (!bookmark.id) bookmark.id = generateUniqueId(); }));
@@ -378,8 +307,6 @@ function rgbToHex(col) {
     if(!rgb) return '#e4d0e5';
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
-
-// --- 核心渲染函数 ---
 function render() {
     const oldScrollTops = [];
     document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
@@ -438,8 +365,6 @@ function render() {
     renderPaginationDots();
     if (isEditing) initSortable();
 }
-
-// --- Swiper 逻辑 ---
 function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
     swiper.addEventListener('mousedown', dragStart);
@@ -451,7 +376,6 @@ function initSwiper() {
     swiper.addEventListener('touchmove', drag, { passive: false });
     swiper.addEventListener('wheel', handleWheel, { passive: false });
 }
-
 function dragStart(e) {
     if (isEditing && e.target.closest('.bookmark-item')) { isDragging = false; return; }
     isDragging = true; hasDragged = false;
@@ -459,7 +383,6 @@ function dragStart(e) {
     animationID = requestAnimationFrame(animation);
     document.getElementById('bookmark-swiper-wrapper').style.transition = 'none';
 }
-
 function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
@@ -471,30 +394,23 @@ function drag(e) {
         }
     }
 }
-
 function dragEnd(e) {
     if (!isDragging) return;
     isDragging = false;
     cancelAnimationFrame(animationID);
-
     if (!hasDragged && e.type === 'touchend') {
         const targetItem = e.target.closest('.bookmark-item');
         if (targetItem && !isEditing && !e.target.classList.contains('delete-btn')) {
             const bookmarkId = targetItem.dataset.id;
             for (const page of pages) {
                 const bookmark = page.bookmarks.find(b => b.id === bookmarkId);
-                if (bookmark && bookmark.url) {
-                    window.location.href = bookmark.url;
-                    return;
-                }
+                if (bookmark && bookmark.url) { window.location.href = bookmark.url; return; }
             }
         }
     }
-
     const movedBy = currentTranslate - prevTranslate;
     const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
     let targetPage = currentPage;
-
     if (hasDragged) {
         if (movedBy < -swiperWidth * 0.15 && currentPage < visualPages.length - 1) targetPage++;
         else if (movedBy > swiperWidth * 0.15 && currentPage > 0) targetPage--;
@@ -504,7 +420,6 @@ function dragEnd(e) {
     renderPaginationDots();
     showPaginationDots();
 }
-
 function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
 function animation() { setSwiperPosition(); if (isDragging) requestAnimationFrame(animation); }
 function setSwiperPosition() { document.getElementById('bookmark-swiper-wrapper').style.transform = `translateX(${currentTranslate}px)`; }
@@ -537,7 +452,6 @@ function handleWheel(e) {
         updateSwiperPosition(true); renderPaginationDots();
     }, 60);
 }
-
 function showPaginationDots() {
     const dotsContainer = document.getElementById('pagination-dots');
     if (!dotsContainer || visualPages.length <= 1) return;
@@ -557,8 +471,6 @@ function renderPaginationDots() {
         dotsContainer.appendChild(dot);
     }
 }
-
-// --- 模态框逻辑 ---
 function selectStyle(element) { document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active')); element.classList.add('active'); updatePreview(); }
 function selectPage(element) { document.querySelectorAll('.page-option').forEach(opt => opt.classList.remove('active')); element.classList.add('active'); }
 function renderPageOptions(selectedPageIndex) {

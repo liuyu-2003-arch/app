@@ -178,6 +178,37 @@ body {
 .user-fab.logged-in { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 .user-fab img { width: 100%; height: 100%; object-fit: cover; }
 
+/* --- 用户下拉菜单 (User Menu) --- */
+.user-menu {
+    position: fixed;
+    top: 70px; right: 20px; width: 260px;
+    background: white; border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    z-index: 2000; padding: 8px 0;
+    opacity: 0; transform: translateY(-10px) scale(0.95);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 14px; color: #37352f; border: 1px solid rgba(0,0,0,0.05);
+}
+.user-menu.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.menu-header { display: flex; align-items: center; padding: 8px 16px 12px; gap: 12px; }
+.user-avatar-small {
+    width: 36px; height: 36px; border-radius: 50%; overflow: hidden;
+    background: #f0f0f0; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;
+}
+.user-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
+.user-info-text { overflow: hidden; }
+.u-name { font-weight: 600; color: #333; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.u-email { color: #888; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 4px 0; }
+.menu-item {
+    display: flex; align-items: center; padding: 8px 16px; cursor: pointer;
+    transition: background 0.1s; gap: 10px; user-select: none;
+}
+.menu-item:hover { background: rgba(0,0,0,0.04); }
+.menu-icon { font-size: 16px; width: 20px; text-align: center; color: #787774; }
+.menu-label { font-size: 11px; color: #999; font-weight: 600; padding: 8px 16px 4px; text-transform: uppercase; }
+
 /* --- 社交登录按钮样式 --- */
 .social-login-section { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
 .social-icons { display: flex; gap: 25px; justify-content: center; }
@@ -200,6 +231,16 @@ body {
 .avatar-option img { width: 100%; height: 100%; }
 .avatar-option:hover { transform: scale(1.1); }
 .avatar-option.selected { border-color: #007AFF; box-shadow: 0 0 0 2px rgba(0,122,255,0.3); }
+
+/* 右上角关闭按钮 */
+.close-modal-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: transparent; border: none; font-size: 28px; line-height: 1;
+    color: #ccc; cursor: pointer; padding: 0; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center; transition: color 0.2s; z-index: 10;
+}
+.close-modal-btn:hover { color: #333; }
+.modal-content h3 { margin-top: 10px; }
 
 /* 编辑控制栏 */
 .edit-controls {
@@ -308,34 +349,4 @@ body {
     .edit-trigger-area { display: none !important; }
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
-}
-
-/* --- 新增：右上角关闭按钮样式 --- */
-.close-modal-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: transparent;
-    border: none;
-    font-size: 28px;
-    line-height: 1;
-    color: #ccc;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-    z-index: 10;
-}
-
-.close-modal-btn:hover {
-    color: #333;
-}
-
-/* 调整一下标题的边距，防止被关闭按钮挡住 */
-.modal-content h3 {
-    margin-top: 10px;
 }

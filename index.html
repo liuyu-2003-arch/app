@@ -31,6 +31,46 @@
         </div>
     </div>
 
+    <div id="user-dropdown" class="user-menu hidden">
+        <div class="menu-header">
+            <div class="user-avatar-small">
+                <img id="menu-user-avatar" src="" alt="">
+            </div>
+            <div class="user-info-text">
+                <div id="menu-user-name" class="u-name">Guest</div>
+                <div id="menu-user-email" class="u-email">guest@example.com</div>
+            </div>
+        </div>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-item" onclick="showToast('功能开发中...', 'normal')">
+            <span class="menu-icon">⚙️</span> Account preferences
+        </div>
+        <div class="menu-item" onclick="showToast('暂无新功能', 'normal')">
+            <span class="menu-icon">⚗️</span> Feature previews
+        </div>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-label">Theme</div>
+        <div class="menu-item" onclick="quickChangeTheme('#f5f7f9')">
+            <span class="menu-icon">⚪</span> Light (Default)
+        </div>
+        <div class="menu-item" onclick="quickChangeTheme('#1a1a1a')">
+            <span class="menu-icon">⚫</span> Dark
+        </div>
+        <div class="menu-item" onclick="quickChangeTheme('#e4d0e5')">
+            <span class="menu-icon">🌸</span> Pink (Original)
+        </div>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-item" onclick="handleLogout()">
+            <span class="menu-icon">🚪</span> Log out
+        </div>
+    </div>
+
     <div class="container">
         <div id="bookmark-swiper" class="bookmark-swiper">
             <div id="bookmark-swiper-wrapper" class="bookmark-swiper-wrapper">
@@ -125,7 +165,7 @@
             <button class="close-modal-btn" onclick="document.getElementById('auth-modal').classList.add('hidden')">×</button>
 
             <h3 id="auth-title">登录 / 注册</h3>
-            <p style="font-size: 12px; color: #666; text-align: center; margin-top: -10px; margin-bottom: 15px;">选择一个头像 (注册或更新资料时生效)</p>
+            <p style="font-size: 12px; color: #666; text-align: center; margin-top: -10px; margin-bottom: 20px;">选择一个头像 (注册或更新资料时生效)</p>
 
             <div id="avatar-selector" class="avatar-grid"></div>
 
@@ -145,10 +185,9 @@
                 <button class="primary" onclick="handleRegister()">注册 / 更新</button>
             </div>
 
-            <div id="user-info-panel" class="hidden" style="text-align: center; width: 100%; margin-bottom: 10px;">
+            <div id="user-info-panel" class="hidden" style="text-align: center; width: 100%;">
                 <p>已登录: <span id="current-email"></span></p>
-                <button onclick="handleLogout()" style="background: #ff4d4d; color: white; width: 100%; padding: 10px; border: none; border-radius: 10px; cursor: pointer;">退出登录</button>
-            </div>
+                </div>
 
             <div class="auth-divider">或使用第三方账号</div>
 
