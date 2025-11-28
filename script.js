@@ -101,27 +101,25 @@ function showToast(message, type = 'normal') {
 }
 
 // --- Auth 相关功能 (修复了 OAuth 回调后的 URL 清理) ---
+// --- Auth 相关功能 ---
 async function initAuth() {
     if (!supabaseClient) return;
 
-    // 1. 获取当前会话 (Supabase 会自动解析 URL 中的 hash)
-    const { data: { session } } = await supabaseClient.auth.getSession();
-
-    // 2. 如果检测到是从 Google/GitHub 跳转回来的 (URL 里有 hash)
+    // 1. 自动处理 OAuth 跳转回来的情况
+    // 如果地址栏里有 access_token，说明是第三方登录跳回来的
     if (window.location.hash && window.location.hash.includes('access_token')) {
-        // 清除浏览器地址栏的乱码，只保留干净的域名 (不刷新页面)
+        // 清理地址栏，去掉那些乱码
         window.history.replaceState(null, '', window.location.pathname);
-
-        // 提示用户
-        if (session) {
-            showToast("第三方登录成功！", "success");
-        }
+        showToast("第三方登录成功！", "success");
     }
 
-    // 3. 更新 UI 状态
+    // 2. 获取当前会话状态
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    // 3. 更新界面 (显示头像等)
     updateUserStatus(session?.user);
 
-    // 4. 开启监听 (保持登录态同步)
+    // 4. 监听后续状态变化 (比如登出)
     supabaseClient.auth.onAuthStateChange((_event, session) => {
         updateUserStatus(session?.user);
     });
