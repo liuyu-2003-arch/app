@@ -148,14 +148,9 @@ function toggleAuthModal() {
     }
 }
 
-// 【新增功能】处理菜单中的“编辑模式”点击
 function handleMenuEdit() {
     const menu = document.getElementById('user-dropdown');
-    // 1. 关闭下拉菜单
-    if (menu) {
-        menu.classList.remove('active');
-    }
-    // 2. 开启编辑模式 (这会弹出底部的 edit-controls)
+    if (menu) menu.classList.remove('active');
     toggleEditMode(true);
 }
 
@@ -191,24 +186,46 @@ async function handleRegister() {
     try {
         const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { avatar_url: selectedAvatarUrl } } });
         if (error) showToast(error.message, "error");
-        else { showToast("注册成功，请查收邮件", "success"); document.getElementById('auth-modal').classList.add('hidden'); }
+        else {
+            showToast("注册成功，请查收邮件", "success");
+            document.getElementById('auth-modal').classList.add('hidden');
+            // 修复：如果注册后直接返回了会话（例如无需验证邮箱），也手动更新状态
+            if (data && data.user && data.session) {
+                updateUserStatus(data.user);
+            }
+        }
     } catch(e) { showToast(e.message, "error"); }
 }
 
+// 【修复核心】handleLogin 函数
 async function handleLogin() {
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return showToast("请输入信息", "error");
     if (!supabaseClient) return showToast("SDK Error", "error");
+
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) showToast(error.message, "error");
-    else { showToast("登录成功", "success"); document.getElementById('auth-modal').classList.add('hidden'); }
+
+    if (error) {
+        showToast(error.message, "error");
+    } else {
+        showToast("登录成功", "success");
+        document.getElementById('auth-modal').classList.add('hidden');
+
+        // 【关键修改】显式调用 updateUserStatus，解决"需要登录两次"的Bug
+        if (data && data.user) {
+            updateUserStatus(data.user);
+        }
+    }
 }
 
 async function handleLogout() {
     if (supabaseClient) await supabaseClient.auth.signOut();
     document.getElementById('user-dropdown').classList.remove('active');
     showToast("已退出登录", "normal");
+    // 显式更新状态为 null
+    updateUserStatus(null);
+    // 加载默认数据
     loadData();
 }
 
