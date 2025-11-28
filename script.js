@@ -44,12 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initSwiper();
     initKeyboardControl();
-    renderAvatarSelector(); // 初始化头像选择器
+    renderAvatarSelector();
 
     // 初始化 Auth
     if (supabaseClient) {
         initAuth().then(() => {
-             // 如果 initAuth 里没加载到数据（没登录），则加载本地数据
              if (!currentUser) loadData();
         });
     } else {
@@ -101,16 +100,15 @@ function showToast(message, type = 'normal') {
     }, 3000);
 }
 
-// --- Auth 相关功能 (核心修复) ---
+// --- Auth 相关功能 ---
 async function initAuth() {
     if (!supabaseClient) return;
 
-    // 1. 【核心修复】先让 Supabase 读取 URL 里的令牌，建立会话
+    // 1. 读取 Session
     const { data: { session } } = await supabaseClient.auth.getSession();
 
-    // 2. 只有在获取 session 之后，才清理 URL
+    // 2. 处理 OAuth 回调清理 URL
     if (window.location.hash && window.location.hash.includes('access_token')) {
-        // 清理地址栏，去掉那些乱码
         window.history.replaceState(null, '', window.location.pathname);
         showToast("第三方登录成功！", "success");
     }
@@ -118,7 +116,7 @@ async function initAuth() {
     // 3. 更新界面
     updateUserStatus(session?.user);
 
-    // 4. 监听后续状态变化
+    // 4. 监听状态
     supabaseClient.auth.onAuthStateChange((_event, session) => {
         updateUserStatus(session?.user);
     });
@@ -129,14 +127,22 @@ function updateUserStatus(user) {
     const fab = document.querySelector('.user-fab');
     const svgIcon = document.getElementById('user-icon-svg');
     const imgIcon = document.getElementById('user-avatar-img');
-    const authActions = document.querySelector('.modal-actions');
     const infoPanel = document.getElementById('user-info-panel');
 
+    // 获取需要控制显隐的 UI 元素
+    const formGroup = document.querySelector('.form-group'); // 邮箱密码框
+    const socialSection = document.querySelector('.social-login-section'); // 社交登录
+    const divider = document.querySelector('.auth-divider'); // 分割线
+    const loginBtn = document.querySelector('.modal-actions button:not(.primary)'); // 登录按钮
+    const actionBtn = document.querySelector('.modal-actions .primary'); // 注册/保存按钮
+    const modalTitle = document.getElementById('auth-title');
+
     if (user) {
+        // --- 登录状态 ---
         fab.classList.add('logged-in');
         document.getElementById('current-email').innerText = user.email;
 
-        // 获取用户头像 (优先使用第三方头像)
+        // 显示头像
         const avatarUrl = user.user_metadata?.avatar_url;
         if (avatarUrl) {
             imgIcon.src = avatarUrl;
@@ -148,21 +154,33 @@ function updateUserStatus(user) {
             svgIcon.setAttribute('fill', '#333');
         }
 
-        if(authActions) authActions.style.display = 'flex';
-        const regBtn = authActions.querySelector('.primary');
-        if(regBtn) regBtn.textContent = "更新头像";
+        // 【核心修改】隐藏不需要的元素
+        if(formGroup) formGroup.style.display = 'none';
+        if(socialSection) socialSection.style.display = 'none';
+        if(divider) divider.style.display = 'none';
+        if(loginBtn) loginBtn.style.display = 'none';
+
+        // 修改剩余按钮的文案
+        if(actionBtn) actionBtn.textContent = "保存新头像";
+        if(modalTitle) modalTitle.textContent = "个人资料";
 
         if(infoPanel) infoPanel.classList.remove('hidden');
-        loadData(); // 登录成功，拉取云端数据
+        loadData();
     } else {
+        // --- 未登录状态 ---
         fab.classList.remove('logged-in');
         imgIcon.style.display = 'none';
         svgIcon.style.display = 'block';
         svgIcon.setAttribute('fill', 'white');
 
-        if(authActions) authActions.style.display = 'flex';
-        const regBtn = authActions.querySelector('.primary');
-        if(regBtn) regBtn.textContent = "注册";
+        // 【核心修改】恢复显示
+        if(formGroup) formGroup.style.display = 'flex';
+        if(socialSection) socialSection.style.display = 'flex';
+        if(divider) divider.style.display = 'flex';
+        if(loginBtn) loginBtn.style.display = 'block';
+
+        if(actionBtn) actionBtn.textContent = "注册";
+        if(modalTitle) modalTitle.textContent = "登录 / 注册";
 
         if(infoPanel) infoPanel.classList.add('hidden');
     }
@@ -182,7 +200,7 @@ async function handleOAuthLogin(provider) {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: provider,
             options: {
-                redirectTo: window.location.href, // 登录成功跳回当前页面
+                redirectTo: window.location.href,
                 queryParams: { access_type: 'offline', prompt: 'consent' },
             }
         });
@@ -196,20 +214,26 @@ async function handleOAuthLogin(provider) {
 async function handleRegister() {
     if (!supabaseClient) return showToast("SDK 初始化失败", "error");
 
-    // 更新资料模式
+    // 更新资料模式 (已登录)
     if (currentUser) {
         if (!selectedAvatarUrl) return showToast("请先选择一个头像", "error");
-        const { data, error } = await supabaseClient.auth.updateUser({ data: { avatar_url: selectedAvatarUrl } });
-        if (error) showToast("更新失败: " + error.message, "error");
-        else {
+
+        const { data, error } = await supabaseClient.auth.updateUser({
+            data: { avatar_url: selectedAvatarUrl }
+        });
+
+        if (error) {
+            showToast("更新失败: " + error.message, "error");
+        } else {
             showToast("头像更新成功！", "success");
-            document.getElementById('auth-modal').classList.add('hidden');
+            // 这里不关闭弹窗，方便用户看效果，或者可以加上:
+            // document.getElementById('auth-modal').classList.add('hidden');
             updateUserStatus(data.user);
         }
         return;
     }
 
-    // 注册模式
+    // 注册模式 (未登录)
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return showToast("请输入邮箱和密码", "error");
@@ -260,7 +284,6 @@ async function loadData() {
                 .eq('user_id', currentUser.id)
                 .single();
             if (data && data.config_data) {
-                console.log("云端数据加载成功");
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
                 localStorage.setItem('pagedData', JSON.stringify(pages));
@@ -271,7 +294,6 @@ async function loadData() {
         } catch (e) { console.error("云端加载失败", e); }
     }
 
-    console.log("加载本地数据");
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
