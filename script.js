@@ -206,24 +206,38 @@ async function handleLogout() {
 // ... (以下 loadData, saveData, render, swiper 等保持原有逻辑不变，直接粘贴即可) ...
 // 为节省篇幅，这里请保留你之前文件中 loadData 及之后的全部代码
 // 必须保留的函数：loadData, saveData, generateUniqueId, ensureBookmarkIds, migrateData, createVisualPages, initTheme, changeTheme, rgbToHex, render, initSwiper, dragStart, drag, dragEnd, getPositionX, animation, setSwiperPosition, updateSwiperPosition, handleWheel, showPaginationDots, renderPaginationDots, selectStyle, selectPage, renderPageOptions, openModal, closeModal, openPageEditModal, closePageEditModal, renderPageList, generateIconCandidates, renderRandomButtons, autoFillInfo, updatePreview, saveBookmark, toggleEditMode, addPage, deletePage, initSortable, deleteBookmark, exportConfig, importConfig, handleImport, initKeyboardControl, triggerKeyboardBounce
+// --- 修改后的 loadData 函数 ---
 async function loadData() {
     if (currentUser && supabaseClient) {
         try {
+            // 【核心修复】将 .single() 改为 .maybeSingle()
+            // 这样新用户没有数据时，不会报 406 红字错误，而是优雅地返回 null
             const { data, error } = await supabaseClient
                 .from('user_configs')
                 .select('config_data')
                 .eq('user_id', currentUser.id)
-                .single();
-            if (data && data.config_data) {
+                .maybeSingle();
+
+            if (error) {
+                console.warn("云端查询轻微异常:", error.message);
+            } else if (data && data.config_data) {
+                console.log("云端数据加载成功");
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
                 localStorage.setItem('pagedData', JSON.stringify(pages));
                 render();
                 document.body.style.visibility = 'visible';
                 return;
+            } else {
+                console.log("新用户或云端无数据，使用本地/默认配置");
             }
-        } catch (e) { console.error("云端加载失败", e); }
+        } catch (e) {
+            console.error("云端加载严重错误", e);
+        }
     }
+
+    // --- 下面是本地加载逻辑 (保持不变) ---
+    console.log("加载本地数据");
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
