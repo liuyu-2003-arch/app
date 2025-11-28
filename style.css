@@ -14,6 +14,8 @@ body {
     display: flex; flex-direction: column; align-items: center;
     box-sizing: border-box;
     visibility: hidden;
+    /* 简单适配深色模式文字颜色，JS会动态修改 */
+    transition: color 0.3s ease;
 }
 
 /* --- 背景层 --- */
@@ -36,9 +38,10 @@ body {
     padding-top: 6vh; padding-bottom: 0; box-sizing: border-box;
 }
 
+/* --- 滑动区域 (触摸修复核心) --- */
 .bookmark-swiper {
     width: 100%; overflow: hidden; flex-grow: 1;
-    touch-action: pan-y;
+    touch-action: pan-y; /* 只允许垂直滚动，防止横滑手势被浏览器劫持 */
 }
 
 .bookmark-swiper-wrapper {
@@ -60,11 +63,12 @@ body {
 }
 
 .page-title {
-    grid-column: 1 / -1; font-size: 24px; font-weight: 600; color: #333;
+    grid-column: 1 / -1; font-size: 24px; font-weight: 600; color: inherit;
     margin: 0 0 5px 0; text-shadow: 0 1px 2px rgba(255,255,255,0.8);
     padding: 5px; border-radius: 8px;
 }
 
+/* --- 书签图标 --- */
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
@@ -92,11 +96,12 @@ body {
 .hidden { display: none !important; }
 
 .bookmark-title {
-    margin-top: 8px; font-size: 13px; color: #444; text-align: center;
+    margin-top: 8px; font-size: 13px; color: inherit; text-align: center;
     width: 120%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     font-weight: 500; text-shadow: 0 1px 2px rgba(255,255,255,0.8);
 }
 
+/* 编辑模式抖动动画 */
 @keyframes ios-jiggle {
     0% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } 100% { transform: rotate(-1.5deg); }
 }
@@ -125,6 +130,7 @@ body {
 }
 .is-editing .delete-btn { display: block; }
 
+/* 右下角编辑按钮 */
 .edit-trigger-area {
     position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;
     display: flex; align-items: center; justify-content: center; z-index: 100;
@@ -137,7 +143,7 @@ body {
 }
 .edit-trigger-area:hover .edit-fab { opacity: 1; transform: scale(1); }
 
-/* --- 顶部提示条 (Toast) 样式 --- */
+/* --- 顶部提示条 (Toast) --- */
 .toast-container {
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
     z-index: 9999; display: flex; flex-direction: column; gap: 10px;
@@ -155,7 +161,7 @@ body {
 .toast.success { background: rgba(52, 199, 89, 0.9); }
 .toast.error { background: rgba(255, 59, 48, 0.9); }
 
-/* --- 用户按钮 (隐形交互优化) --- */
+/* --- 用户按钮 (Login Button) --- */
 .user-trigger-area {
     position: fixed; top: 0; right: 0;
     width: 100px; height: 100px;
@@ -173,12 +179,19 @@ body {
     overflow: hidden;
 }
 
-.user-trigger-area:hover .user-fab { opacity: 1; transform: scale(1); }
+/* 交互优化：鼠标移入时显示，或者【登录后常驻显示】 */
+.user-trigger-area:hover .user-fab,
+.user-fab.logged-in {
+    opacity: 1;
+    transform: scale(1);
+}
+
 .user-fab:hover { background: rgba(0,0,0,0.6); transform: scale(1.1); }
+/* 登录后样式：白色底，有阴影 */
 .user-fab.logged-in { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 .user-fab img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- 用户下拉菜单 (User Menu) --- */
+/* --- 登录后下拉菜单 (User Menu) --- */
 .user-menu {
     position: fixed;
     top: 70px; right: 20px; width: 260px;
@@ -186,11 +199,12 @@ body {
     box-shadow: 0 10px 40px rgba(0,0,0,0.15);
     z-index: 2000; padding: 8px 0;
     opacity: 0; transform: translateY(-10px) scale(0.95);
-    pointer-events: none;
+    pointer-events: none; /* 隐藏时不可点 */
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     font-size: 14px; color: #37352f; border: 1px solid rgba(0,0,0,0.05);
 }
 .user-menu.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
 .menu-header { display: flex; align-items: center; padding: 8px 16px 12px; gap: 12px; }
 .user-avatar-small {
     width: 36px; height: 36px; border-radius: 50%; overflow: hidden;
@@ -209,7 +223,7 @@ body {
 .menu-icon { font-size: 16px; width: 20px; text-align: center; color: #787774; }
 .menu-label { font-size: 11px; color: #999; font-weight: 600; padding: 8px 16px 4px; text-transform: uppercase; }
 
-/* --- 社交登录按钮样式 --- */
+/* --- 社交登录按钮样式 (圆球) --- */
 .social-login-section { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
 .social-icons { display: flex; gap: 25px; justify-content: center; }
 .social-btn {
@@ -232,37 +246,7 @@ body {
 .avatar-option:hover { transform: scale(1.1); }
 .avatar-option.selected { border-color: #007AFF; box-shadow: 0 0 0 2px rgba(0,122,255,0.3); }
 
-/* 右上角关闭按钮 */
-.close-modal-btn {
-    position: absolute; top: 15px; right: 15px;
-    background: transparent; border: none; font-size: 28px; line-height: 1;
-    color: #ccc; cursor: pointer; padding: 0; width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center; transition: color 0.2s; z-index: 10;
-}
-.close-modal-btn:hover { color: #333; }
-.modal-content h3 { margin-top: 10px; }
-
-/* 编辑控制栏 */
-.edit-controls {
-    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
-    padding: 10px 20px; border-radius: 30px; display: flex; gap: 15px; align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 101; transition: bottom 0.4s;
-}
-.edit-controls.hidden { bottom: -100px; }
-.edit-controls button { border: none; background: #f0f0f0; padding: 8px 16px; border-radius: 15px; font-weight: 600; cursor: pointer; color: #333; white-space: nowrap;}
-.edit-controls button.done-btn { background: #007AFF; color: white; }
-
-/* 调色盘 */
-.theme-swatches { display: flex; gap: 8px; padding-right: 10px; border-right: 1px solid #ddd; }
-.swatch {
-    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
-    border: 2px solid transparent; transition: transform 0.2s;
-}
-.swatch:hover { transform: scale(1.1); }
-.swatch.active { border-color: #333; transform: scale(1.1); }
-
-/* 弹窗样式 */
+/* --- 弹窗样式 --- */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;
@@ -275,7 +259,16 @@ body {
     animation: popUp 0.3s ease;
 }
 @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; }
+.modal-content h3 { margin: 0; font-size: 18px; color: #333; text-align: center; margin-top: 10px; }
+
+/* 右上角关闭按钮 */
+.close-modal-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: transparent; border: none; font-size: 28px; line-height: 1;
+    color: #ccc; cursor: pointer; padding: 0; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center; transition: color 0.2s; z-index: 10;
+}
+.close-modal-btn:hover { color: #333; }
 
 .modal-top-split { display: flex; gap: 15px; background: #f5f7f9; padding: 15px; border-radius: 16px; align-items: stretch; }
 .preview-section { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #e0e0e0; padding-right: 15px; flex-shrink: 0; }
