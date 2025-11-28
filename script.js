@@ -149,6 +149,13 @@ function toggleAuthModal() {
     }
 }
 
+// 新增：菜单点击“编辑模式”
+function handleMenuEdit() {
+    const menu = document.getElementById('user-dropdown');
+    if (menu) menu.classList.remove('active');
+    toggleEditMode(true);
+}
+
 function quickChangeTheme(color) {
     changeTheme(color);
     // 简单适配深色模式字体
@@ -203,15 +210,9 @@ async function handleLogout() {
     loadData();
 }
 
-// ... (以下 loadData, saveData, render, swiper 等保持原有逻辑不变，直接粘贴即可) ...
-// 为节省篇幅，这里请保留你之前文件中 loadData 及之后的全部代码
-// 必须保留的函数：loadData, saveData, generateUniqueId, ensureBookmarkIds, migrateData, createVisualPages, initTheme, changeTheme, rgbToHex, render, initSwiper, dragStart, drag, dragEnd, getPositionX, animation, setSwiperPosition, updateSwiperPosition, handleWheel, showPaginationDots, renderPaginationDots, selectStyle, selectPage, renderPageOptions, openModal, closeModal, openPageEditModal, closePageEditModal, renderPageList, generateIconCandidates, renderRandomButtons, autoFillInfo, updatePreview, saveBookmark, toggleEditMode, addPage, deletePage, initSortable, deleteBookmark, exportConfig, importConfig, handleImport, initKeyboardControl, triggerKeyboardBounce
-// --- 修改后的 loadData 函数 ---
 async function loadData() {
     if (currentUser && supabaseClient) {
         try {
-            // 【核心修复】将 .single() 改为 .maybeSingle()
-            // 这样新用户没有数据时，不会报 406 红字错误，而是优雅地返回 null
             const { data, error } = await supabaseClient
                 .from('user_configs')
                 .select('config_data')
@@ -236,7 +237,6 @@ async function loadData() {
         }
     }
 
-    // --- 下面是本地加载逻辑 (保持不变) ---
     console.log("加载本地数据");
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {

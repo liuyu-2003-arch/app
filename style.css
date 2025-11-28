@@ -130,18 +130,33 @@ body {
 }
 .is-editing .delete-btn { display: block; }
 
-/* 右下角编辑按钮 */
-.edit-trigger-area {
-    position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;
-    display: flex; align-items: center; justify-content: center; z-index: 100;
+/* 右下角编辑按钮样式已移除 */
+
+/* 编辑控制栏 */
+.edit-controls {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: white; padding: 15px 25px; border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 1000;
+    display: flex; align-items: center; gap: 15px;
+    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.edit-fab {
-    width: 40px; height: 40px; background: #333; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; transform: scale(0.8); transition: all 0.3s; cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+@keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.edit-controls button {
+    background: #f0f0f0; border: none; padding: 10px 15px; border-radius: 10px;
+    cursor: pointer; font-size: 14px; font-weight: 500; color: #333; transition: all 0.2s; white-space: nowrap;
 }
-.edit-trigger-area:hover .edit-fab { opacity: 1; transform: scale(1); }
+.edit-controls button:hover { background: #e0e0e0; transform: translateY(-2px); }
+.edit-controls .done-btn { background: #007AFF; color: white; padding: 10px 20px; }
+.edit-controls .done-btn:hover { background: #0066d6; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
+
+/* 配色切换 */
+.theme-swatches { display: flex; gap: 8px; padding-right: 15px; border-right: 1px solid #eee; margin-right: 5px; }
+.swatch {
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.2s;
+}
+.swatch:hover { transform: scale(1.1); }
+.swatch.active { border-color: #007AFF; transform: scale(1.1); }
 
 /* --- 顶部提示条 (Toast) --- */
 .toast-container {
@@ -175,20 +190,27 @@ body {
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; backdrop-filter: blur(5px);
     transition: all 0.3s ease;
+    /* 默认状态：隐藏 */
     opacity: 0; transform: scale(0.8);
     overflow: hidden;
 }
 
-/* 交互优化：鼠标移入时显示，或者【登录后常驻显示】 */
-.user-trigger-area:hover .user-fab,
-.user-fab.logged-in {
+/* 交互优化：只有鼠标移入触发区域时才显示 */
+.user-trigger-area:hover .user-fab {
     opacity: 1;
     transform: scale(1);
 }
 
+/* 登录后样式：只保留背景色变化，去掉强制显示 */
+.user-fab.logged-in {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    /* 删除了 opacity: 1; 和 transform: scale(1); 以实现自动隐藏 */
+}
+
 .user-fab:hover { background: rgba(0,0,0,0.6); transform: scale(1.1); }
-/* 登录后样式：白色底，有阴影 */
-.user-fab.logged-in { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.user-fab.logged-in:hover { background: white; transform: scale(1.1); }
+
 .user-fab img { width: 100%; height: 100%; object-fit: cover; }
 
 /* --- 登录后下拉菜单 (User Menu) --- */
@@ -339,7 +361,7 @@ body {
     .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
     .page-title { text-align: left; margin-bottom: 0; padding-left: 4px; }
     .pagination-dots { bottom: 40px; }
-    .edit-trigger-area { display: none !important; }
+    /* 移除之前的 edit-trigger-area 样式覆盖 */
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
 }
