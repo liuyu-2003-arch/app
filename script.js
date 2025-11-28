@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化 Auth
     if (supabaseClient) {
         initAuth().then(() => {
+             // 如果 initAuth 里没加载到数据（没登录），则加载本地数据
              if (!currentUser) loadData();
         });
     } else {
@@ -100,26 +101,24 @@ function showToast(message, type = 'normal') {
     }, 3000);
 }
 
-// --- Auth 相关功能 (修复了 OAuth 回调后的 URL 清理) ---
-// --- Auth 相关功能 ---
+// --- Auth 相关功能 (核心修复) ---
 async function initAuth() {
     if (!supabaseClient) return;
 
-    // 1. 自动处理 OAuth 跳转回来的情况
-    // 如果地址栏里有 access_token，说明是第三方登录跳回来的
+    // 1. 【核心修复】先让 Supabase 读取 URL 里的令牌，建立会话
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    // 2. 只有在获取 session 之后，才清理 URL
     if (window.location.hash && window.location.hash.includes('access_token')) {
         // 清理地址栏，去掉那些乱码
         window.history.replaceState(null, '', window.location.pathname);
         showToast("第三方登录成功！", "success");
     }
 
-    // 2. 获取当前会话状态
-    const { data: { session } } = await supabaseClient.auth.getSession();
-
-    // 3. 更新界面 (显示头像等)
+    // 3. 更新界面
     updateUserStatus(session?.user);
 
-    // 4. 监听后续状态变化 (比如登出)
+    // 4. 监听后续状态变化
     supabaseClient.auth.onAuthStateChange((_event, session) => {
         updateUserStatus(session?.user);
     });
@@ -137,7 +136,7 @@ function updateUserStatus(user) {
         fab.classList.add('logged-in');
         document.getElementById('current-email').innerText = user.email;
 
-        // 获取用户头像
+        // 获取用户头像 (优先使用第三方头像)
         const avatarUrl = user.user_metadata?.avatar_url;
         if (avatarUrl) {
             imgIcon.src = avatarUrl;
@@ -154,7 +153,7 @@ function updateUserStatus(user) {
         if(regBtn) regBtn.textContent = "更新头像";
 
         if(infoPanel) infoPanel.classList.remove('hidden');
-        loadData();
+        loadData(); // 登录成功，拉取云端数据
     } else {
         fab.classList.remove('logged-in');
         imgIcon.style.display = 'none';
@@ -261,6 +260,7 @@ async function loadData() {
                 .eq('user_id', currentUser.id)
                 .single();
             if (data && data.config_data) {
+                console.log("云端数据加载成功");
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
                 localStorage.setItem('pagedData', JSON.stringify(pages));
@@ -271,6 +271,7 @@ async function loadData() {
         } catch (e) { console.error("云端加载失败", e); }
     }
 
+    console.log("加载本地数据");
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
@@ -356,7 +357,7 @@ function rgbToHex(col) {
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
 
-// --- 核心渲染函数 (修复了点击逻辑) ---
+// --- 核心渲染函数 ---
 function render() {
     const oldScrollTops = [];
     document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
@@ -390,7 +391,6 @@ function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // 【点击/跳转修复】
             div.onclick = (e) => {
                 if (isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
@@ -417,7 +417,7 @@ function render() {
     if (isEditing) initSortable();
 }
 
-// --- Swiper 逻辑 (含拖拽/触摸修复) ---
+// --- Swiper 逻辑 ---
 function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
     swiper.addEventListener('mousedown', dragStart);
@@ -442,7 +442,6 @@ function drag(e) {
     if (isDragging) {
         const currentPosition = getPositionX(e);
         const diff = currentPosition - startPos;
-        // 修复：10px 阈值，防止误触
         if (Math.abs(diff) > 10) hasDragged = true;
         if (hasDragged) {
             currentTranslate = prevTranslate + diff;
@@ -456,7 +455,6 @@ function dragEnd(e) {
     isDragging = false;
     cancelAnimationFrame(animationID);
 
-    // 修复：触摸结束时手动跳转
     if (!hasDragged && e.type === 'touchend') {
         const targetItem = e.target.closest('.bookmark-item');
         if (targetItem && !isEditing && !e.target.classList.contains('delete-btn')) {
