@@ -256,11 +256,16 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; backdrop-filter: blur(5px);
     transition: all 0.3s ease;
-    opacity: 0; transform: scale(0.8);
+
+    /* 默认状态（未登录）：半透明显示，提示用户点击 */
+    opacity: 0.6;
+    transform: scale(1);
+
     overflow: hidden;
 }
 
 .user-trigger-area:hover .user-fab {
+    /* 鼠标移入区域：无论是登录还是未登录，都完全显示 */
     opacity: 1;
     transform: scale(1);
 }
@@ -268,6 +273,10 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .user-fab.logged-in {
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+    /* 登录后状态：默认隐藏 */
+    opacity: 0;
+    transform: scale(0.8);
 }
 
 .user-fab:hover { background: rgba(0,0,0,0.6); transform: scale(1.1); }
