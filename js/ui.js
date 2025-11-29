@@ -1,9 +1,10 @@
 import { state } from './state.js';
-import { saveData, updateSyncStatus } from './api.js';
-import { debounce, t, showToast, generateUniqueId } from './utils.js';
+import { saveData } from './api.js'; // 修正：这里不再引入 updateSyncStatus
+// 修正：updateSyncStatus 必须从 utils.js 引入
+import { debounce, t, showToast, generateUniqueId, updateSyncStatus } from './utils.js';
 
 export const debouncedSaveData = debounce(() => saveData(), 1000);
-let autoFillTimer = null; // 模块内的局部变量
+let autoFillTimer = null;
 
 // --- 渲染核心 (Render) ---
 export function render() {
@@ -602,7 +603,6 @@ export function createAvatarSelector(containerId, onSelect) {
 }
 
 // --- Swiper 逻辑 (Swiper) ---
-// (这部分保持不变，为了完整性，如果需要我可以再贴一次，但关键修复是上面新增的 openModal 逻辑)
 export function initSwiper() {
     const swiper = document.getElementById('bookmark-swiper');
     if (!swiper) return;
