@@ -79,6 +79,7 @@ function createVisualPages() {
     }
 
     state.pages.forEach((page, originalPageIndex) => {
+        // ... (循环逻辑保持不变) ...
         if (page.bookmarks.length === 0 && state.isEditing) {
             state.visualPages.push({ title: page.title, bookmarks: [], originalPageIndex: originalPageIndex, chunkIndex: 0 });
         } else if (page.bookmarks.length > 0) {
@@ -92,9 +93,7 @@ function createVisualPages() {
              }
         }
     });
-    if (state.visualPages.length === 0) {
-        state.visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
-    }
+    // ...
 }
 
 // --- 模态框与书签逻辑 ---
