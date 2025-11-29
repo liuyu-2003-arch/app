@@ -70,7 +70,9 @@ export function render() {
 function createVisualPages() {
     state.visualPages = [];
     const isMobile = window.innerWidth < 768;
-    const chunkSize = isMobile ? 16 : 32;
+
+    // 修改点：移动端改为 25 (5列 x 5行)，桌面端保持 32
+    const chunkSize = isMobile ? 25 : 32;
 
     if (!state.pages || state.pages.length === 0) {
         state.pages = [{ title: "Home", bookmarks: [] }];

@@ -569,61 +569,143 @@ body.dark-mode .user-pill-icon {
 }
 
 /* --- 移动端适配 (包含登录框修复) --- */
+/* --- 移动端适配 (重点修改区域) --- */
 @media (max-width: 768px) {
-    .container { padding-top: 50px; }
-    .bookmark-page { padding-top: 0; }
-    .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
-    .page-title { text-align: left; margin-bottom: 0; padding-left: 4px; }
-    .pagination-dots { bottom: 40px; }
-    .edit-controls { display: none !important; }
+    /* 1. 整体上移，减少顶部留白 */
+    .container {
+        padding-top: 10px; /* 从 50px 减小到 10px */
+    }
 
+    /* 2. 标题样式调整：与右上角 Logo 对齐 */
+    .bookmark-page {
+        position: relative; /* 为绝对定位的标题提供基准 */
+        padding-top: 0;
+    }
+
+    .page-title {
+        position: absolute;
+        top: 25px;       /* 根据 User Pill 的高度调整，使其垂直居中对齐 */
+        left: 20px;      /* 左侧留白 */
+        font-size: 22px; /* 稍微调小一点 */
+        margin: 0;
+        z-index: 10;
+        text-align: left;
+        padding: 0;
+        width: auto;
+    }
+
+    /* 3. 内容区域：下移以避开标题，并改为 5 列布局 */
+    .bookmark-page-content {
+        margin-top: 70px; /* 给绝对定位的标题留出空间 */
+        justify-content: center; /* 居中 */
+        align-content: flex-start;
+        padding-bottom: 80px;
+        max-width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+
+        /* 强制 5 列布局 */
+        --mobile-card-size: 58px; /* 缩小图标尺寸以容纳5列 */
+        --mobile-gap: 12px;       /* 缩小间距 */
+
+        display: grid;
+        grid-template-columns: repeat(5, var(--mobile-card-size)); /* 5列 */
+        gap: var(--mobile-gap);
+        width: auto; /* 让 grid 决定宽度 */
+    }
+
+    /* 4. 调整图标样式以适应变小的尺寸 */
+    .bookmark-item {
+        width: var(--mobile-card-size);
+    }
+    .icon-box {
+        width: var(--mobile-card-size);
+        height: var(--mobile-card-size);
+        border-radius: 14px; /*稍微减小圆角*/
+    }
+    .text-icon {
+        font-size: 24px; /* 文字图标变小 */
+    }
+    .bookmark-title {
+        font-size: 11px; /* 标题字号变小 */
+        margin-top: 4px;
+        width: 130%; /* 允许文字稍微超出图标宽度 */
+    }
+
+    /* 5. 隐藏“编辑书签”按钮，但保留“编辑主题” */
+    /* 通过属性选择器选中 onclick 包含 handleMenuEdit 的元素 */
+    .user-menu .menu-item[onclick*="handleMenuEdit"] {
+        display: none !important;
+    }
+
+    /* 6. 修复底部控件显示问题 */
+    /* 隐藏通用的编辑条 (添加书签/页面等) */
+    #edit-controls.edit-controls {
+        display: none !important;
+    }
+
+    /* 确保主题控制器显示 (覆盖之前的 display:none !important) */
+    #theme-controls.edit-controls {
+        display: flex !important;
+        width: 90%;
+        padding: 15px;
+        flex-wrap: wrap; /* 允许换行以适应窄屏幕 */
+        justify-content: center;
+        bottom: 30px;
+    }
+
+    /* 优化主题面板在手机上的布局 */
+    #theme-controls .theme-patterns {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    #theme-controls .control-divider {
+        display: none; /* 手机上隐藏分割线，直接换行 */
+    }
+
+    /* User Pill 调整 */
     .user-trigger-area {
-        padding: 10px;
+        padding: 15px; /* 稍微减少边距 */
     }
 
     .user-pill {
-        padding: 4px 12px 4px 4px; /* 稍微缩小内边距 */
+        padding: 4px 12px 4px 4px;
     }
 
-    /* 1. 弹窗容器 */
+    .pagination-dots { bottom: 30px; }
+
+    /* Modal 适配保持不变 */
     .modal-content {
         min-width: unset !important;
         width: 92%;
         max-width: 350px;
-        padding: 25px 20px; /* 增加内边距 */
+        padding: 25px 20px;
     }
-
-    /* 2. 保持横向排列，改为紧凑布局 */
     .input-row {
         display: flex !important;
         flex-direction: row !important;
-        justify-content: flex-start !important; /* 改为起始对齐，拉近距离 */
+        justify-content: flex-start !important;
         align-items: center !important;
-        gap: 15px !important; /* 控制文字和框之间的间距 */
+        gap: 15px !important;
     }
-
-    /* 3. 标签样式 */
     .input-label {
         width: auto !important;
-        min-width: 40px; /* 保证最小宽度 */
+        min-width: 40px;
         flex-shrink: 0;
         text-align: left !important;
         font-size: 14px;
         padding-right: 0;
         font-weight: 600;
     }
-
-
-    /* 4. 输入框样式：自动填满剩余空间，且更大 */
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="password"],
     .modal-content input[type="tel"] {
-        flex: 1 !important;         /* 自动占据剩余所有宽度 */
-        width: auto !important;     /* 取消固定宽度 */
-        min-width: 0;               /* 防止溢出 */
-        height: 52px !important;    /* 增加高度，更容易点击 */
-        font-size: 16px !important; /* 增大字号 (iOS下16px防止自动缩放) */
+        flex: 1 !important;
+        width: auto !important;
+        min-width: 0;
+        height: 52px !important;
+        font-size: 16px !important;
         padding: 0 15px;
         border-radius: 12px;
     }
