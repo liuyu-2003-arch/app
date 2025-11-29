@@ -1,6 +1,6 @@
 import { state } from './state.js';
-import { saveData, updateSyncStatus } from './api.js';
-import { debounce, t, showToast, generateUniqueId } from './utils.js';
+import { saveData } from './api.js'; // 移除了 updateSyncStatus
+import { debounce, t, showToast, generateUniqueId, updateSyncStatus } from './utils.js'; // 添加到了这里
 
 export const debouncedSaveData = debounce(() => saveData(), 1000);
 
@@ -71,8 +71,8 @@ function createVisualPages() {
     const isMobile = window.innerWidth < 768;
     const chunkSize = isMobile ? 16 : 32;
 
-    if (state.pages.length === 0) {
-        state.pages.push({ title: "Home", bookmarks: [] });
+    if (!state.pages || state.pages.length === 0) {
+        state.pages = [{ title: "Home", bookmarks: [] }];
     }
 
     state.pages.forEach((page, originalPageIndex) => {
@@ -90,7 +90,10 @@ function createVisualPages() {
              }
         }
     });
-    if (state.visualPages.length === 0) state.visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
+    // 防止完全空白
+    if (state.visualPages.length === 0) {
+        state.visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
+    }
 }
 
 // --- 编辑与交互 ---
@@ -153,7 +156,6 @@ export function initSwiper() {
     swiper.addEventListener('touchmove', drag, { passive: false });
     swiper.addEventListener('wheel', handleWheel, { passive: false });
 
-    // 键盘支持
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
@@ -197,7 +199,8 @@ function dragEnd(e) {
     cancelAnimationFrame(state.animationID);
     const movedBy = state.currentTranslate - state.prevTranslate;
     const swiper = document.getElementById('bookmark-swiper');
-    const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
+    // const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
+    const swiperWidth = swiper ? swiper.clientWidth : 1;
     let targetPage = state.currentPage;
     if (state.hasDragged) {
         if (movedBy < -swiperWidth * 0.15 && state.currentPage < state.visualPages.length - 1) targetPage++;
@@ -234,7 +237,8 @@ function handleWheel(e) {
     setSwiperPosition();
     clearTimeout(state.wheelTimeout);
     state.wheelTimeout = setTimeout(() => {
-        const swiperWidth = document.getElementById('bookmark-swiper').clientWidth;
+        const swiper = document.getElementById('bookmark-swiper');
+        const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
         const moveOffset = state.currentTranslate - (state.currentPage * -swiperWidth);
         let targetPage = state.currentPage;
         if (moveOffset < -swiperWidth * 0.05) targetPage++;
@@ -255,7 +259,6 @@ function renderPaginationDots() {
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
         dotsContainer.appendChild(dot);
     }
-    // 显示 dots
     dotsContainer.classList.add('visible');
     if(state.dotsTimer) clearTimeout(state.dotsTimer);
     state.dotsTimer = setTimeout(() => dotsContainer.classList.remove('visible'), 2000);
@@ -272,6 +275,10 @@ export function openModal(pageIndex = -1, bookmarkIndex = -1) {
     } else {
         titleInput.value = ''; urlInput.value = ''; iconInput.value = '';
     }
+}
+
+export function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
 }
 
 export function saveBookmark() {
