@@ -21,7 +21,6 @@
     <div class="background-layer"></div>
 
     <div id="toast-container" class="toast-container"></div>
-
     <div id="sync-status" class="sync-status"></div>
 
     <div class="user-trigger-area">
@@ -44,17 +43,19 @@
             </div>
         </div>
 
-        <div class="menu-divider"></div>
-
-        <div class="menu-item" onclick="handleMenuEdit()">
-            <span class="menu-icon">✏️</span> <span data-i18n="menu_edit">Edit Mode</span>
-        </div>
-
         <div class="menu-item" onclick="openPrefModal()">
             <span class="menu-icon">⚙️</span> <span data-i18n="menu_pref">Account Preferences</span>
         </div>
 
         <div class="menu-divider"></div>
+
+        <div class="menu-item" onclick="handleMenuEdit()">
+            <span class="menu-icon">✏️</span> <span data-i18n="menu_edit_bookmark">Edit Bookmark</span>
+        </div>
+
+        <div class="menu-item" onclick="openThemeModal()">
+            <span class="menu-icon">🎨</span> <span data-i18n="menu_edit_theme">Edit Theme</span>
+        </div>
 
         <div class="menu-label" data-i18n="menu_lang">Language</div>
         <div class="menu-item" onclick="changeLanguage('en')">
@@ -62,22 +63,6 @@
         </div>
         <div class="menu-item" onclick="changeLanguage('zh')">
             <span class="menu-icon">🇨🇳</span> 中文
-        </div>
-
-        <div class="menu-divider"></div>
-
-        <div class="menu-label" data-i18n="menu_theme">Theme (Pattern)</div>
-        <div class="menu-item" onclick="quickChangeTheme(null, 'none')">
-            <span class="menu-icon">🌊</span> <span data-i18n="theme_default">Default</span>
-        </div>
-        <div class="menu-item" onclick="quickChangeTheme(null, 'bg-pattern-aurora')">
-            <span class="menu-icon">✨</span> <span data-i18n="theme_aurora">Aurora</span>
-        </div>
-        <div class="menu-item" onclick="quickChangeTheme(null, 'bg-pattern-flow')">
-            <span class="menu-icon">🌫️</span> <span data-i18n="theme_flow">Flow</span>
-        </div>
-        <div class="menu-item" onclick="quickChangeTheme(null, 'bg-pattern-lines-d')">
-            <span class="menu-icon">╱</span> <span data-i18n="theme_lines_d">Diag. Lines</span>
         </div>
 
         <div class="menu-divider"></div>
@@ -96,19 +81,44 @@
     </div>
 
     <div id="edit-controls" class="edit-controls hidden">
-        <div class="theme-swatches">
-            <div class="swatch" style="background: #e4d0e5" onclick="changeTheme('#e4d0e5', this, null)"></div>
-            <div class="swatch" style="background: #f5dbe3" onclick="changeTheme('#f5dbe3', this, null)"></div>
-            <div class="swatch" style="background: #f9e8ee" onclick="changeTheme('#f9e8ee', this, null)"></div>
-            <div class="swatch" style="background: #dbe4f5" onclick="changeTheme('#dbe4f5', this, null)"></div>
-            <div class="swatch" style="background: #f0f0f2" onclick="changeTheme('#f0f0f2', this, null)"></div>
-            <div class="swatch" style="background: #1a1a1a; border: 1px solid #555;" onclick="changeTheme('#1a1a1a', this, null)"></div>
-        </div>
         <button onclick="openModal()" data-i18n="btn_add_bookmark">➕ Add Bookmark</button>
         <button onclick="openPageEditModal()" data-i18n="btn_edit_page">📝 Edit Pages</button>
         <button onclick="importConfig()" data-i18n="btn_import">📥 Import</button>
         <button onclick="exportConfig()" data-i18n="btn_export">📤 Export</button>
         <button class="done-btn" onclick="toggleEditMode(false)" data-i18n="btn_done">Done</button>
+    </div>
+
+    <div id="theme-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="close-modal-btn" onclick="document.getElementById('theme-modal').classList.add('hidden')">×</button>
+            <h3 data-i18n="modal_theme_title">Edit Theme</h3>
+
+            <div class="modal-top-split">
+                <div class="preview-section" style="border-right: 1px solid #eee; padding-right: 20px; justify-content: flex-start;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px; font-weight: 500;">Color</div>
+                    <div class="theme-swatches-grid">
+                        <div class="swatch" style="background: #e4d0e5" onclick="changeTheme('#e4d0e5', this, null)"></div>
+                        <div class="swatch" style="background: #f5dbe3" onclick="changeTheme('#f5dbe3', this, null)"></div>
+                        <div class="swatch" style="background: #f9e8ee" onclick="changeTheme('#f9e8ee', this, null)"></div>
+                        <div class="swatch" style="background: #dbe4f5" onclick="changeTheme('#dbe4f5', this, null)"></div>
+                        <div class="swatch" style="background: #f0f0f2" onclick="changeTheme('#f0f0f2', this, null)"></div>
+                        <div class="swatch" style="background: #1a1a1a; border: 1px solid #555;" onclick="changeTheme('#1a1a1a', this, null)"></div>
+                    </div>
+                </div>
+
+                <div class="candidate-section" style="flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 8px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 2px; font-weight: 500; text-align: center;">Pattern</div>
+                    <div class="style-option" onclick="quickChangeTheme(null, 'none')" data-i18n="theme_default">Default (Wave)</div>
+                    <div class="style-option" onclick="quickChangeTheme(null, 'bg-pattern-aurora')" data-i18n="theme_aurora">Aurora</div>
+                    <div class="style-option" onclick="quickChangeTheme(null, 'bg-pattern-flow')" data-i18n="theme_flow">Flow</div>
+                    <div class="style-option" onclick="quickChangeTheme(null, 'bg-pattern-lines-d')" data-i18n="theme_lines_d">Diag. Lines</div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="primary" onclick="document.getElementById('theme-modal').classList.add('hidden')" data-i18n="btn_done">Done</button>
+            </div>
+        </div>
     </div>
 
     <div id="modal" class="modal hidden">

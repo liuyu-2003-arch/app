@@ -474,3 +474,21 @@ body.dark-mode .sync-status {
     color: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
+
+/* ... (保留原有内容) ... */
+
+/* --- Edit Theme 弹窗中的圆点布局 --- */
+.theme-swatches-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3列 */
+    gap: 10px;
+    justify-items: center;
+}
+
+/* 覆盖 .swatch 在弹窗里的样式，使其稍大一点以便点击 */
+.modal-content .swatch {
+    width: 32px;
+    height: 32px;
+}
+
+/* ... (保留底部的 @media query 内容) ... */

@@ -29,9 +29,9 @@ let wheelTimeout = null;
 // --- i18n Logic ---
 const translations = {
     en: {
-        "menu_edit": "Edit Mode",
+        "menu_edit_bookmark": "Edit Bookmark", // 原 menu_edit
+        "menu_edit_theme": "Edit Theme",       // 新增
         "menu_pref": "Account Preferences",
-        "menu_theme": "Theme (Pattern)",
         "menu_lang": "Language",
         "menu_logout": "Log out",
         "theme_default": "Default (Wave)",
@@ -86,21 +86,21 @@ const translations = {
         "msg_logged_in": "Logged in as",
 
         "modal_pref_title": "Account Preferences",
+        "modal_theme_title": "Edit Theme", // 新增
         "label_display_name": "Display Name",
         "label_phone": "Phone",
         "btn_save": "Save Changes",
         "msg_select_new_avatar": "Tap to change avatar",
         "msg_save_success": "Preferences saved successfully",
 
-        // 新增同步状态文本
         "msg_saving": "Saving...",
         "msg_saved": "All changes saved",
         "msg_save_fail": "Save failed"
     },
     zh: {
-        "menu_edit": "编辑模式",
+        "menu_edit_bookmark": "编辑书签", // 原 menu_edit
+        "menu_edit_theme": "编辑主题",    // 新增
         "menu_pref": "账户设置",
-        "menu_theme": "主题样式",
         "menu_lang": "语言 / Language",
         "menu_logout": "退出登录",
         "theme_default": "默认 (波浪)",
@@ -155,13 +155,13 @@ const translations = {
         "msg_logged_in": "已登录",
 
         "modal_pref_title": "账户设置",
+        "modal_theme_title": "编辑主题", // 新增
         "label_display_name": "显示名称",
         "label_phone": "手机号",
         "btn_save": "保存更改",
         "msg_select_new_avatar": "点击更换头像",
         "msg_save_success": "设置保存成功",
 
-        // 新增同步状态文本
         "msg_saving": "正在同步...",
         "msg_saved": "云端已同步",
         "msg_save_fail": "同步失败"
@@ -200,20 +200,13 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 【关键修复】检测 URL 是否因为多次重定向导致了畸形 hash (如 ## 或 多个 #)
-    // 这种情况会导致 Supabase 无法解析 Token。
-    // 逻辑：如果有多个 #，取最后一个；如果以 ## 开头，修复为 #
+    // 【关键修复】检测并修复双重 hash (##access_token)，让登录流程能继续
     if (window.location.hash) {
         let hash = window.location.hash;
-
-        // 1. 处理双重哈希 ## (如 https://site.com/##access_token...)
         if (hash.startsWith('##')) {
             hash = '#' + hash.substring(2);
             window.history.replaceState(null, '', window.location.pathname + hash);
-        }
-        // 2. 处理叠加哈希 (如 #access_token=...#access_token=...)
-        // 取最后一个 # 之后的内容
-        else if ((hash.match(/#/g) || []).length > 1) {
+        } else if ((hash.match(/#/g) || []).length > 1) {
             const lastHashIndex = hash.lastIndexOf('#');
             hash = hash.substring(lastHashIndex);
             window.history.replaceState(null, '', window.location.pathname + hash);
@@ -286,8 +279,6 @@ async function initAuth() {
     if (!supabaseClient) return;
     const { data: { session } } = await supabaseClient.auth.getSession();
 
-    // 移除干扰代码，让 Supabase 自动处理
-
     updateUserStatus(session?.user);
     supabaseClient.auth.onAuthStateChange((_event, session) => { updateUserStatus(session?.user); });
 }
@@ -323,14 +314,11 @@ function updateUserStatus(user) {
 
         if(infoPanel) infoPanel.classList.remove('hidden');
 
-        // --- 核心修改开始 ---
-        // 登录状态：移除 data-i18n 属性，防止被自动翻译重置为 "Guest"
         if(menuUserName) {
             menuUserName.removeAttribute('data-i18n');
             const displayName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
             menuUserName.innerText = displayName;
         }
-        // --- 核心修改结束 ---
 
         if(menuUserEmail) menuUserEmail.innerText = user.email;
         if(menuUserAvatar) menuUserAvatar.src = avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
@@ -350,13 +338,10 @@ function updateUserStatus(user) {
         if(modalTitle) modalTitle.textContent = t("modal_auth_title");
         if(infoPanel) infoPanel.classList.add('hidden');
 
-        // --- 核心修改开始 ---
-        // 退出状态：恢复 data-i18n 属性，让其显示为 "Guest" (游客)
         if(menuUserName) {
             menuUserName.setAttribute('data-i18n', 'auth_guest');
             menuUserName.innerText = t("auth_guest");
         }
-        // --- 核心修改结束 ---
 
         if(menuUserEmail) menuUserEmail.innerText = "guest@example.com";
         if(menuUserAvatar) menuUserAvatar.src = "";
@@ -372,10 +357,18 @@ function toggleAuthModal() {
     }
 }
 
+// 打开 "Edit Bookmark" 模式 (原 handleMenuEdit)
 function handleMenuEdit() {
     const menu = document.getElementById('user-dropdown');
     if (menu) menu.classList.remove('active');
     toggleEditMode(true);
+}
+
+// 打开 "Edit Theme" 弹窗 (新功能)
+function openThemeModal() {
+    const menu = document.getElementById('user-dropdown');
+    if (menu) menu.classList.remove('active');
+    document.getElementById('theme-modal').classList.remove('hidden');
 }
 
 function quickChangeTheme(color, pattern) {
@@ -386,7 +379,6 @@ async function handleOAuthLogin(provider) {
     if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
     showToast(`Navigating to ${provider}...`, "normal");
 
-    // 【关键修复】获取纯净的 URL (不带 hash)，防止把旧的 access_token 再次传给 Supabase
     const redirectUrl = window.location.origin + window.location.pathname;
 
     try {
@@ -455,7 +447,6 @@ async function handleLogout() {
     document.getElementById('user-dropdown').classList.remove('active');
     showToast(t("msg_logout"), "normal");
 
-    // 【关键修复】退出登录时，彻底清除 URL hash，防止下次登录时 hash 叠加
     if (window.location.hash) {
         history.replaceState(null, '', window.location.pathname);
     }
