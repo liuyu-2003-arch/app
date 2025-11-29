@@ -323,8 +323,15 @@ function updateUserStatus(user) {
 
         if(infoPanel) infoPanel.classList.remove('hidden');
 
-        const displayName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
-        if(menuUserName) menuUserName.innerText = displayName;
+        // --- 核心修改开始 ---
+        // 登录状态：移除 data-i18n 属性，防止被自动翻译重置为 "Guest"
+        if(menuUserName) {
+            menuUserName.removeAttribute('data-i18n');
+            const displayName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
+            menuUserName.innerText = displayName;
+        }
+        // --- 核心修改结束 ---
+
         if(menuUserEmail) menuUserEmail.innerText = user.email;
         if(menuUserAvatar) menuUserAvatar.src = avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
 
@@ -342,7 +349,15 @@ function updateUserStatus(user) {
         if(actionBtn) actionBtn.textContent = t("btn_register");
         if(modalTitle) modalTitle.textContent = t("modal_auth_title");
         if(infoPanel) infoPanel.classList.add('hidden');
-        if(menuUserName) menuUserName.innerText = t("auth_guest");
+
+        // --- 核心修改开始 ---
+        // 退出状态：恢复 data-i18n 属性，让其显示为 "Guest" (游客)
+        if(menuUserName) {
+            menuUserName.setAttribute('data-i18n', 'auth_guest');
+            menuUserName.innerText = t("auth_guest");
+        }
+        // --- 核心修改结束 ---
+
         if(menuUserEmail) menuUserEmail.innerText = "guest@example.com";
         if(menuUserAvatar) menuUserAvatar.src = "";
     }
