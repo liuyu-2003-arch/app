@@ -5,7 +5,8 @@ import {
     render, toggleEditMode, initSwiper, saveBookmark, deleteBookmark, openModal, closeModal,
     addPage, deletePage, openPageEditModal, closePageEditModal, renderPageList,
     initTheme, changeTheme, quickChangeTheme, openThemeControls, closeThemeControls,
-    openPrefModal, switchAvatarTab, handleAvatarFile, selectNewAvatar, createAvatarSelector
+    openPrefModal, switchAvatarTab, handleAvatarFile, selectNewAvatar, createAvatarSelector,
+    autoFillInfo, updatePreview, selectStyle, selectPage
 } from './ui.js';
 import { t, showToast } from './utils.js';
 import { state } from './state.js';
@@ -14,14 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. 初始化基础配置
     document.body.style.visibility = 'hidden';
     i18n.updateTexts();
-    initTheme(); // 初始化主题
+    initTheme();
     initSwiper();
 
     // 2. 注册页面的头像选择器
     createAvatarSelector('avatar-selector', (url) => {
         state.selectedAvatarUrl = url;
     });
-    // 默认选中第一个
     const authContainer = document.getElementById('avatar-selector');
     if (authContainer && authContainer.firstChild) authContainer.firstChild.click();
 
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadData();
     }
 
-    // 4. 监听导入文件 (HTML中没有 onclick，是通过id绑定的)
+    // 4. 监听导入文件
     const importInput = document.getElementById('import-file-input');
     if(importInput) importInput.addEventListener('change', handleImport);
 
@@ -45,8 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ============================================================
-    // 🔥 核心修复：将模块内的函数挂载到 window，让 HTML onclick 能找到
+    // 🔥 核心修复：挂载所有交互函数到 window
     // ============================================================
+
+    // --- 弹窗逻辑 (重点修复) ---
+    window.autoFillInfo = autoFillInfo; // 修复自动填充
+    window.updatePreview = updatePreview; // 修复实时预览
+    window.selectStyle = selectStyle; // 修复样式选择
+    window.selectPage = selectPage; // 修复页面选择
 
     // --- 账户 (Auth) ---
     window.handleLogin = () => {
@@ -65,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.handleOAuthLogin = handleOAuthLogin;
     window.savePreferences = savePreferences;
 
-    // --- 菜单与弹窗 (Menus & Modals) ---
+    // --- 菜单与弹窗 ---
     window.toggleAuthModal = () => {
          if (state.currentUser) {
             document.getElementById('user-dropdown').classList.toggle('active');
@@ -79,54 +85,42 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     window.openModal = openModal;
     window.closeModal = closeModal;
-
-    // --- 编辑模式 (Edit Mode) ---
     window.toggleEditMode = toggleEditMode;
 
-    // --- 书签操作 (Bookmarks) ---
+    // --- 书签操作 ---
     window.saveBookmark = saveBookmark;
     window.deleteBookmark = deleteBookmark;
 
-    // --- 页面管理 (Page Management) ---
-    // 之前这些按钮点不动，是因为这里漏了挂载
+    // --- 页面管理 ---
     window.addPage = addPage;
     window.deletePage = deletePage;
     window.openPageEditModal = openPageEditModal;
     window.closePageEditModal = closePageEditModal;
 
-    // --- 导入导出 (Import/Export) ---
+    // --- 导入导出 ---
     window.importConfig = importConfig;
     window.exportConfig = exportConfig;
 
-    // --- 主题控制 (Themes) ---
+    // --- 主题控制 ---
     window.openThemeControls = openThemeControls;
     window.closeThemeControls = closeThemeControls;
     window.quickChangeTheme = quickChangeTheme;
-    // changeTheme 需要透传参数
     window.changeTheme = (color, el, pattern) => changeTheme(color, el, pattern);
 
-    // --- 偏好设置与头像 (Preferences & Avatar) ---
+    // --- 偏好设置 ---
     window.openPrefModal = openPrefModal;
     window.switchAvatarTab = switchAvatarTab;
     window.handleAvatarFile = handleAvatarFile;
     window.selectNewAvatar = selectNewAvatar;
-    window.selectStyle = (el) => {
-        document.querySelectorAll('.style-option').forEach(o => o.classList.remove('active'));
-        el.classList.add('active');
-        // 如果需要实时预览更新，可以在这里调用 updatePreview()，需从 ui.js 导出
-    };
 
-    // --- 语言切换 (Language) ---
+    // --- 语言 ---
     window.changeLanguage = (lang) => {
         i18n.setLang(lang);
-        // 简单粗暴：刷新页面以更新所有文本（或者你可以手动调用 render）
         location.reload();
     };
 
-    // 窗口调整事件
     window.addEventListener('resize', () => { render(); });
 
-    // 点击外部关闭菜单
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('user-dropdown');
         const fab = document.querySelector('.user-fab');

@@ -1,8 +1,9 @@
 import { state } from './state.js';
-import { saveData } from './api.js'; // 移除了 updateSyncStatus
-import { debounce, t, showToast, generateUniqueId, updateSyncStatus } from './utils.js'; // 添加到了这里
+import { saveData, updateSyncStatus } from './api.js';
+import { debounce, t, showToast, generateUniqueId } from './utils.js';
 
 export const debouncedSaveData = debounce(() => saveData(), 1000);
+let autoFillTimer = null; // 模块内的局部变量
 
 // --- 渲染核心 (Render) ---
 export function render() {
@@ -84,197 +85,54 @@ function createVisualPages() {
                 state.visualPages.push({ title: page.title, bookmarks: chunk, originalPageIndex: originalPageIndex, chunkIndex: i / chunkSize });
             }
         } else {
-             // 即使为空，非编辑模式下也至少展示一页（如果只有一个空页）
              if (state.pages.length === 1) {
                  state.visualPages.push({ title: page.title, bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
              }
         }
     });
-    // 防止完全空白
     if (state.visualPages.length === 0) {
         state.visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
     }
 }
 
-// --- 编辑与交互 ---
-export function toggleEditMode(enable) {
-    state.isEditing = enable;
-    document.body.classList.toggle('is-editing', enable);
-    const controls = document.getElementById('edit-controls');
-    document.getElementById('theme-controls').classList.add('hidden');
-
-    if (enable) controls.classList.remove('hidden');
-    else {
-        controls.classList.add('hidden');
-        state.sortableInstances.forEach(instance => instance.destroy());
-        state.sortableInstances = [];
-    }
-    render();
-}
-
-function initSortable() {
-    if (!state.isEditing) return;
-    document.querySelectorAll('.bookmark-page-content').forEach(content => {
-        const instance = new Sortable(content, {
-            group: 'shared-bookmarks', animation: 350, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag', forceFallback: true,
-            onEnd: function (evt) {
-                const itemEl = evt.item; const newRect = itemEl.getBoundingClientRect(); const fallbackEl = document.querySelector('.sortable-drag');
-                if (fallbackEl) {
-                    const oldRect = fallbackEl.getBoundingClientRect(); const dx = oldRect.left - newRect.left; const dy = oldRect.top - newRect.top;
-                    requestAnimationFrame(() => { itemEl.style.transform = `translate3d(${dx}px, ${dy}px, 0)`; itemEl.style.transition = 'transform 0s'; requestAnimationFrame(() => { itemEl.style.transform = 'translate3d(0, 0, 0)'; itemEl.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)'; }); });
-                }
-                const bookmarkMap = new Map(); state.pages.forEach(page => page.bookmarks.forEach(bookmark => bookmarkMap.set(bookmark.id, bookmark)));
-                const newPages = []; const pageElements = document.querySelectorAll('.bookmark-page'); state.pages.forEach((p, i) => newPages[i] = { ...p, bookmarks: [] });
-                pageElements.forEach(pageEl => {
-                    const originalPageIndex = parseInt(pageEl.dataset.originalPageIndex); const bookmarkElements = pageEl.querySelectorAll('.bookmark-item');
-                    bookmarkElements.forEach(itemEl => {
-                        const bookmarkId = itemEl.dataset.id; const bookmark = bookmarkMap.get(bookmarkId);
-                        if (bookmark && newPages[originalPageIndex]) newPages[originalPageIndex].bookmarks.push(bookmark);
-                    });
-                });
-                state.pages = newPages.filter(p => p.title);
-
-                updateSyncStatus('saving');
-                debouncedSaveData();
-                createVisualPages(); setTimeout(() => { render(); }, 10);
-            }
-        });
-        state.sortableInstances.push(instance);
-    });
-}
-
-// --- Swiper 逻辑 ---
-export function initSwiper() {
-    const swiper = document.getElementById('bookmark-swiper');
-    if (!swiper) return;
-    swiper.addEventListener('mousedown', dragStart);
-    swiper.addEventListener('touchstart', dragStart, { passive: true });
-    swiper.addEventListener('mouseup', dragEnd);
-    swiper.addEventListener('mouseleave', dragEnd);
-    swiper.addEventListener('touchend', dragEnd);
-    swiper.addEventListener('mousemove', drag);
-    swiper.addEventListener('touchmove', drag, { passive: false });
-    swiper.addEventListener('wheel', handleWheel, { passive: false });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
-        if (e.key === 'ArrowLeft') {
-            if (state.currentPage > 0) {
-                state.currentPage--; updateSwiperPosition(true); renderPaginationDots();
-            }
-        }
-        else if (e.key === 'ArrowRight') {
-            if (state.currentPage < state.visualPages.length - 1) {
-                state.currentPage++; updateSwiperPosition(true); renderPaginationDots();
-            }
-        }
-    });
-}
-
-function dragStart(e) {
-    if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
-    state.isDragging = true; state.hasDragged = false;
-    state.startPos = getPositionX(e);
-    state.animationID = requestAnimationFrame(animation);
-    const wrapper = document.getElementById('bookmark-swiper-wrapper');
-    if(wrapper) wrapper.style.transition = 'none';
-}
-
-function drag(e) {
-    if (state.isDragging) {
-        const currentPosition = getPositionX(e);
-        const diff = currentPosition - state.startPos;
-        if (Math.abs(diff) > 10) state.hasDragged = true;
-        if (state.hasDragged) {
-            state.currentTranslate = state.prevTranslate + diff;
-            if (e.cancelable) e.preventDefault();
-        }
-    }
-}
-
-function dragEnd(e) {
-    if (!state.isDragging) return;
-    state.isDragging = false;
-    cancelAnimationFrame(state.animationID);
-    const movedBy = state.currentTranslate - state.prevTranslate;
-    const swiper = document.getElementById('bookmark-swiper');
-    // const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
-    const swiperWidth = swiper ? swiper.clientWidth : 1;
-    let targetPage = state.currentPage;
-    if (state.hasDragged) {
-        if (movedBy < -swiperWidth * 0.15 && state.currentPage < state.visualPages.length - 1) targetPage++;
-        else if (movedBy > swiperWidth * 0.15 && state.currentPage > 0) targetPage--;
-    }
-    state.currentPage = targetPage;
-    updateSwiperPosition(true);
-    renderPaginationDots();
-}
-
-function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
-function animation() { setSwiperPosition(); if (state.isDragging) requestAnimationFrame(animation); }
-function setSwiperPosition() {
-    const wrapper = document.getElementById('bookmark-swiper-wrapper');
-    if(wrapper) wrapper.style.transform = `translateX(${state.currentTranslate}px)`;
-}
-function updateSwiperPosition(withTransition = true) {
-    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
-    const swiper = document.getElementById('bookmark-swiper');
-    if (!swiperWrapper || !swiper) return;
-    const swiperWidth = swiper.clientWidth;
-    state.currentTranslate = state.currentPage * -swiperWidth;
-    state.prevTranslate = state.currentTranslate;
-    if (withTransition) swiperWrapper.style.transition = 'transform 0.2s ease-out';
-    setSwiperPosition();
-}
-function handleWheel(e) {
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
-    e.preventDefault();
-    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
-    if(!swiperWrapper) return;
-    swiperWrapper.style.transition = 'none';
-    state.currentTranslate -= (e.deltaX * 0.5);
-    setSwiperPosition();
-    clearTimeout(state.wheelTimeout);
-    state.wheelTimeout = setTimeout(() => {
-        const swiper = document.getElementById('bookmark-swiper');
-        const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
-        const moveOffset = state.currentTranslate - (state.currentPage * -swiperWidth);
-        let targetPage = state.currentPage;
-        if (moveOffset < -swiperWidth * 0.05) targetPage++;
-        else if (moveOffset > swiperWidth * 0.05) targetPage--;
-        state.currentPage = Math.max(0, Math.min(state.visualPages.length - 1, targetPage));
-        updateSwiperPosition(true); renderPaginationDots();
-    }, 60);
-}
-
-function renderPaginationDots() {
-    const dotsContainer = document.getElementById('pagination-dots');
-    if(!dotsContainer) return;
-    dotsContainer.innerHTML = '';
-    for (let i = 0; i < state.visualPages.length; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        if (i === state.currentPage) dot.classList.add('active');
-        dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
-        dotsContainer.appendChild(dot);
-    }
-    dotsContainer.classList.add('visible');
-    if(state.dotsTimer) clearTimeout(state.dotsTimer);
-    state.dotsTimer = setTimeout(() => dotsContainer.classList.remove('visible'), 2000);
-}
-
-// --- 模态框与书签操作 ---
+// --- 模态框与书签逻辑 (Modal Logic) ---
 export function openModal(pageIndex = -1, bookmarkIndex = -1) {
     state.currentEditInfo = { pageIndex, bookmarkIndex };
     document.getElementById('modal').classList.remove('hidden');
-    const titleInput = document.getElementById('input-title'); const urlInput = document.getElementById('input-url'); const iconInput = document.getElementById('input-icon');
+    const titleInput = document.getElementById('input-title');
+    const urlInput = document.getElementById('input-url');
+    const iconInput = document.getElementById('input-icon');
+
+    let currentStyle = 'full';
+    let targetPageIndex = 0;
+
     if (pageIndex >= 0 && bookmarkIndex >= 0) {
         const item = state.pages[pageIndex].bookmarks[bookmarkIndex];
-        titleInput.value = item.title; urlInput.value = item.url; iconInput.value = item.icon || "";
+        titleInput.value = item.title;
+        urlInput.value = item.url;
+        iconInput.value = item.icon || "";
+        currentStyle = item.style || 'full';
+        targetPageIndex = pageIndex;
+        // 编辑时也触发一次自动获取逻辑，主要是为了加载图标候选
+        autoFillInfo();
     } else {
-        titleInput.value = ''; urlInput.value = ''; iconInput.value = '';
+        // 新增模式
+        const currentVisualPage = state.visualPages[state.currentPage];
+        titleInput.value = '';
+        urlInput.value = '';
+        iconInput.value = '';
+        targetPageIndex = currentVisualPage ? currentVisualPage.originalPageIndex : 0;
+        document.getElementById('icon-candidates').innerHTML = '';
+        renderRandomButtons(document.getElementById('icon-candidates')); // 默认显示随机图标
     }
+
+    // 更新样式选择状态
+    document.querySelectorAll('.style-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.style === currentStyle);
+    });
+
+    renderPageOptions(targetPageIndex);
+    updatePreview();
 }
 
 export function closeModal() {
@@ -288,21 +146,38 @@ export function saveBookmark() {
     const styleEl = document.querySelector('.style-option.active');
     const style = styleEl ? styleEl.dataset.style : 'full';
 
+    // 获取当前选中的页面
+    const pageEl = document.querySelector('.page-option.active');
+    const newPageIndex = pageEl ? parseInt(pageEl.dataset.index) : 0;
+
     if (!title || !url) return showToast(t('msg_title_url_req'), "error");
     if (!url.startsWith('http')) url = 'https://' + url;
 
     const { pageIndex, bookmarkIndex } = state.currentEditInfo;
-    const newPageIndex = state.visualPages[state.currentPage] ? state.visualPages[state.currentPage].originalPageIndex : 0;
 
     if (pageIndex >= 0 && bookmarkIndex >= 0) {
+        // 编辑现有
         const itemToUpdate = state.pages[pageIndex].bookmarks[bookmarkIndex];
-        itemToUpdate.title = title; itemToUpdate.url = url; itemToUpdate.icon = icon; itemToUpdate.style = style;
+        const newItem = { ...itemToUpdate, title, url, icon, style };
+
+        if (pageIndex !== newPageIndex) {
+            // 如果换了页面，从旧页面删除，加到新页面
+            state.pages[pageIndex].bookmarks.splice(bookmarkIndex, 1);
+            state.pages[newPageIndex].bookmarks.push(newItem);
+        } else {
+            // 原地更新
+            state.pages[pageIndex].bookmarks[bookmarkIndex] = newItem;
+        }
     } else {
+        // 新增
         const newItem = { id: generateUniqueId(), title, url, icon, style };
         if (!state.pages[newPageIndex]) state.pages[newPageIndex] = { title: "New Page", bookmarks: [] };
         state.pages[newPageIndex].bookmarks.push(newItem);
+        state.currentPage = newPageIndex; // 跳转到新加的页面
     }
-    saveData(); document.getElementById('modal').classList.add('hidden'); render();
+    saveData();
+    closeModal();
+    render();
 }
 
 export function deleteBookmark(e, bookmarkId) {
@@ -315,6 +190,181 @@ export function deleteBookmark(e, bookmarkId) {
         }
         if (found) { saveData(); render(); }
     }
+}
+
+// --- 🔄 自动填充与图标逻辑 (Auto-fill & Icons) ---
+export function autoFillInfo() {
+    if (autoFillTimer) clearTimeout(autoFillTimer);
+    autoFillTimer = setTimeout(() => {
+        const urlVal = document.getElementById('input-url').value;
+        const titleInput = document.getElementById('input-title');
+        const iconInput = document.getElementById('input-icon');
+
+        generateIconCandidates(urlVal); // 生成图标候选
+
+        if (urlVal && urlVal.includes('.') && urlVal.length > 4) {
+            let safeUrl = urlVal;
+            if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
+            try {
+                const urlObj = new URL(safeUrl);
+                let domain = urlObj.hostname;
+                if (domain.endsWith('.')) domain = domain.slice(0, -1);
+
+                // 如果图标为空，自动填一个默认的
+                if (!iconInput.value) iconInput.value = `https://manifest.im/icon/${domain}`;
+                // 如果标题为空，尝试从域名提取
+                if (!titleInput.value) {
+                    let domainName = domain.replace('www.', '').split('.')[0];
+                    if(domainName) titleInput.value = domainName.charAt(0).toUpperCase() + domainName.slice(1);
+                }
+                updatePreview();
+            } catch (e) {}
+        }
+    }, 500);
+}
+
+export function generateIconCandidates(urlVal) {
+    const list = document.getElementById('icon-candidates');
+    list.innerHTML = '';
+    if (!urlVal || !urlVal.includes('.') || urlVal.length < 4) {
+        renderRandomButtons(list);
+        return;
+    }
+
+    let safeUrl = urlVal;
+    if (!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
+    let domain = "", protocol = "https:";
+
+    try {
+        const urlObj = new URL(safeUrl);
+        domain = urlObj.hostname;
+        protocol = urlObj.protocol;
+        if (domain.endsWith('.')) domain = domain.slice(0, -1);
+    } catch(e) {
+        renderRandomButtons(list);
+        return;
+    }
+
+    renderRandomButtons(list); // 先放随机按钮
+
+    const sources = [
+        { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
+        { name: 'Vemetric', url: `https://favicon.vemetric.com/${domain}` },
+        { name: 'Logo.dev', url: `https://img.logo.dev/${domain}?token=pk_CD4SuapcQDq1yZFMwSaYeA&size=100&format=png` },
+        { name: 'Brandfetch', url: `https://cdn.brandfetch.io/${domain}?c=1idVW8VN57Jat7AexnZ` },
+        { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` }
+    ];
+
+    // 倒序插入，让 Manifest 在最前
+    for (let i = sources.length - 1; i >= 0; i--) {
+        const src = sources[i];
+        const item = document.createElement('div');
+        item.className = 'candidate-item';
+        item.title = src.name;
+        const img = document.createElement('img');
+        img.src = src.url;
+
+        item.onclick = () => {
+            document.getElementById('input-icon').value = src.url;
+            updatePreview();
+            document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+        };
+
+        img.onerror = () => { item.style.display = 'none'; };
+        item.appendChild(img);
+        list.insertBefore(item, list.firstChild);
+    }
+}
+
+function renderRandomButtons(container) {
+    const randomTypes = [
+        { type: 'random-shapes', icon: '🎲' },
+        { type: 'random-identicon', icon: '🧩' },
+        { type: 'random-emoji', icon: '😀' },
+        { type: 'random-bottts', icon: '🤖' },
+        { type: 'random-avataaars', icon: '🧑' }
+    ];
+    randomTypes.forEach(rnd => {
+        const item = document.createElement('div');
+        item.className = 'candidate-item candidate-random';
+        item.innerText = rnd.icon;
+        item.onclick = () => {
+            const seed = Math.random().toString(36).substring(7);
+            let url = '';
+            if(rnd.type === 'random-shapes') url = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
+            else if(rnd.type === 'random-identicon') url = `https://api.dicebear.com/9.x/identicon/svg?seed=${seed}`;
+            else if(rnd.type === 'random-bottts') url = `https://api.dicebear.com/9.x/bottts/svg?seed=${seed}`;
+            else if(rnd.type === 'random-avataaars') url = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}`;
+            else url = `https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}`;
+
+            document.getElementById('input-icon').value = url;
+            updatePreview();
+            document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+        };
+        container.appendChild(item);
+    });
+}
+
+export function updatePreview() {
+    const titleVal = document.getElementById('input-title').value || "Preview";
+    const iconVal = document.getElementById('input-icon').value;
+    const styleEl = document.querySelector('.style-option.active');
+    const styleVal = styleEl ? styleEl.dataset.style : 'full';
+
+    const previewCard = document.getElementById('preview-card');
+    const previewImg = document.getElementById('preview-img');
+    const previewText = document.getElementById('preview-text');
+    const previewTitle = document.getElementById('preview-title');
+
+    previewTitle.innerText = titleVal;
+    previewCard.classList.remove('style-white', 'style-fit');
+    if (styleVal === 'white') previewCard.classList.add('style-white');
+    else if (styleVal === 'fit') previewCard.classList.add('style-fit');
+
+    const firstChar = titleVal.charAt(0).toUpperCase() || "A";
+    previewText.innerText = firstChar;
+
+    if (iconVal) {
+        previewImg.src = iconVal;
+        previewImg.style.display = 'block';
+        previewText.style.display = 'none';
+        previewImg.onerror = () => {
+            previewImg.style.display = 'none';
+            previewText.style.display = 'flex';
+        };
+    } else {
+        previewImg.style.display = 'none';
+        previewText.style.display = 'flex';
+    }
+}
+
+// --- 辅助 UI 功能 ---
+export function selectStyle(element) {
+    document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+    updatePreview();
+}
+
+export function selectPage(element) {
+    document.querySelectorAll('.page-option').forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+}
+
+export function renderPageOptions(selectedPageIndex) {
+    const container = document.getElementById('page-options-container');
+    if(!container) return;
+    container.innerHTML = '';
+    state.pages.forEach((page, index) => {
+        const option = document.createElement('div');
+        option.className = 'page-option';
+        option.textContent = page.title || `Page ${index + 1}`;
+        option.dataset.index = index;
+        option.onclick = () => selectPage(option);
+        if (index === selectedPageIndex) option.classList.add('active');
+        container.appendChild(option);
+    });
 }
 
 // --- 页面管理逻辑 ---
@@ -548,5 +598,173 @@ export function createAvatarSelector(containerId, onSelect) {
             if(onSelect) onSelect(url);
         };
         container.appendChild(div);
+    });
+}
+
+// --- Swiper 逻辑 (Swiper) ---
+// (这部分保持不变，为了完整性，如果需要我可以再贴一次，但关键修复是上面新增的 openModal 逻辑)
+export function initSwiper() {
+    const swiper = document.getElementById('bookmark-swiper');
+    if (!swiper) return;
+    swiper.addEventListener('mousedown', dragStart);
+    swiper.addEventListener('touchstart', dragStart, { passive: true });
+    swiper.addEventListener('mouseup', dragEnd);
+    swiper.addEventListener('mouseleave', dragEnd);
+    swiper.addEventListener('touchend', dragEnd);
+    swiper.addEventListener('mousemove', drag);
+    swiper.addEventListener('touchmove', drag, { passive: false });
+    swiper.addEventListener('wheel', handleWheel, { passive: false });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+        if (e.key === 'ArrowLeft') {
+            if (state.currentPage > 0) {
+                state.currentPage--; updateSwiperPosition(true); renderPaginationDots();
+            }
+        }
+        else if (e.key === 'ArrowRight') {
+            if (state.currentPage < state.visualPages.length - 1) {
+                state.currentPage++; updateSwiperPosition(true); renderPaginationDots();
+            }
+        }
+    });
+}
+
+function dragStart(e) {
+    if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
+    state.isDragging = true; state.hasDragged = false;
+    state.startPos = getPositionX(e);
+    state.animationID = requestAnimationFrame(animation);
+    const wrapper = document.getElementById('bookmark-swiper-wrapper');
+    if(wrapper) wrapper.style.transition = 'none';
+}
+
+function drag(e) {
+    if (state.isDragging) {
+        const currentPosition = getPositionX(e);
+        const diff = currentPosition - state.startPos;
+        if (Math.abs(diff) > 10) state.hasDragged = true;
+        if (state.hasDragged) {
+            state.currentTranslate = state.prevTranslate + diff;
+            if (e.cancelable) e.preventDefault();
+        }
+    }
+}
+
+function dragEnd(e) {
+    if (!state.isDragging) return;
+    state.isDragging = false;
+    cancelAnimationFrame(state.animationID);
+    const movedBy = state.currentTranslate - state.prevTranslate;
+    const swiper = document.getElementById('bookmark-swiper');
+    const swiperWidth = swiper ? swiper.clientWidth : 1;
+    let targetPage = state.currentPage;
+    if (state.hasDragged) {
+        if (movedBy < -swiperWidth * 0.15 && state.currentPage < state.visualPages.length - 1) targetPage++;
+        else if (movedBy > swiperWidth * 0.15 && state.currentPage > 0) targetPage--;
+    }
+    state.currentPage = targetPage;
+    updateSwiperPosition(true);
+    renderPaginationDots();
+}
+
+function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
+function animation() { setSwiperPosition(); if (state.isDragging) requestAnimationFrame(animation); }
+function setSwiperPosition() {
+    const wrapper = document.getElementById('bookmark-swiper-wrapper');
+    if(wrapper) wrapper.style.transform = `translateX(${state.currentTranslate}px)`;
+}
+function updateSwiperPosition(withTransition = true) {
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    const swiper = document.getElementById('bookmark-swiper');
+    if (!swiperWrapper || !swiper) return;
+    const swiperWidth = swiper.clientWidth;
+    state.currentTranslate = state.currentPage * -swiperWidth;
+    state.prevTranslate = state.currentTranslate;
+    if (withTransition) swiperWrapper.style.transition = 'transform 0.2s ease-out';
+    setSwiperPosition();
+}
+function handleWheel(e) {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
+    e.preventDefault();
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    if(!swiperWrapper) return;
+    swiperWrapper.style.transition = 'none';
+    state.currentTranslate -= (e.deltaX * 0.5);
+    setSwiperPosition();
+    clearTimeout(state.wheelTimeout);
+    state.wheelTimeout = setTimeout(() => {
+        const swiper = document.getElementById('bookmark-swiper');
+        const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
+        const moveOffset = state.currentTranslate - (state.currentPage * -swiperWidth);
+        let targetPage = state.currentPage;
+        if (moveOffset < -swiperWidth * 0.05) targetPage++;
+        else if (moveOffset > swiperWidth * 0.05) targetPage--;
+        state.currentPage = Math.max(0, Math.min(state.visualPages.length - 1, targetPage));
+        updateSwiperPosition(true); renderPaginationDots();
+    }, 60);
+}
+
+function renderPaginationDots() {
+    const dotsContainer = document.getElementById('pagination-dots');
+    if(!dotsContainer) return;
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i < state.visualPages.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        if (i === state.currentPage) dot.classList.add('active');
+        dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
+        dotsContainer.appendChild(dot);
+    }
+    dotsContainer.classList.add('visible');
+    if(state.dotsTimer) clearTimeout(state.dotsTimer);
+    state.dotsTimer = setTimeout(() => dotsContainer.classList.remove('visible'), 2000);
+}
+
+// --- 编辑与交互 ---
+export function toggleEditMode(enable) {
+    state.isEditing = enable;
+    document.body.classList.toggle('is-editing', enable);
+    const controls = document.getElementById('edit-controls');
+    document.getElementById('theme-controls').classList.add('hidden');
+
+    if (enable) controls.classList.remove('hidden');
+    else {
+        controls.classList.add('hidden');
+        state.sortableInstances.forEach(instance => instance.destroy());
+        state.sortableInstances = [];
+    }
+    render();
+}
+
+function initSortable() {
+    if (!state.isEditing) return;
+    document.querySelectorAll('.bookmark-page-content').forEach(content => {
+        const instance = new Sortable(content, {
+            group: 'shared-bookmarks', animation: 350, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag', forceFallback: true,
+            onEnd: function (evt) {
+                const itemEl = evt.item; const newRect = itemEl.getBoundingClientRect(); const fallbackEl = document.querySelector('.sortable-drag');
+                if (fallbackEl) {
+                    const oldRect = fallbackEl.getBoundingClientRect(); const dx = oldRect.left - newRect.left; const dy = oldRect.top - newRect.top;
+                    requestAnimationFrame(() => { itemEl.style.transform = `translate3d(${dx}px, ${dy}px, 0)`; itemEl.style.transition = 'transform 0s'; requestAnimationFrame(() => { itemEl.style.transform = 'translate3d(0, 0, 0)'; itemEl.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)'; }); });
+                }
+                const bookmarkMap = new Map(); state.pages.forEach(page => page.bookmarks.forEach(bookmark => bookmarkMap.set(bookmark.id, bookmark)));
+                const newPages = []; const pageElements = document.querySelectorAll('.bookmark-page'); state.pages.forEach((p, i) => newPages[i] = { ...p, bookmarks: [] });
+                pageElements.forEach(pageEl => {
+                    const originalPageIndex = parseInt(pageEl.dataset.originalPageIndex); const bookmarkElements = pageEl.querySelectorAll('.bookmark-item');
+                    bookmarkElements.forEach(itemEl => {
+                        const bookmarkId = itemEl.dataset.id; const bookmark = bookmarkMap.get(bookmarkId);
+                        if (bookmark && newPages[originalPageIndex]) newPages[originalPageIndex].bookmarks.push(bookmark);
+                    });
+                });
+                state.pages = newPages.filter(p => p.title);
+
+                updateSyncStatus('saving');
+                debouncedSaveData();
+                createVisualPages(); setTimeout(() => { render(); }, 10);
+            }
+        });
+        state.sortableInstances.push(instance);
     });
 }
