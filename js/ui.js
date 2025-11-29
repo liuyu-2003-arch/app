@@ -41,14 +41,13 @@ export function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // --- 核心修复：点击事件处理 ---
+            // --- 核心：点击事件 ---
             div.onclick = (e) => {
                 if (state.isEditing) {
-                    // 编辑模式下：点击打开编辑弹窗（除非点了删除按钮）
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // 正常模式下：只有当“没有发生拖拽”时，才进行跳转
-                    // hasDragged 会在 drag() 函数中根据位移大小被设置为 true
+                    // 只有在明确标记为“已拖拽”时才阻止跳转
+                    // 微小的抖动（<10px）不会设置 hasDragged，因此可以正常点击
                     if (!state.hasDragged) window.location.href = item.url;
                 }
             };
@@ -646,15 +645,20 @@ function triggerKeyboardBounce(offset) {
     }, 150);
 }
 
-// --- 辅助：统一获取坐标 (修复：统一使用 clientX/Y) ---
+// --- 核心修复：统一获取坐标 ---
 function getPositionX(e) { return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; }
 function getPositionY(e) { return e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; }
 
+// --- 核心修复：更健壮的拖拽逻辑 ---
 function dragStart(e) {
     if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
 
     state.isDragging = true;
-    state.hasDragged = false; // 确保每次开始都重置为 false
+    state.hasDragged = false;
+
+    // 初始化状态，用于方向锁定
+    state.isScrolling = false;
+    state.dragDirectionLocked = false;
 
     // 记录初始坐标
     state.startPos = getPositionX(e);
@@ -666,28 +670,43 @@ function dragStart(e) {
 }
 
 function drag(e) {
-    if (state.isDragging) {
-        const currentPosition = getPositionX(e);
-        const currentPositionY = getPositionY(e);
+    if (!state.isDragging) return;
 
-        // 计算水平和垂直位移
-        const diff = currentPosition - state.startPos;
-        const diffY = currentPositionY - state.startPosY;
+    // 1. 如果已经判定为滚动模式，直接忽略水平拖拽，允许浏览器默认行为
+    if (state.isScrolling) return;
 
-        // --- 核心修复 1: 垂直滚动检测 ---
-        // 如果垂直位移 > 水平位移，判定为用户想滚动页面，直接 return，不设置 hasDragged
-        // 这样 touchend 时，hasDragged 仍为 false，点击事件就会正常触发
-        if (!state.hasDragged && Math.abs(diffY) > Math.abs(diff)) return;
+    const cx = getPositionX(e);
+    const cy = getPositionY(e);
+    const diffX = cx - state.startPos;
+    const diffY = cy - state.startPosY;
 
-        // --- 核心修复 2: 提高水平拖拽阈值 ---
-        // 将阈值从 10px 提高到 15px，减少因为手指轻微颤动导致的误判
-        if (Math.abs(diff) > 15) state.hasDragged = true;
+    // 2. 方向锁定逻辑 (Direction Locking)
+    // 在移动初期 (5px以内)，判断用户意图是“横向翻页”还是“纵向滚动”
+    if (!state.dragDirectionLocked) {
+        const absX = Math.abs(diffX);
+        const absY = Math.abs(diffY);
 
-        if (state.hasDragged) {
-            state.currentTranslate = state.prevTranslate + diff;
-            // 只有确实发生水平拖拽了，才阻止默认行为 (如浏览器后退或滚动)
-            if (e.cancelable) e.preventDefault();
+        if (absX > 5 || absY > 5) {
+            state.dragDirectionLocked = true;
+            if (absY > absX) {
+                // 垂直移动更多 -> 判定为滚动 -> 退出并忽略后续水平移动
+                state.isScrolling = true;
+                return;
+            }
+            // 否则 -> 判定为横向翻页 -> 继续执行下方逻辑
+        } else {
+            // 移动距离太小，视为点击抖动，暂不处理
+            return;
         }
+    }
+
+    // 3. 只有明确判定为横向翻页，且位移超过 10px，才激活“已拖拽”状态
+    if (Math.abs(diffX) > 10) state.hasDragged = true;
+
+    if (state.hasDragged) {
+        state.currentTranslate = state.prevTranslate + diffX;
+        // 阻止默认事件（防止页面左右反弹或干扰）
+        if (e.cancelable) e.preventDefault();
     }
 }
 
@@ -755,7 +774,7 @@ function renderPaginationDots() {
         dot.className = 'dot';
         if (i === state.currentPage) dot.classList.add('active');
 
-        // --- 修复：添加 data-title 属性，配合 CSS 显示标题 ---
+        // --- 修复：添加 data-title 属性 ---
         dot.setAttribute('data-title', state.visualPages[i].title || `Page ${i + 1}`);
 
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
