@@ -243,7 +243,7 @@ body.dark-mode .user-icon-svg {
 .sync-status.error { color: #FF3B30; }
 body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
-/* User Trigger Area & New Pill Button Styles */
+/* User Trigger Area & Glassmorphic Pill Button */
 .user-trigger-area {
     position: fixed; top: 0; right: 0;
     width: auto; height: auto;
@@ -255,20 +255,24 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .user-pill {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
+    /* Glass Effect */
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 30px;
     padding: 4px 14px 4px 4px;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     gap: 8px;
 }
 
 .user-pill:hover {
-    background: rgba(255, 255, 255, 0.85);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
 .user-pill-icon {
@@ -302,11 +306,14 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     padding-right: 2px;
 }
 
+/* Dark Mode Glass Pill */
 body.dark-mode .user-pill {
-    background: rgba(30, 30, 30, 0.6);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 body.dark-mode .user-pill:hover {
-    background: rgba(40, 40, 40, 0.85);
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 body.dark-mode .user-pill-text {
     color: #eee;
