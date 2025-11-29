@@ -4,6 +4,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let supabaseClient = null;
 let currentUser = null;
 let selectedAvatarUrl = '';
+let prefAvatarUrl = ''; // 新增：用于账户设置中选中的新头像
 
 if (window.supabase && window.supabase.createClient) {
     try { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { console.error(e); }
@@ -46,7 +47,7 @@ const translations = {
         "btn_confirm": "Confirm",
         "btn_add_page": "➕ Add New Page",
         "btn_login": "Login",
-        "btn_register": "Register",
+        "btn_register": "Register", // 已修改：去除 / Update
         "label_url": "URL",
         "label_title": "Title",
         "label_logo": "Logo URL",
@@ -61,7 +62,7 @@ const translations = {
         "modal_edit_title": "Edit/Add Bookmark",
         "modal_page_title": "Edit Pages",
         "modal_auth_title": "Login / Register",
-        "modal_auth_hint": "Choose an avatar (for registration)",
+        "modal_auth_hint": "Choose an avatar (for registration)", // 已修改：去除 or update
         "preview_title": "Preview",
         "style_full": "Full",
         "style_fit": "Fit",
@@ -82,7 +83,15 @@ const translations = {
         "msg_page_not_empty": "Page is not empty",
         "msg_import_success": "Import successful",
         "msg_import_fail": "Import failed, format error",
-        "msg_logged_in": "Logged in as"
+        "msg_logged_in": "Logged in as",
+
+        // 新增：账户设置相关
+        "modal_pref_title": "Account Preferences",
+        "label_display_name": "Name",
+        "label_phone": "Phone",
+        "btn_save": "Save Changes",
+        "msg_select_new_avatar": "Tap to change avatar",
+        "msg_save_success": "Preferences saved successfully"
     },
     zh: {
         "menu_edit": "编辑模式",
@@ -103,7 +112,7 @@ const translations = {
         "btn_confirm": "确定",
         "btn_add_page": "➕ 添加新页面",
         "btn_login": "登录",
-        "btn_register": "注册",
+        "btn_register": "注册", // 已修改
         "label_url": "网页网址",
         "label_title": "网页标题",
         "label_logo": "图标地址",
@@ -118,7 +127,7 @@ const translations = {
         "modal_edit_title": "编辑/添加书签",
         "modal_page_title": "编辑页面",
         "modal_auth_title": "登录 / 注册",
-        "modal_auth_hint": "选择一个头像 (注册资料时生效)",
+        "modal_auth_hint": "选择一个头像 (用于注册)", // 已修改
         "preview_title": "标题预览",
         "style_full": "铺满",
         "style_fit": "适中",
@@ -139,7 +148,15 @@ const translations = {
         "msg_page_not_empty": "页面不为空",
         "msg_import_success": "导入成功",
         "msg_import_fail": "导入失败，格式错误",
-        "msg_logged_in": "已登录"
+        "msg_logged_in": "已登录",
+
+        // 新增：账户设置相关
+        "modal_pref_title": "账户设置",
+        "label_display_name": "昵称",
+        "label_phone": "手机号",
+        "btn_save": "保存更改",
+        "msg_select_new_avatar": "点击更换头像",
+        "msg_save_success": "设置保存成功"
     }
 };
 
@@ -162,6 +179,11 @@ function updateTexts() {
     document.getElementById('input-icon').placeholder = t('ph_icon');
     document.getElementById('auth-email').placeholder = t('ph_email');
     document.getElementById('auth-password').placeholder = t('ph_password');
+    // 新增 placeholder 更新
+    const nameInput = document.getElementById('pref-name');
+    if(nameInput) nameInput.placeholder = t('label_display_name');
+    const phoneInput = document.getElementById('pref-phone');
+    if(phoneInput) phoneInput.placeholder = t('label_phone');
 }
 
 function changeLanguage(lang) {
@@ -173,11 +195,18 @@ function changeLanguage(lang) {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.body.style.visibility = 'hidden';
-    updateTexts(); // Initialize texts
+    updateTexts();
     initTheme();
     initSwiper();
     initKeyboardControl();
-    renderAvatarSelector();
+
+    // 使用新的通用函数初始化注册页面的头像选择器
+    createAvatarSelector('avatar-selector', (url) => {
+        selectedAvatarUrl = url;
+    });
+    // 默认选中第一个
+    const authContainer = document.getElementById('avatar-selector');
+    if (authContainer && authContainer.firstChild) authContainer.firstChild.click();
 
     // 点击外部关闭菜单
     document.addEventListener('click', (e) => {
@@ -198,24 +227,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
-function renderAvatarSelector() {
-    const container = document.getElementById('avatar-selector');
+// 新增：通用头像选择器创建函数
+function createAvatarSelector(containerId, onSelect) {
+    const container = document.getElementById(containerId);
     if(!container) return;
     container.innerHTML = '';
-    const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear'];
+
+    const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear', 'Molly'];
     seeds.forEach(seed => {
         const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed + Math.random()}`;
         const div = document.createElement('div');
         div.className = 'avatar-option';
         div.innerHTML = `<img src="${url}">`;
         div.onclick = () => {
-            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            container.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
             div.classList.add('selected');
-            selectedAvatarUrl = url;
+            if(onSelect) onSelect(url);
         };
         container.appendChild(div);
     });
-    if (container.firstChild) container.firstChild.click();
 }
 
 function showToast(message, type = 'normal') {
@@ -253,9 +283,12 @@ function updateUserStatus(user) {
     const modalTitle = document.getElementById('auth-title');
     const infoPanel = document.getElementById('user-info-panel');
     const menuUserName = document.getElementById('menu-user-name');
+    const menuUserEmail = document.getElementById('menu-user-email');
+    const menuUserAvatar = document.getElementById('menu-user-avatar');
 
     if (user) {
         fab.classList.add('logged-in');
+        // 优先使用 user_metadata 中的头像，若无则显示默认
         const avatarUrl = user.user_metadata?.avatar_url;
         if (avatarUrl) {
             imgIcon.src = avatarUrl;
@@ -266,8 +299,15 @@ function updateUserStatus(user) {
             svgIcon.style.display = 'block';
             svgIcon.setAttribute('fill', '#333');
         }
+
         if(infoPanel) infoPanel.classList.remove('hidden');
-        if(menuUserName) menuUserName.innerText = user.user_metadata?.full_name || user.email.split('@')[0];
+
+        // 更新菜单中的信息
+        const displayName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
+        if(menuUserName) menuUserName.innerText = displayName;
+        if(menuUserEmail) menuUserEmail.innerText = user.email;
+        if(menuUserAvatar) menuUserAvatar.src = avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
+
         document.getElementById('current-email').innerText = user.email;
         loadData();
     } else {
@@ -283,16 +323,14 @@ function updateUserStatus(user) {
         if(modalTitle) modalTitle.textContent = t("modal_auth_title");
         if(infoPanel) infoPanel.classList.add('hidden');
         if(menuUserName) menuUserName.innerText = t("auth_guest");
+        if(menuUserEmail) menuUserEmail.innerText = "guest@example.com";
+        if(menuUserAvatar) menuUserAvatar.src = "";
     }
 }
 
 function toggleAuthModal() {
     if (currentUser) {
         const menu = document.getElementById('user-dropdown');
-        document.getElementById('menu-user-name').innerText = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-        document.getElementById('menu-user-email').innerText = currentUser.email;
-        const avatar = currentUser.user_metadata?.avatar_url;
-        document.getElementById('menu-user-avatar').src = avatar || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
         menu.classList.toggle('active');
     } else {
         document.getElementById('auth-modal').classList.remove('hidden');
@@ -324,18 +362,23 @@ async function handleOAuthLogin(provider) {
 
 async function handleRegister() {
     if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
-    if (currentUser) {
-        if (!selectedAvatarUrl) return showToast(t("msg_select_avatar"), "error");
-        const { data, error } = await supabaseClient.auth.updateUser({ data: { avatar_url: selectedAvatarUrl } });
-        if (error) showToast(error.message, "error");
-        else { showToast(t("msg_update_success"), "success"); document.getElementById('auth-modal').classList.add('hidden'); updateUserStatus(data.user); }
-        return;
-    }
+    // 仅处理注册逻辑
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return showToast(t("msg_email_pass_req"), "error");
+
+    if (!selectedAvatarUrl) return showToast(t("msg_select_avatar"), "error");
+
     try {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { avatar_url: selectedAvatarUrl } } });
+        const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    avatar_url: selectedAvatarUrl
+                }
+            }
+        });
         if (error) showToast(error.message, "error");
         else {
             showToast(t("msg_reg_success"), "success");
@@ -474,9 +517,6 @@ function initTheme() {
 }
 
 // 核心主题切换逻辑
-// color: 背景颜色 (例如 #e4d0e5, #1a1a1a)，如果为 null 则不改颜色
-// element: 被点击的 DOM 元素 (用于 active 状态切换)
-// pattern: 纹理类名 (例如 'bg-pattern-lines', 'none')，如果为 null 则不改纹理
 function changeTheme(color, element, pattern) {
     const bg = document.querySelector('.background-layer');
 
@@ -484,9 +524,6 @@ function changeTheme(color, element, pattern) {
     if (color) {
         bg.style.backgroundColor = color;
         localStorage.setItem('themeColor', color);
-
-        // 深色模式处理：如果是深色背景 (#1a1a1a)，切换 CSS 类来处理反白
-        // 使用 CSS class 'dark-mode' 来控制全局文字颜色，比直接操作 style 更可靠
         document.body.classList.toggle('dark-mode', color === '#1a1a1a');
 
         // 更新底部色块的 Active 状态
@@ -875,4 +912,71 @@ function triggerKeyboardBounce(offset) {
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper'); const swiperWidth = document.getElementById('bookmark-swiper').clientWidth; const baseTranslate = currentPage * -swiperWidth;
     swiperWrapper.style.transition = 'transform 0.15s cubic-bezier(0.215, 0.610, 0.355, 1.000)'; swiperWrapper.style.transform = `translateX(${baseTranslate + offset}px)`;
     setTimeout(() => { swiperWrapper.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; swiperWrapper.style.transform = `translateX(${baseTranslate}px)`; }, 150);
+}
+
+// 新增：打开账户设置弹窗
+function openPrefModal() {
+    if (!currentUser) {
+        showToast(t("msg_login_success") ? "Please login first" : "请先登录", "error");
+        return;
+    }
+
+    // 1. 填充当前数据
+    const meta = currentUser.user_metadata || {};
+    document.getElementById('pref-name').value = meta.full_name || meta.display_name || '';
+    document.getElementById('pref-phone').value = meta.phone_number || meta.phone || '';
+
+    // 2. 显示当前头像
+    const currentAvatar = meta.avatar_url || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
+    document.getElementById('pref-current-img').src = currentAvatar;
+    prefAvatarUrl = currentAvatar;
+
+    // 3. 渲染选择器（不选中任何新头像，除非用户点击）
+    createAvatarSelector('pref-avatar-selector', (url) => {
+        prefAvatarUrl = url;
+        document.getElementById('pref-current-img').src = url; // 实时预览
+    });
+
+    // 4. 显示弹窗并关闭菜单
+    document.getElementById('user-dropdown').classList.remove('active');
+    document.getElementById('pref-modal').classList.remove('hidden');
+}
+
+// 新增：保存账户设置
+async function savePreferences() {
+    if (!supabaseClient || !currentUser) return;
+
+    const name = document.getElementById('pref-name').value;
+    const phone = document.getElementById('pref-phone').value;
+
+    // 准备更新数据
+    const updates = {
+        data: {
+            full_name: name,
+            phone_number: phone,
+            avatar_url: prefAvatarUrl
+        }
+    };
+
+    const btn = document.querySelector('#pref-modal .primary');
+    const originalText = btn.textContent;
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+        const { data, error } = await supabaseClient.auth.updateUser(updates);
+
+        if (error) throw error;
+
+        showToast(t("msg_save_success"), "success");
+        document.getElementById('pref-modal').classList.add('hidden');
+
+        updateUserStatus(data.user);
+
+    } catch (e) {
+        showToast(e.message, "error");
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
 }
