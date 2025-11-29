@@ -464,41 +464,43 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
 
-    /* --- 登录弹窗修复 (垂直堆叠版) --- */
+    /* --- 登录弹窗修复 (强制缩小输入框版) --- */
 
-    /* 1. 弹窗容器调整 */
+    /* 1. 弹窗容器 */
     .modal-content {
         min-width: unset !important;
-        width: 88%;           /* 宽度占比 */
-        max-width: 340px;     /* 限制最大宽度 */
-        padding: 24px 20px;   /* 增加一点内边距，让视觉更舒适 */
+        width: 92%;
+        max-width: 350px;
+        padding: 20px 15px;
     }
 
-    /* 2. 关键修改：将输入行改为“垂直排列” */
+    /* 2. 保持横向排列，两端对齐 */
     .input-row {
-        flex-direction: column !important; /* 强制标签在上，输入框在下 */
-        align-items: flex-start !important;/* 左对齐 */
-        gap: 6px;                          /* 标签和输入框之间的间距 */
+        display: flex !important;
+        flex-direction: row !important;       /* 强制横向 */
+        justify-content: space-between !important; /* 标签在左，输入框在右 */
+        align-items: center !important;
+        gap: 0; /* 间距由 space-between 控制 */
     }
 
-    /* 3. 标签样式重置 */
+    /* 3. 让标签自动适应宽度，不要固定死 */
     .input-label {
-        width: 100% !important; /* 占满整行 */
-        text-align: left !important; /* 文字左对齐 */
-        font-size: 14px;        /* 字体大小适中 */
-        font-weight: 600;       /* 加粗一点，作为标题 */
-        color: #444;
+        width: auto !important;     /* 宽度自动，容纳 "Password" */
+        flex-shrink: 0;             /* 禁止标签被压缩 */
+        text-align: left !important;
+        font-size: 13px;
+        padding-right: 10px;        /* 给右边留点空隙 */
     }
 
-    /* 4. 输入框样式 */
+    /* 4. 强制缩小输入框宽度，解决遮挡问题 */
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="password"],
     .modal-content input[type="tel"] {
-        width: 100%;            /* 输入框占满整行 */
-        height: 42px;           /* 增加高度，方便手指点击 */
-        padding: 0 12px;
-        box-sizing: border-box; /* 确保 padding 不会撑大宽度 */
-        margin-top: 0;
+        flex: none !important;      /* 取消自动充满 */
+        width: 65% !important;      /* ★关键：强制只占 65% 的宽度 */
+        height: 38px;
+        font-size: 13px;
+        padding: 0 10px;
     }
 }
