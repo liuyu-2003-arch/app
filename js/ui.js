@@ -41,11 +41,14 @@ export function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
+            // --- 核心修复：点击事件处理 ---
             div.onclick = (e) => {
                 if (state.isEditing) {
+                    // 编辑模式下：点击打开编辑弹窗（除非点了删除按钮）
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // 核心逻辑：只有当确实发生了拖拽时才拦截点击
+                    // 正常模式下：只有当“没有发生拖拽”时，才进行跳转
+                    // hasDragged 会在 drag() 函数中根据位移大小被设置为 true
                     if (!state.hasDragged) window.location.href = item.url;
                 }
             };
@@ -643,12 +646,20 @@ function triggerKeyboardBounce(offset) {
     }, 150);
 }
 
+// --- 辅助：统一获取坐标 (修复：统一使用 clientX/Y) ---
+function getPositionX(e) { return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; }
+function getPositionY(e) { return e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; }
+
 function dragStart(e) {
     if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
-    state.isDragging = true; state.hasDragged = false;
+
+    state.isDragging = true;
+    state.hasDragged = false; // 确保每次开始都重置为 false
+
+    // 记录初始坐标
     state.startPos = getPositionX(e);
-    // --- 修复：记录 Y 轴起始点 ---
     state.startPosY = getPositionY(e);
+
     state.animationID = requestAnimationFrame(animation);
     const wrapper = document.getElementById('bookmark-swiper-wrapper');
     if(wrapper) wrapper.style.transition = 'none';
@@ -657,19 +668,24 @@ function dragStart(e) {
 function drag(e) {
     if (state.isDragging) {
         const currentPosition = getPositionX(e);
-        const currentPositionY = getPositionY(e); // --- 修复：获取 Y 轴位置 ---
+        const currentPositionY = getPositionY(e);
+
+        // 计算水平和垂直位移
         const diff = currentPosition - state.startPos;
-        const diffY = currentPositionY - state.startPosY; // --- 修复：计算 Y 轴位移 ---
+        const diffY = currentPositionY - state.startPosY;
 
-        // --- 修复核心：如果垂直位移明显大于水平位移，则认为是垂直滚动，不触发 Swiper 拖拽 ---
-        // 这样可以避免手指在尝试上下滚动时，被误判为水平拖拽，导致 hasDragged = true，进而阻止了点击事件
-        if (!state.hasDragged && Math.abs(diffY) > Math.abs(diff) && Math.abs(diffY) > 5) return;
+        // --- 核心修复 1: 垂直滚动检测 ---
+        // 如果垂直位移 > 水平位移，判定为用户想滚动页面，直接 return，不设置 hasDragged
+        // 这样 touchend 时，hasDragged 仍为 false，点击事件就会正常触发
+        if (!state.hasDragged && Math.abs(diffY) > Math.abs(diff)) return;
 
-        // --- 修复核心：将触发阈值从 10 提高到 15，减少误触 ---
+        // --- 核心修复 2: 提高水平拖拽阈值 ---
+        // 将阈值从 10px 提高到 15px，减少因为手指轻微颤动导致的误判
         if (Math.abs(diff) > 15) state.hasDragged = true;
 
         if (state.hasDragged) {
             state.currentTranslate = state.prevTranslate + diff;
+            // 只有确实发生水平拖拽了，才阻止默认行为 (如浏览器后退或滚动)
             if (e.cancelable) e.preventDefault();
         }
     }
@@ -691,10 +707,6 @@ function dragEnd(e) {
     updateSwiperPosition(true);
     renderPaginationDots();
 }
-
-function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
-// --- 修复：新增获取 Y 轴位置函数 ---
-function getPositionY(e) { return e.type.includes('mouse') ? e.pageY : e.touches[0].clientY; }
 
 function animation() { setSwiperPosition(); if (state.isDragging) requestAnimationFrame(animation); }
 function setSwiperPosition() {
@@ -743,7 +755,7 @@ function renderPaginationDots() {
         dot.className = 'dot';
         if (i === state.currentPage) dot.classList.add('active');
 
-        // --- 修复：添加 data-title 属性 ---
+        // --- 修复：添加 data-title 属性，配合 CSS 显示标题 ---
         dot.setAttribute('data-title', state.visualPages[i].title || `Page ${i + 1}`);
 
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
