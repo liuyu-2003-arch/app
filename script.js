@@ -200,6 +200,11 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 【关键修复】检测并修复双重 hash (##access_token)，让登录流程能继续
+    if (window.location.hash && window.location.hash.startsWith('##')) {
+        window.location.hash = window.location.hash.substring(1);
+    }
+
     document.body.style.visibility = 'hidden';
     updateTexts();
     initTheme();
@@ -350,10 +355,18 @@ function quickChangeTheme(color, pattern) {
 async function handleOAuthLogin(provider) {
     if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
     showToast(`Navigating to ${provider}...`, "normal");
+
+    // 【关键修复】获取纯净的 URL (不带 hash)，防止把旧的 access_token 再次传给 Supabase
+    // 这解决了退出后重新登录出现 ##access_token 的问题
+    const redirectUrl = window.location.origin + window.location.pathname;
+
     try {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: provider,
-            options: { redirectTo: window.location.href, queryParams: { access_type: 'offline', prompt: 'consent' } }
+            options: {
+                redirectTo: redirectUrl,
+                queryParams: { access_type: 'offline', prompt: 'consent' }
+            }
         });
         if (error) throw error;
     } catch (e) { showToast(e.message, "error"); }
