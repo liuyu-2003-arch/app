@@ -580,10 +580,10 @@ body.dark-mode .user-pill-icon {
     .container { padding-top: 10px; }
 
     /* 2. 标题绝对定位，与右上角 Logo 对齐 */
-    .bookmark-page { position: relative; padding-top: 5; }
+    .bookmark-page { position: relative; padding-top: 0; }
 
     .page-title {
-        position: absolute; top: 25px; left: 20px;
+        position: absolute; top: 35px; left: 30px;
         font-size: 22px; margin: 0; z-index: 10;
         text-align: left; padding: 0; width: auto;
     }
