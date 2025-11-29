@@ -577,18 +577,16 @@ body.dark-mode .user-pill-icon {
 /* --- 移动端适配 (包含登录框修复) --- */
 /* --- 移动端适配 (重点修改区域) --- */
 @media (max-width: 768px) {
-    /* ... (Container 和 Page Title 样式保持上一步的修改) ... */
+    /* ... (头部样式保持不变) ... */
     .container { padding-top: 10px; }
-
     .bookmark-page { position: relative; padding-top: 0; }
-
     .page-title {
         position: absolute; top: 25px; left: 20px;
         font-size: 22px; margin: 0; z-index: 10;
         text-align: left; padding: 0; width: auto;
     }
 
-    /* 2. 修改为 4列 布局 */
+    /* 2. 修改内容区域：更大图标 + 更大间距 */
     .bookmark-page-content {
         margin-top: 70px;
         justify-content: center;
@@ -597,29 +595,42 @@ body.dark-mode .user-pill-icon {
         max-width: 100%;
         padding-left: 10px; padding-right: 10px;
 
-        /* 核心修改：4列布局 */
-        --mobile-card-size: 64px; /* 4列时图标可以稍微大一点点，或者保持 58px */
-        --mobile-gap: 15px;       /* 间距也可以稍微大一点 */
+        /* --- 核心修改开始 --- */
+        --mobile-card-size: 70px; /* 增大：64px -> 70px */
+        --mobile-gap: 20px;       /* 增大：15px -> 20px */
+        /* --- 核心修改结束 --- */
 
         display: grid;
-        grid-template-columns: repeat(4, var(--mobile-card-size)); /* 改为 4 */
+        grid-template-columns: repeat(4, var(--mobile-card-size)); /* 保持4列 */
         gap: var(--mobile-gap);
         width: auto;
     }
 
+    /* 3. 适配增大的图标 */
     .bookmark-item { width: var(--mobile-card-size); }
+
     .icon-box {
-        width: var(--mobile-card-size); height: var(--mobile-card-size);
-        border-radius: 16px;
+        width: var(--mobile-card-size);
+        height: var(--mobile-card-size);
+        border-radius: 18px; /* 稍微增大圆角以匹配尺寸 (16px -> 18px) */
     }
-    .text-icon { font-size: 26px; }
-    .bookmark-title { font-size: 12px; margin-top: 5px; width: 130%; }
 
-    /* 3. 恢复“编辑书签”按钮显示 */
-    /* 删除之前添加的 .user-menu .menu-item[onclick*="handleMenuEdit"] { display: none } 代码 */
-    /* 这里不需要写任何代码，只要确保之前隐藏它的代码被删除即可 */
+    .text-icon {
+        font-size: 30px; /* 文字图标也稍微放大 (26px -> 30px) */
+    }
 
-    /* 底部控件样式保持之前的修复 */
+    .bookmark-title {
+        font-size: 13px; /* 字体微调 (12px -> 13px) */
+        margin-top: 6px;
+        width: 120%; /* 防止文字过宽重叠，稍微收一点 */
+    }
+
+    /* ... (以下样式保持不变) ... */
+
+    /* 确保编辑书签按钮显示 */
+    .user-menu .menu-item[onclick*="handleMenuEdit"] { display: flex !important; }
+
+    /* 底部控件 */
     #edit-controls.edit-controls { display: none !important; }
 
     #theme-controls.edit-controls {
@@ -631,11 +642,12 @@ body.dark-mode .user-pill-icon {
     #theme-controls.edit-controls.hidden { display: none !important; }
     #theme-controls .control-divider { display: none; }
 
-    /* ... (User Pill 和 Modal 样式保持不变) ... */
+    /* User Pill */
     .user-trigger-area { padding: 15px; }
     .user-pill { padding: 4px 12px 4px 4px; }
     .pagination-dots { bottom: 30px; }
 
+    /* Modal */
     .modal-content {
         min-width: unset !important; width: 92%; max-width: 350px; padding: 25px 20px;
     }
