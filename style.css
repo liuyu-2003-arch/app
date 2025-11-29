@@ -545,37 +545,40 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
         min-width: unset !important;
         width: 92%;
         max-width: 350px;
-        padding: 20px 15px;
+        padding: 25px 20px; /* 增加内边距 */
     }
 
-    /* 2. 保持横向排列，两端对齐 */
+    /* 2. 保持横向排列，改为紧凑布局 */
     .input-row {
         display: flex !important;
         flex-direction: row !important;
-        justify-content: space-between !important;
+        justify-content: flex-start !important; /* 改为起始对齐，拉近距离 */
         align-items: center !important;
-        gap: 0;
+        gap: 15px !important; /* 控制文字和框之间的间距 */
     }
 
-    /* 3. 让标签自动适应宽度，不要固定死 */
+    /* 3. 标签样式 */
     .input-label {
         width: auto !important;
+        min-width: 40px; /* 保证最小宽度 */
         flex-shrink: 0;
         text-align: left !important;
-        font-size: 13px;
-        padding-right: 10px;
+        font-size: 14px;
+        padding-right: 0;
+        font-weight: 600;
     }
 
-    /* 4. 强制缩小输入框宽度，解决遮挡问题 */
+    /* 4. 输入框样式：自动填满剩余空间，且更大 */
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="password"],
     .modal-content input[type="tel"] {
-        flex: none !important;
-        width: 65% !important;      /* 强制只占 65% 的宽度 */
-        height: 48px !important;    /* 增加高度，方便点击 */
-        font-size: 15px !important; /* 加大字号 */
-        padding: 0 10px;
+        flex: 1 !important;         /* 自动占据剩余所有宽度 */
+        width: auto !important;     /* 取消固定宽度 */
+        min-width: 0;               /* 防止溢出 */
+        height: 52px !important;    /* 增加高度，更容易点击 */
+        font-size: 16px !important; /* 增大字号 (iOS下16px防止自动缩放) */
+        padding: 0 15px;
         border-radius: 12px;
     }
 }
