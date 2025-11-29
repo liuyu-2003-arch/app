@@ -293,7 +293,15 @@ body.dark-mode .user-icon-svg {
 .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
 
 /* --- 头像选择器 --- */
-.avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+/* 修改前：display: grid; ... */
+/* 修改后：使用 Flex 布局实现完美居中 */
+.avatar-grid {
+    display: flex;              /* 改为 Flex 布局 */
+    justify-content: center;    /* 水平居中 */
+    gap: 15px;                 /* 稍微增加头像间距 */
+    margin-bottom: 20px;
+}
+
 .avatar-option {
     width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;
@@ -311,7 +319,7 @@ body.dark-mode .user-icon-svg {
 }
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    min-width: 420px; max-width: 800px;
+    min-width: 350px; max-width: 800px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
     animation: popUp 0.3s ease;
 }
