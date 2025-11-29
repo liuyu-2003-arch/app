@@ -292,16 +292,13 @@ body.dark-mode .user-icon-svg {
 .auth-divider { width: 100%; display: flex; align-items: center; justify-content: center; margin: 10px 0 20px 0; color: #999; font-size: 12px; }
 .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
 
-/* --- 头像选择器 --- */
-/* 修改前：display: grid; ... */
-/* 修改后：使用 Flex 布局实现完美居中 */
+/* --- 头像选择器 (使用 Flex 居中) --- */
 .avatar-grid {
-    display: flex;              /* 改为 Flex 布局 */
-    justify-content: center;    /* 水平居中 */
-    gap: 15px;                 /* 稍微增加头像间距 */
+    display: flex;
+    justify-content: center;
+    gap: 15px;
     margin-bottom: 20px;
 }
-
 .avatar-option {
     width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;
@@ -319,7 +316,8 @@ body.dark-mode .user-icon-svg {
 }
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    min-width: 350px; max-width: 800px;
+    min-width: 350px; /* 默认宽度调整为 350px */
+    max-width: 800px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
     animation: popUp 0.3s ease;
 }
@@ -353,7 +351,23 @@ body.dark-mode .user-icon-svg {
 .form-group { display: flex; flex-direction: column; gap: 15px; }
 .input-row { display: flex; align-items: center; gap: 10px; }
 .input-label { font-size: 13px; color: #666; width: 65px; text-align: right; flex-shrink: 0; font-weight: 500; }
-.modal-content input[type="text"], .modal-content input[type="email"], .modal-content input[type="password"] { flex: 1; border: 1px solid #e0e0e0; border-radius: 10px; background: #f9f9f9; font-size: 14px; outline: none; transition: border-color 0.2s; height: 44px; padding: 0 12px; box-sizing: border-box; }
+
+/* 修改输入框样式：添加 input[type="tel"] 以统一手机号输入框样式 */
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="password"],
+.modal-content input[type="tel"] {
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background: #f9f9f9;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    height: 44px;
+    padding: 0 12px;
+    box-sizing: border-box;
+}
 .modal-content input:focus { border-color: #007AFF; background: white; }
 
 .page-options-container { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; padding: 0; border: none; background: transparent; overflow-x: auto; }
@@ -406,7 +420,7 @@ body.dark-mode .user-icon-svg {
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
 
-    /* --- 新增：修复登录窗口宽度 --- */
+    /* 修复手机端弹窗过宽的问题 */
     .modal-content {
         min-width: unset !important;
         width: 85%;

@@ -4,7 +4,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let supabaseClient = null;
 let currentUser = null;
 let selectedAvatarUrl = '';
-let prefAvatarUrl = ''; // 新增：用于账户设置中选中的新头像
+let prefAvatarUrl = '';
 
 if (window.supabase && window.supabase.createClient) {
     try { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { console.error(e); }
@@ -47,7 +47,7 @@ const translations = {
         "btn_confirm": "Confirm",
         "btn_add_page": "➕ Add New Page",
         "btn_login": "Login",
-        "btn_register": "Register", // 已修改：去除 / Update
+        "btn_register": "Register",
         "label_url": "URL",
         "label_title": "Title",
         "label_logo": "Logo URL",
@@ -62,7 +62,7 @@ const translations = {
         "modal_edit_title": "Edit/Add Bookmark",
         "modal_page_title": "Edit Pages",
         "modal_auth_title": "Login / Register",
-        "modal_auth_hint": "Choose an avatar (for registration)", // 已修改：去除 or update
+        "modal_auth_hint": "Choose an avatar (for registration)",
         "preview_title": "Preview",
         "style_full": "Full",
         "style_fit": "Fit",
@@ -85,9 +85,8 @@ const translations = {
         "msg_import_fail": "Import failed, format error",
         "msg_logged_in": "Logged in as",
 
-        // 新增：账户设置相关
         "modal_pref_title": "Account Preferences",
-        "label_display_name": "Name",
+        "label_display_name": "Display Name", // 这里的文案已更新
         "label_phone": "Phone",
         "btn_save": "Save Changes",
         "msg_select_new_avatar": "Tap to change avatar",
@@ -112,7 +111,7 @@ const translations = {
         "btn_confirm": "确定",
         "btn_add_page": "➕ 添加新页面",
         "btn_login": "登录",
-        "btn_register": "注册", // 已修改
+        "btn_register": "注册",
         "label_url": "网页网址",
         "label_title": "网页标题",
         "label_logo": "图标地址",
@@ -127,7 +126,7 @@ const translations = {
         "modal_edit_title": "编辑/添加书签",
         "modal_page_title": "编辑页面",
         "modal_auth_title": "登录 / 注册",
-        "modal_auth_hint": "选择一个头像 (用于注册)", // 已修改
+        "modal_auth_hint": "选择一个头像 (用于注册)",
         "preview_title": "标题预览",
         "style_full": "铺满",
         "style_fit": "适中",
@@ -150,9 +149,8 @@ const translations = {
         "msg_import_fail": "导入失败，格式错误",
         "msg_logged_in": "已登录",
 
-        // 新增：账户设置相关
         "modal_pref_title": "账户设置",
-        "label_display_name": "昵称",
+        "label_display_name": "显示名称", // 这里的文案已更新
         "label_phone": "手机号",
         "btn_save": "保存更改",
         "msg_select_new_avatar": "点击更换头像",
@@ -173,13 +171,11 @@ function updateTexts() {
             el.textContent = t(key);
         }
     });
-    // Update placeholders
     document.getElementById('input-url').placeholder = t('ph_url');
     document.getElementById('input-title').placeholder = t('ph_title');
     document.getElementById('input-icon').placeholder = t('ph_icon');
     document.getElementById('auth-email').placeholder = t('ph_email');
     document.getElementById('auth-password').placeholder = t('ph_password');
-    // 新增 placeholder 更新
     const nameInput = document.getElementById('pref-name');
     if(nameInput) nameInput.placeholder = t('label_display_name');
     const phoneInput = document.getElementById('pref-phone');
@@ -200,15 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initSwiper();
     initKeyboardControl();
 
-    // 使用新的通用函数初始化注册页面的头像选择器
     createAvatarSelector('avatar-selector', (url) => {
         selectedAvatarUrl = url;
     });
-    // 默认选中第一个
     const authContainer = document.getElementById('avatar-selector');
     if (authContainer && authContainer.firstChild) authContainer.firstChild.click();
 
-    // 点击外部关闭菜单
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('user-dropdown');
         const fab = document.querySelector('.user-fab');
@@ -227,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
-// 新增：通用头像选择器创建函数
 function createAvatarSelector(containerId, onSelect) {
     const container = document.getElementById(containerId);
     if(!container) return;
@@ -288,7 +280,6 @@ function updateUserStatus(user) {
 
     if (user) {
         fab.classList.add('logged-in');
-        // 优先使用 user_metadata 中的头像，若无则显示默认
         const avatarUrl = user.user_metadata?.avatar_url;
         if (avatarUrl) {
             imgIcon.src = avatarUrl;
@@ -302,7 +293,6 @@ function updateUserStatus(user) {
 
         if(infoPanel) infoPanel.classList.remove('hidden');
 
-        // 更新菜单中的信息
         const displayName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
         if(menuUserName) menuUserName.innerText = displayName;
         if(menuUserEmail) menuUserEmail.innerText = user.email;
@@ -343,7 +333,6 @@ function handleMenuEdit() {
     toggleEditMode(true);
 }
 
-// 快速切换辅助函数 (Quick Toggle Helper)
 function quickChangeTheme(color, pattern) {
     changeTheme(color, null, pattern);
 }
@@ -362,7 +351,6 @@ async function handleOAuthLogin(provider) {
 
 async function handleRegister() {
     if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
-    // 仅处理注册逻辑
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     if(!email || !password) return showToast(t("msg_email_pass_req"), "error");
@@ -509,37 +497,25 @@ function createVisualPages() {
 }
 
 function initTheme() {
-    // 恢复之前的颜色，默认使用粉色 (#e4d0e5)
     const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
     const savedPattern = localStorage.getItem('themePattern') || 'none';
-
     changeTheme(savedColor, null, savedPattern);
 }
 
-// 核心主题切换逻辑
 function changeTheme(color, element, pattern) {
     const bg = document.querySelector('.background-layer');
-
-    // 1. 处理颜色
     if (color) {
         bg.style.backgroundColor = color;
         localStorage.setItem('themeColor', color);
         document.body.classList.toggle('dark-mode', color === '#1a1a1a');
-
-        // 更新底部色块的 Active 状态
         if (element) {
             document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
             element.classList.add('active');
         }
     }
-
-    // 2. 处理纹理
     if (pattern) {
         localStorage.setItem('themePattern', pattern);
-        // 移除所有自定义纹理类 (回归默认 SVG)
         bg.classList.remove('bg-pattern-lines-d', 'bg-pattern-aurora', 'bg-pattern-flow');
-
-        // 如果不是 'none'，则添加新的纹理类 (这会覆盖默认 SVG)
         if (pattern !== 'none') {
             bg.classList.add(pattern);
         }
