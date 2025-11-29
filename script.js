@@ -485,8 +485,8 @@ function changeTheme(color, element, pattern) {
     // Handle Pattern
     if (pattern !== undefined) {
         localStorage.setItem('themePattern', pattern);
-        // Remove all pattern classes
-        bg.classList.remove('bg-pattern-grid', 'bg-pattern-lines-h', 'bg-pattern-lines-d');
+        // Remove all pattern classes, adding bg-pattern-lines-v
+        bg.classList.remove('bg-pattern-grid', 'bg-pattern-lines-h', 'bg-pattern-lines-d', 'bg-pattern-lines-v');
         if (pattern && pattern !== 'none') {
             bg.classList.add(pattern);
         }

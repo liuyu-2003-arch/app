@@ -21,7 +21,6 @@ body {
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
     background-color: #e4d0e5;
-    /* 默认保留原有的 SVG 背景，但在使用线条主题时会被覆盖 */
     background-image:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0,0L48,26.7C96,53,192,107,288,122.7C384,139,480,117,576,106.7C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E"),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.2)' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E"),
@@ -32,7 +31,8 @@ body {
     transition: background-color 0.5s ease;
 }
 
-/* --- 新增：线条与网格背景样式 --- */
+/* --- 背景纹理样式 --- */
+/* 网格 */
 .background-layer.bg-pattern-grid {
     background-image:
         linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
@@ -40,13 +40,19 @@ body {
     background-size: 20px 20px, 20px 20px !important;
     background-position: center !important;
 }
-
+/* 水平线 */
 .background-layer.bg-pattern-lines-h {
     background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px) !important;
     background-size: 100% 20px !important;
     background-position: center !important;
 }
-
+/* 垂直线 */
+.background-layer.bg-pattern-lines-v {
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px) !important;
+    background-size: 20px 100% !important;
+    background-position: center !important;
+}
+/* 斜线 */
 .background-layer.bg-pattern-lines-d {
     background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0, rgba(0, 0, 0, 0.05) 1px, transparent 0, transparent 10px) !important;
     background-size: auto !important;
@@ -59,7 +65,7 @@ body {
     padding-top: 6vh; padding-bottom: 0; box-sizing: border-box;
 }
 
-/* --- 滑动区域 (触摸修复核心) --- */
+/* --- 滑动区域 --- */
 .bookmark-swiper {
     width: 100%; overflow: hidden; flex-grow: 1;
     touch-action: pan-y;
@@ -151,7 +157,7 @@ body {
 }
 .is-editing .delete-btn { display: block; }
 
-/* 编辑控制栏 (底部弹出) */
+/* 编辑控制栏 */
 .edit-controls {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: white; padding: 15px 25px; border-radius: 20px;
@@ -169,11 +175,23 @@ body {
 .edit-controls .done-btn:hover { background: #0066d6; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
 
 /* 配色切换 */
-.theme-swatches { display: flex; gap: 8px; padding-right: 15px; border-right: 1px solid #eee; margin-right: 5px; }
+.theme-swatches { display: flex; gap: 10px; padding-right: 15px; border-right: 1px solid #eee; margin-right: 5px; }
 .swatch {
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;
+    position: relative; overflow: hidden; background-clip: padding-box;
 }
+/* 给线条主题的色块加一点纹理预览 */
+.swatch.swatch-lines-v::after {
+    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 6px 100%;
+}
+.swatch.swatch-grid::after {
+    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+    background-size: 6px 6px;
+}
+
 .swatch:hover { transform: scale(1.1); }
 .swatch.active { border-color: #007AFF; transform: scale(1.1); }
 
