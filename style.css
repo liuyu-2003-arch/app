@@ -638,7 +638,7 @@ body.dark-mode .user-pill-icon {
     /* 其他适配 */
     .user-trigger-area { padding: 15px; }
     .user-pill { padding: 4px 12px 4px 4px; }
-    .pagination-dots { bottom: 20px; }
+    .pagination-dots { bottom: 20px; } /* 底部圆点位置 */
 
     .modal-content {
         min-width: unset !important; width: 92%; max-width: 350px; padding: 25px 20px;
