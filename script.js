@@ -204,7 +204,6 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 修复 Hash 登录问题
     if (window.location.hash) {
         let hash = window.location.hash;
         if (hash.startsWith('##')) {
@@ -223,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSwiper();
     initKeyboardControl();
 
-    // 注册页面的头像选择器
+    // 注册页面的简单头像选择器
     createAvatarSelector('avatar-selector', (url) => {
         selectedAvatarUrl = url;
     });
@@ -985,7 +984,6 @@ function triggerKeyboardBounce(offset) {
 function handleFeedback() {
     const subject = encodeURIComponent("Homepage Feedback");
     const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
-    // 修正：更新为 jemchmi@gmail.com
     window.location.href = `mailto:jemchmi@gmail.com?subject=${subject}&body=${body}`;
 }
 
@@ -1003,8 +1001,8 @@ function openPrefModal() {
     document.getElementById('pref-current-img').src = currentAvatar;
     prefAvatarUrl = currentAvatar;
 
-    // 初始化头像网格
-    renderAvatarGrid();
+    // ★★★ 传入当前头像 URL，用于生成“回退选项” ★★★
+    renderAvatarGrid(currentAvatar);
     switchAvatarTab('emoji');
 
     document.getElementById('user-dropdown').classList.remove('active');
@@ -1055,42 +1053,56 @@ function switchAvatarTab(tabName) {
     document.getElementById(`avatar-panel-${tabName}`).classList.remove('hidden');
 }
 
-function renderAvatarGrid() {
+// ★★★ 核心修复：渲染头像网格 (带“当前头像”回退功能 + 更多人物风格) ★★★
+function renderAvatarGrid(currentUrl) {
     const container = document.getElementById('pref-avatar-grid');
     container.innerHTML = '';
 
-    const emojis = [
-        "😀", "😎", "🤖", "👻", "👽", "👾",
-        "🐱", "🐶", "🦊", "🦁", "🐼", "🐨",
-        "🍎", "🍋", "🍉", "🍇", "🍓", "🍑",
-        "🌍", "🌙", "⭐", "⚡", "🔥", "💧",
-        "💡", "💻", "📷", "🎨", "🎮", "🎵",
-        "🚀", "✈️", "🚲", "🚗", "🏠", "⛺"
+    // 1. 回退选项：当前使用的头像
+    // 只有当 currentUrl 存在且不是默认的 Guest 头像时才显示
+    if (currentUrl && !currentUrl.includes('seed=Guest')) {
+        const div = document.createElement('div');
+        div.className = 'emoji-item';
+        div.style.border = "2px solid #007AFF"; // 蓝色高亮边框
+        div.title = "Current Avatar"; // 鼠标悬停提示
+        // 渲染当前头像
+        div.innerHTML = `<img src="${currentUrl}" style="width:100%; height:100%; object-fit: cover;">`;
+        div.onclick = () => selectNewAvatar(div, currentUrl);
+        container.appendChild(div);
+    }
+
+    // 2. 扩充的头像库 (修复了之前 Emoji 显示灰色的问题，并增加了更多人物)
+    // 我们混合使用不同的 DiceBear 风格来提供多样性
+    const collections = [
+        // 之前用户喜欢的 Notion 风格 (黑白线条)
+        { style: 'notionists', count: 12 },
+        // 新增：Adventurer (探险家风格，色彩丰富，类似人物卡)
+        { style: 'adventurer', count: 12 },
+        // 新增：Fun Emoji (专门的 Emoji 风格，替代之前错误的 initials)
+        { style: 'fun-emoji', count: 12 },
+        // 新增：Micah (极简风格)
+        { style: 'micah', count: 6 }
     ];
 
-    const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear', 'Molly', 'Simba', 'Coco'];
+    collections.forEach(c => {
+        for(let i=0; i<c.count; i++) {
+            // 使用随机种子生成不同的头像
+            const seed = `${c.style}-${i}-${Math.random().toString(36).substring(7)}`;
+            const url = `https://api.dicebear.com/9.x/${c.style}/svg?seed=${seed}`;
 
-    emojis.forEach(emoji => {
-        const div = document.createElement('div');
-        div.className = 'emoji-item';
-        div.textContent = emoji;
-        const url = `https://api.dicebear.com/9.x/initials/svg?seed=${emoji}&backgroundColor=transparent&fontSize=40`;
-        div.onclick = () => selectNewAvatar(div, url, true);
-        container.appendChild(div);
-    });
-
-    seeds.forEach(seed => {
-        const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}`;
-        const div = document.createElement('div');
-        div.className = 'emoji-item';
-        div.innerHTML = `<img src="${url}" style="width:100%; height:100%;">`;
-        div.onclick = () => selectNewAvatar(div, url);
-        container.appendChild(div);
+            const div = document.createElement('div');
+            div.className = 'emoji-item';
+            // 使用 loading="lazy" 优化加载
+            div.innerHTML = `<img src="${url}" style="width:100%; height:100%;" loading="lazy">`;
+            div.onclick = () => selectNewAvatar(div, url);
+            container.appendChild(div);
+        }
     });
 }
 
 function selectNewAvatar(el, url, isEmoji = false) {
     document.querySelectorAll('.emoji-item').forEach(item => item.classList.remove('selected'));
+    // 注意：如果是“当前头像”的回退选项，我们不移除它的蓝色边框，只是加上选中状态
     el.classList.add('selected');
     prefAvatarUrl = url;
     document.getElementById('pref-current-img').src = url;
