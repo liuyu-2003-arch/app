@@ -170,7 +170,7 @@ body.dark-mode .user-icon-svg {
 }
 .is-editing .delete-btn { display: block; }
 
-/* 编辑控制栏 */
+/* 编辑控制栏 (通用底部栏) */
 .edit-controls {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: white; padding: 15px 25px; border-radius: 20px;
@@ -188,7 +188,7 @@ body.dark-mode .user-icon-svg {
 .edit-controls .done-btn:hover { background: #0066d6; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
 
 /* 配色切换 */
-.theme-swatches { display: flex; gap: 8px; padding-right: 15px; border-right: 1px solid #eee; margin-right: 5px; }
+.theme-swatches { display: flex; gap: 8px; margin-right: 5px; }
 .swatch {
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;
@@ -196,6 +196,22 @@ body.dark-mode .user-icon-svg {
 }
 .swatch:hover { transform: scale(1.1); }
 .swatch.active { border-color: #007AFF; transform: scale(1.1); }
+
+/* 控制栏分割线 */
+.control-divider {
+    width: 1px; height: 24px; background: #eee; margin: 0 5px;
+}
+
+/* 主题模式按钮 */
+.theme-patterns {
+    display: flex; gap: 8px;
+}
+.pattern-btn {
+    background: transparent; border: 1px solid #ddd; padding: 6px 12px;
+    border-radius: 8px; font-size: 13px; color: #555; cursor: pointer; transition: all 0.2s;
+}
+.pattern-btn:hover { background: #f5f5f5; }
+.pattern-btn.active { background: #007AFF; color: white; border-color: #007AFF; }
 
 /* --- 顶部提示条 (Toast) --- */
 .toast-container {
@@ -214,6 +230,33 @@ body.dark-mode .user-icon-svg {
 .toast.visible { opacity: 1; transform: translateY(0) scale(1); }
 .toast.success { background: rgba(52, 199, 89, 0.9); }
 .toast.error { background: rgba(255, 59, 48, 0.9); }
+
+/* --- 同步状态指示器 --- */
+.sync-status {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 9000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.sync-status.visible { opacity: 1; transform: translateY(0); }
+.sync-status.saving { color: #007AFF; }
+.sync-status.saved { color: #34C759; }
+.sync-status.error { color: #FF3B30; }
+body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
 /* --- 用户按钮 (Login Button) --- */
 .user-trigger-area {
@@ -428,67 +471,3 @@ body.dark-mode .user-icon-svg {
         padding: 20px;
     }
 }
-
-/* --- 同步状态指示器 --- */
-.sync-status {
-    position: fixed;
-    top: 20px;
-    left: 20px; /* 显示在左上角，与右上角用户头像对称 */
-    background: rgba(255, 255, 255, 0.9);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #333;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 9000;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.sync-status.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.sync-status.saving {
-    color: #007AFF;
-}
-
-.sync-status.saved {
-    color: #34C759;
-}
-
-.sync-status.error {
-    color: #FF3B30;
-}
-
-/* 深色模式适配 */
-body.dark-mode .sync-status {
-    background: rgba(30, 30, 30, 0.9);
-    color: #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-
-/* ... (保留原有内容) ... */
-
-/* --- Edit Theme 弹窗中的圆点布局 --- */
-.theme-swatches-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3列 */
-    gap: 10px;
-    justify-items: center;
-}
-
-/* 覆盖 .swatch 在弹窗里的样式，使其稍大一点以便点击 */
-.modal-content .swatch {
-    width: 32px;
-    height: 32px;
-}
-
-/* ... (保留底部的 @media query 内容) ... */

@@ -29,8 +29,8 @@ let wheelTimeout = null;
 // --- i18n Logic ---
 const translations = {
     en: {
-        "menu_edit_bookmark": "Edit Bookmark", // 原 menu_edit
-        "menu_edit_theme": "Edit Theme",       // 新增
+        "menu_edit_bookmark": "Edit Bookmark",
+        "menu_edit_theme": "Edit Theme",
         "menu_pref": "Account Preferences",
         "menu_lang": "Language",
         "menu_logout": "Log out",
@@ -84,22 +84,19 @@ const translations = {
         "msg_import_success": "Import successful",
         "msg_import_fail": "Import failed, format error",
         "msg_logged_in": "Logged in as",
-
         "modal_pref_title": "Account Preferences",
-        "modal_theme_title": "Edit Theme", // 新增
         "label_display_name": "Display Name",
         "label_phone": "Phone",
         "btn_save": "Save Changes",
         "msg_select_new_avatar": "Tap to change avatar",
         "msg_save_success": "Preferences saved successfully",
-
         "msg_saving": "Saving...",
         "msg_saved": "All changes saved",
         "msg_save_fail": "Save failed"
     },
     zh: {
-        "menu_edit_bookmark": "编辑书签", // 原 menu_edit
-        "menu_edit_theme": "编辑主题",    // 新增
+        "menu_edit_bookmark": "编辑书签",
+        "menu_edit_theme": "编辑主题",
         "menu_pref": "账户设置",
         "menu_lang": "语言 / Language",
         "menu_logout": "退出登录",
@@ -153,15 +150,12 @@ const translations = {
         "msg_import_success": "导入成功",
         "msg_import_fail": "导入失败，格式错误",
         "msg_logged_in": "已登录",
-
         "modal_pref_title": "账户设置",
-        "modal_theme_title": "编辑主题", // 新增
         "label_display_name": "显示名称",
         "label_phone": "手机号",
         "btn_save": "保存更改",
         "msg_select_new_avatar": "点击更换头像",
         "msg_save_success": "设置保存成功",
-
         "msg_saving": "正在同步...",
         "msg_saved": "云端已同步",
         "msg_save_fail": "同步失败"
@@ -200,7 +194,6 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 【关键修复】检测并修复双重 hash (##access_token)，让登录流程能继续
     if (window.location.hash) {
         let hash = window.location.hash;
         if (hash.startsWith('##')) {
@@ -274,7 +267,6 @@ function showToast(message, type = 'normal') {
     setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// 修复登录两次的问题：移除手动清理 URL hash 的逻辑
 async function initAuth() {
     if (!supabaseClient) return;
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -357,23 +349,78 @@ function toggleAuthModal() {
     }
 }
 
-// 打开 "Edit Bookmark" 模式 (原 handleMenuEdit)
+// ----------------------------------------------------
+// New: Edit Bookmark & Edit Theme Controls
+// ----------------------------------------------------
+
 function handleMenuEdit() {
     const menu = document.getElementById('user-dropdown');
     if (menu) menu.classList.remove('active');
     toggleEditMode(true);
 }
 
-// 打开 "Edit Theme" 弹窗 (新功能)
-function openThemeModal() {
+function toggleEditMode(enable) {
+    isEditing = enable; document.body.classList.toggle('is-editing', enable);
+    const controls = document.getElementById('edit-controls');
+
+    // 确保 Theme Controls 关闭
+    document.getElementById('theme-controls').classList.add('hidden');
+
+    if (enable) controls.classList.remove('hidden');
+    else { controls.classList.add('hidden'); sortableInstances.forEach(instance => instance.destroy()); sortableInstances = []; }
+    render();
+}
+
+function openThemeControls() {
     const menu = document.getElementById('user-dropdown');
     if (menu) menu.classList.remove('active');
-    document.getElementById('theme-modal').classList.remove('hidden');
+
+    // 关闭 Edit Bookmark 栏
+    toggleEditMode(false);
+
+    document.getElementById('theme-controls').classList.remove('hidden');
+}
+
+function closeThemeControls() {
+    document.getElementById('theme-controls').classList.add('hidden');
 }
 
 function quickChangeTheme(color, pattern) {
     changeTheme(color, null, pattern);
 }
+
+function initTheme() {
+    const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
+    const savedPattern = localStorage.getItem('themePattern') || 'none';
+    changeTheme(savedColor, null, savedPattern);
+}
+
+function changeTheme(color, element, pattern) {
+    const bg = document.querySelector('.background-layer');
+    if (color) {
+        bg.style.backgroundColor = color;
+        localStorage.setItem('themeColor', color);
+        document.body.classList.toggle('dark-mode', color === '#1a1a1a');
+        if (element) {
+            document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+            element.classList.add('active');
+        }
+    }
+    if (pattern) {
+        localStorage.setItem('themePattern', pattern);
+        bg.classList.remove('bg-pattern-lines-d', 'bg-pattern-aurora', 'bg-pattern-flow');
+        if (pattern !== 'none') {
+            bg.classList.add(pattern);
+        }
+
+        // 更新底部栏 Pattern 按钮的选中状态
+        document.querySelectorAll('.pattern-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.pattern === pattern);
+        });
+    }
+}
+
+// ----------------------------------------------------
 
 async function handleOAuthLogin(provider) {
     if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
@@ -502,29 +549,25 @@ async function loadData() {
     document.body.style.visibility = 'visible';
 }
 
-// 增加同步进度提示的保存函数
 async function saveData() {
     localStorage.setItem('pagedData', JSON.stringify(pages));
 
     if (currentUser && supabaseClient) {
-        updateSyncStatus('saving'); // 显示正在保存
-
+        updateSyncStatus('saving');
         try {
             const { error } = await supabaseClient
                 .from('user_configs')
                 .upsert({ user_id: currentUser.id, config_data: pages, updated_at: new Date() }, { onConflict: 'user_id' });
 
             if (error) throw error;
-
-            updateSyncStatus('saved'); // 显示保存成功
+            updateSyncStatus('saved');
         } catch (e) {
             console.error("Cloud save fail", e);
-            updateSyncStatus('error'); // 显示保存失败
+            updateSyncStatus('error');
         }
     }
 }
 
-// 新增：更新同步状态UI
 let syncTimer = null;
 function updateSyncStatus(status) {
     const el = document.getElementById('sync-status');
@@ -578,32 +621,6 @@ function createVisualPages() {
         }
     });
     if (visualPages.length === 0) visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
-}
-
-function initTheme() {
-    const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
-    const savedPattern = localStorage.getItem('themePattern') || 'none';
-    changeTheme(savedColor, null, savedPattern);
-}
-
-function changeTheme(color, element, pattern) {
-    const bg = document.querySelector('.background-layer');
-    if (color) {
-        bg.style.backgroundColor = color;
-        localStorage.setItem('themeColor', color);
-        document.body.classList.toggle('dark-mode', color === '#1a1a1a');
-        if (element) {
-            document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-            element.classList.add('active');
-        }
-    }
-    if (pattern) {
-        localStorage.setItem('themePattern', pattern);
-        bg.classList.remove('bg-pattern-lines-d', 'bg-pattern-aurora', 'bg-pattern-flow');
-        if (pattern !== 'none') {
-            bg.classList.add(pattern);
-        }
-    }
 }
 
 function rgbToHex(col) {
