@@ -397,4 +397,12 @@ body.dark-mode .user-icon-svg {
     .pagination-dots { bottom: 40px; }
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
+
+    /* --- 新增：修复登录窗口宽度 --- */
+    .modal-content {
+        min-width: unset !important;
+        width: 85%;
+        max-width: 320px;
+        padding: 20px;
+    }
 }
