@@ -1,134 +1,201 @@
-import { initSupabase, loadData, saveData, exportConfig, importConfig, handleImport } from './api.js';
-import { initAuth, handleLogin, handleRegister, handleLogout, handleOAuthLogin, savePreferences } from './auth.js';
-import { i18n } from './i18n.js';
-import {
-    render, toggleEditMode, initSwiper, saveBookmark, deleteBookmark, openModal, closeModal,
-    addPage, deletePage, openPageEditModal, closePageEditModal, renderPageList,
-    initTheme, changeTheme, quickChangeTheme, openThemeControls, closeThemeControls,
-    openPrefModal, switchAvatarTab, handleAvatarFile, selectNewAvatar, createAvatarSelector,
-    autoFillInfo, updatePreview, selectStyle, selectPage
-} from './ui.js';
-import { t, showToast } from './utils.js';
+import { getSupabase, loadData } from './api.js';
 import { state } from './state.js';
+import { showToast, t } from './utils.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. 初始化基础配置
-    document.body.style.visibility = 'hidden';
-    i18n.updateTexts();
-    initTheme();
-    initSwiper();
+export async function initAuth() {
+    const sb = getSupabase();
+    if (!sb) return;
+    const { data: { session } } = await sb.auth.getSession();
+    updateUserStatus(session?.user);
+    sb.auth.onAuthStateChange((_event, session) => { updateUserStatus(session?.user); });
+}
 
-    // 2. 注册页面的头像选择器
-    createAvatarSelector('avatar-selector', (url) => {
-        state.selectedAvatarUrl = url;
-    });
-    const authContainer = document.getElementById('avatar-selector');
-    if (authContainer && authContainer.firstChild) authContainer.firstChild.click();
+export function updateUserStatus(user) {
+    state.currentUser = user;
 
-    // 3. 初始化 Supabase
-    const sb = initSupabase();
-    if (sb) {
-        initAuth().then(() => { if (!state.currentUser) loadData(); });
-    } else {
+    // --- 核心修复：获取新的 pill 元素 ---
+    const userPill = document.getElementById('user-pill');
+    const svgIcon = document.getElementById('user-icon-svg');
+    const imgIcon = document.getElementById('user-avatar-img');
+    const pillText = document.getElementById('user-pill-text');
+
+    const infoPanel = document.getElementById('user-info-panel');
+    const menuUserName = document.getElementById('menu-user-name');
+    const menuUserEmail = document.getElementById('menu-user-email');
+    const menuUserAvatar = document.getElementById('menu-user-avatar');
+
+    // Auth Modal Elements
+    const formGroup = document.querySelector('#auth-modal .form-group');
+    const socialSection = document.querySelector('.social-login-section');
+    const divider = document.querySelector('.auth-divider');
+    const loginBtn = document.querySelector('#auth-modal .modal-actions button:not(.primary)');
+    const actionBtn = document.querySelector('#auth-modal .modal-actions .primary');
+    const modalTitle = document.getElementById('auth-title');
+
+    // 检查元素是否存在，防止报错
+    if (!userPill) return;
+
+    if (user) {
+        userPill.classList.add('logged-in');
+        const avatarUrl = user.user_metadata?.avatar_url;
+
+        // 显示头像图片，隐藏图标
+        if (avatarUrl) {
+            imgIcon.src = avatarUrl;
+            imgIcon.style.display = 'block';
+            svgIcon.style.display = 'none';
+        } else {
+            imgIcon.style.display = 'none';
+            svgIcon.style.display = 'block';
+            svgIcon.setAttribute('fill', '#333');
+        }
+
+        // 设置按钮文字为用户名
+        const userName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
+        if (pillText) {
+            pillText.innerText = userName;
+            pillText.removeAttribute('data-i18n');
+        }
+
+        if(infoPanel) infoPanel.classList.remove('hidden');
+        if(menuUserName) {
+            menuUserName.removeAttribute('data-i18n');
+            menuUserName.innerText = userName;
+        }
+        if(menuUserEmail) menuUserEmail.innerText = user.email;
+        if(menuUserAvatar) menuUserAvatar.src = avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
+
+        // 登录后显示邮件地址
+        const currentEmailEl = document.getElementById('current-email');
+        if(currentEmailEl) currentEmailEl.innerText = user.email;
+
         loadData();
+    } else {
+        userPill.classList.remove('logged-in');
+
+        // 显示默认图标
+        imgIcon.style.display = 'none';
+        svgIcon.style.display = 'block';
+        svgIcon.setAttribute('fill', 'white'); // 未登录时白色图标
+
+        // 重置文字为 Login
+        if (pillText) {
+            pillText.setAttribute('data-i18n', 'btn_login');
+            pillText.innerText = t('btn_login');
+        }
+
+        if(formGroup) formGroup.style.display = 'flex';
+        if(socialSection) socialSection.style.display = 'flex';
+        if(divider) divider.style.display = 'flex';
+        if(loginBtn) loginBtn.style.display = 'block';
+        if(actionBtn) actionBtn.textContent = t("btn_register");
+        if(modalTitle) modalTitle.textContent = t("modal_auth_title");
+
+        if(infoPanel) infoPanel.classList.add('hidden');
+        if(menuUserName) {
+            menuUserName.setAttribute('data-i18n', 'auth_guest');
+            menuUserName.innerText = t("auth_guest");
+        }
+    }
+}
+
+export async function handleLogin(email, password) {
+    const sb = getSupabase();
+    if (!sb) return showToast(t("msg_sdk_error"), "error");
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) showToast(error.message, "error");
+    else {
+        showToast(t("msg_login_success"), "success");
+        document.getElementById('auth-modal').classList.add('hidden');
+        if (data && data.user) updateUserStatus(data.user);
+    }
+}
+
+export async function handleRegister(email, password, avatarUrl) {
+    const sb = getSupabase();
+    if (!sb) return showToast(t("msg_sdk_error"), "error");
+    try {
+        const { data, error } = await sb.auth.signUp({
+            email, password,
+            options: { data: { avatar_url: avatarUrl } }
+        });
+        if (error) showToast(error.message, "error");
+        else {
+            showToast(t("msg_reg_success"), "success");
+            document.getElementById('auth-modal').classList.add('hidden');
+            if (data && data.user && data.session) updateUserStatus(data.user);
+        }
+    } catch(e) { showToast(e.message, "error"); }
+}
+
+export async function handleLogout() {
+    const sb = getSupabase();
+    if (sb) await sb.auth.signOut();
+    document.getElementById('user-dropdown').classList.remove('active');
+    showToast(t("msg_logout"), "normal");
+    if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+    updateUserStatus(null);
+    loadData();
+}
+
+export async function handleOAuthLogin(provider) {
+    const sb = getSupabase();
+    if (!sb) return showToast(t("msg_sdk_error"), "error");
+    showToast(`Navigating to ${provider}...`, "normal");
+    const redirectUrl = window.location.origin + window.location.pathname;
+    try {
+        const { error } = await sb.auth.signInWithOAuth({
+            provider: provider,
+            options: {
+                redirectTo: redirectUrl,
+                queryParams: { access_type: 'offline', prompt: 'consent' }
+            }
+        });
+        if (error) throw error;
+    } catch (e) { showToast(e.message, "error"); }
+}
+
+export async function savePreferences() {
+    const sb = getSupabase();
+    if (!sb || !state.currentUser) return;
+
+    if (state.prefAvatarUrl && state.prefAvatarUrl.length > 20000) {
+        showToast(t("msg_img_too_large"), "error");
+        return;
     }
 
-    // 4. 监听导入文件
-    const importInput = document.getElementById('import-file-input');
-    if(importInput) importInput.addEventListener('change', handleImport);
+    const name = document.getElementById('pref-name').value;
+    const phone = document.getElementById('pref-phone').value;
 
-    // 5. 绑定反馈按钮
-    window.handleFeedback = () => {
-        const subject = encodeURIComponent("Homepage Feedback");
-        const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
-        window.location.href = `mailto:jemchmi@gmail.com?subject=${subject}&body=${body}`;
-    };
-
-    // ============================================================
-    // 🔥 核心修复：挂载所有交互函数到 window
-    // ============================================================
-
-
-    // --- 弹窗逻辑 (重点修复) ---
-    window.autoFillInfo = autoFillInfo; // 修复自动填充
-    window.updatePreview = updatePreview; // 修复实时预览
-    window.selectStyle = selectStyle; // 修复样式选择
-    window.selectPage = selectPage; // 修复页面选择
-
-    // --- 账户 (Auth) ---
-    window.handleLogin = () => {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-password').value;
-        if(!email || !pass) return showToast(t("msg_input_req"), "error");
-        handleLogin(email, pass);
-    };
-    window.handleRegister = () => {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-password').value;
-        if(!email || !pass) return showToast(t("msg_input_req"), "error");
-        handleRegister(email, pass, state.selectedAvatarUrl);
-    };
-    window.handleLogout = handleLogout;
-    window.handleOAuthLogin = handleOAuthLogin;
-    window.savePreferences = savePreferences;
-
-    // --- 菜单与弹窗 ---
-    window.toggleAuthModal = () => {
-         if (state.currentUser) {
-            document.getElementById('user-dropdown').classList.toggle('active');
-        } else {
-            document.getElementById('auth-modal').classList.remove('hidden');
+    const updates = {
+        data: {
+            full_name: name,
+            phone_number: phone,
+            avatar_url: state.prefAvatarUrl
         }
     };
-    window.handleMenuEdit = () => {
-        document.getElementById('user-dropdown').classList.remove('active');
-        toggleEditMode(true);
-    };
-    window.openModal = openModal;
-    window.closeModal = closeModal;
-    window.toggleEditMode = toggleEditMode;
 
-    // --- 书签操作 ---
-    window.saveBookmark = saveBookmark;
-    window.deleteBookmark = deleteBookmark;
+    const btn = document.querySelector('#pref-modal .primary');
+    if(btn) {
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+    }
 
-    // --- 页面管理 ---
-    window.addPage = addPage;
-    window.deletePage = deletePage;
-    window.openPageEditModal = openPageEditModal;
-    window.closePageEditModal = closePageEditModal;
+    try {
+        const { data, error } = await sb.auth.updateUser(updates);
+        if (error) throw error;
 
-    // --- 导入导出 ---
-    window.importConfig = importConfig;
-    window.exportConfig = exportConfig;
+        const { data: refreshData } = await sb.auth.refreshSession();
+        updateUserStatus(refreshData.user || data.user);
 
-    // --- 主题控制 ---
-    window.openThemeControls = openThemeControls;
-    window.closeThemeControls = closeThemeControls;
-    window.quickChangeTheme = quickChangeTheme;
-    window.changeTheme = (color, el, pattern) => changeTheme(color, el, pattern);
-
-    // --- 偏好设置 ---
-    window.openPrefModal = openPrefModal;
-    window.switchAvatarTab = switchAvatarTab;
-    window.handleAvatarFile = handleAvatarFile;
-    window.selectNewAvatar = selectNewAvatar;
-
-    // --- 语言 ---
-    window.changeLanguage = (lang) => {
-        i18n.setLang(lang);
-        location.reload();
-    };
-
-    window.addEventListener('resize', () => { render(); });
-
-    document.addEventListener('click', (e) => {
-        const menu = document.getElementById('user-dropdown');
-        const pill = document.getElementById('user-pill'); // Updated from user-fab
-        if (menu && menu.classList.contains('active')) {
-            if (!menu.contains(e.target) && !pill.contains(e.target)) {
-                menu.classList.remove('active');
-            }
+        showToast(t("msg_save_success"), "success");
+        document.getElementById('pref-modal').classList.add('hidden');
+    } catch (e) {
+        showToast(e.message, "error");
+    } finally {
+        if(btn) {
+            btn.textContent = t('btn_save') || 'Save';
+            btn.disabled = false;
         }
-    });
-});
+    }
+}

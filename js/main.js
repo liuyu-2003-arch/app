@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. 初始化 Supabase
     const sb = initSupabase();
     if (sb) {
+        // initAuth 成功后会调用 updateUserStatus，如果 auth.js 报错这里就会卡住
         initAuth().then(() => { if (!state.currentUser) loadData(); });
     } else {
         loadData();
@@ -49,10 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
 
     // --- 弹窗逻辑 (重点修复) ---
-    window.autoFillInfo = autoFillInfo; // 修复自动填充
-    window.updatePreview = updatePreview; // 修复实时预览
-    window.selectStyle = selectStyle; // 修复样式选择
-    window.selectPage = selectPage; // 修复页面选择
+    window.autoFillInfo = autoFillInfo;
+    window.updatePreview = updatePreview;
+    window.selectStyle = selectStyle;
+    window.selectPage = selectPage;
 
     // --- 账户 (Auth) ---
     window.handleLogin = () => {
@@ -121,11 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', () => { render(); });
 
+    // --- 核心修复：更新点击监听器 ---
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('user-dropdown');
-        const fab = document.querySelector('.user-fab');
+        const pill = document.getElementById('user-pill'); // 使用新的 ID
+
         if (menu && menu.classList.contains('active')) {
-            if (!menu.contains(e.target) && !fab.contains(e.target)) {
+            // 检查点击目标是否在菜单或按钮外部
+            if (!menu.contains(e.target) && (!pill || !pill.contains(e.target))) {
                 menu.classList.remove('active');
             }
         }
