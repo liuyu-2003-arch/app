@@ -45,7 +45,7 @@ export function render() {
                 if (state.isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // --- 修复：确保只有真正的拖拽才拦截点击 ---
+                    // 核心逻辑：只有当确实发生了拖拽时才拦截点击
                     if (!state.hasDragged) window.location.href = item.url;
                 }
             };
@@ -93,7 +93,7 @@ function createVisualPages() {
     });
 }
 
-// --- 模态框与书签逻辑 (保持不变) ---
+// --- 模态框与书签逻辑 ---
 export function openModal(pageIndex = -1, bookmarkIndex = -1) {
     state.currentEditInfo = { pageIndex, bookmarkIndex };
     document.getElementById('modal').classList.remove('hidden');
@@ -182,7 +182,7 @@ export function deleteBookmark(e, bookmarkId) {
     }
 }
 
-// --- 自动填充与图标 (保持不变) ---
+// --- 自动填充与图标 ---
 export function autoFillInfo() {
     if (autoFillTimer) clearTimeout(autoFillTimer);
     autoFillTimer = setTimeout(() => {
@@ -663,9 +663,11 @@ function drag(e) {
 
         // --- 修复核心：如果垂直位移明显大于水平位移，则认为是垂直滚动，不触发 Swiper 拖拽 ---
         // 这样可以避免手指在尝试上下滚动时，被误判为水平拖拽，导致 hasDragged = true，进而阻止了点击事件
-        if (Math.abs(diffY) > Math.abs(diff) && Math.abs(diffY) > 5) return;
+        if (!state.hasDragged && Math.abs(diffY) > Math.abs(diff) && Math.abs(diffY) > 5) return;
 
-        if (Math.abs(diff) > 10) state.hasDragged = true;
+        // --- 修复核心：将触发阈值从 10 提高到 15，减少误触 ---
+        if (Math.abs(diff) > 15) state.hasDragged = true;
+
         if (state.hasDragged) {
             state.currentTranslate = state.prevTranslate + diff;
             if (e.cancelable) e.preventDefault();
@@ -741,7 +743,7 @@ function renderPaginationDots() {
         dot.className = 'dot';
         if (i === state.currentPage) dot.classList.add('active');
 
-        // --- 修复：添加 data-title 属性，配合 CSS 显示悬停/点击标题 ---
+        // --- 修复：添加 data-title 属性 ---
         dot.setAttribute('data-title', state.visualPages[i].title || `Page ${i + 1}`);
 
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
