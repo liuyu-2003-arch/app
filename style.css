@@ -455,6 +455,7 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .pagination-dots .dot:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
 
 @media (max-width: 768px) {
+    /* --- 原有布局适配保持不变 --- */
     .container { padding-top: 50px; }
     .bookmark-page { padding-top: 0; }
     .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
@@ -463,11 +464,35 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
 
-    /* 修复手机端弹窗过宽的问题 */
+    /* --- 下面是针对登录弹窗的修复代码 --- */
+
+    /* 1. 调整弹窗容器：稍微加宽，并减小左右内边距，给内容腾空间 */
     .modal-content {
         min-width: unset !important;
-        width: 85%;
-        max-width: 320px;
-        padding: 20px;
+        width: 90%;           /* 原来是85%，改大一点 */
+        max-width: 340px;     /* 原来是320px，稍微加宽 */
+        padding: 20px 15px;   /* 上下20px，左右缩小为15px */
+    }
+
+    /* 2. 缩小输入框行内的间距 */
+    .input-row {
+        gap: 5px;             /* 减小 Label 和 Input 之间的空隙 */
+    }
+
+    /* 3. 缩小 Label (如 "Pass") 的字号和宽度 */
+    .input-label {
+        font-size: 12px;
+        width: 35px !important; /* 强制缩小 Label 宽度 */
+        white-space: nowrap;    /* 防止文字换行 */
+    }
+
+    /* 4. 优化输入框样式：减小内边距和字号，防止内容溢出 */
+    .modal-content input[type="text"],
+    .modal-content input[type="email"],
+    .modal-content input[type="password"],
+    .modal-content input[type="tel"] {
+        padding: 0 8px;       /* 减小输入框内部左右留白 */
+        font-size: 13px;      /* 稍微缩小字体 */
+        height: 40px;         /* 稍微减小高度，让整体更紧凑 */
     }
 }
