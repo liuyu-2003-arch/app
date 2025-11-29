@@ -1,4 +1,4 @@
-const CACHE_NAME = 'homepage-v1';
+const CACHE_NAME = 'homepage-v1.1'; // 建议升级一下版本号
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -37,8 +37,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
+    // 🔴 修复核心：如果是 Supabase API 请求或非 GET 请求（如 POST/PUT），直接走网络，不经过 SW 缓存
+    // 这样能防止数据库更新后，刷新页面读取到旧的缓存数据
+    if (url.hostname.includes('supabase.co') || event.request.method !== 'GET') {
+        return; // 直接返回，浏览器会执行默认的网络请求
+    }
+
     // 策略 A：对于 JSON 配置文件 -> 网络优先 (Network First)
-    // 确保你修改了配置后，用户能尽快看到更新
     if (url.pathname.endsWith('.json')) {
         event.respondWith(
             fetch(event.request)
@@ -47,27 +52,23 @@ self.addEventListener('fetch', (event) => {
                     caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
                     return response;
                 })
-                .catch(() => caches.match(event.request)) // 网络失败才用缓存
+                .catch(() => caches.match(event.request))
         );
         return;
     }
 
-    // 策略 B：对于其他所有资源 (HTML/CSS/JS/图片) -> 缓存优先，后台更新 (Stale-While-Revalidate)
-    // 这是速度最快的策略，兼顾了速度和更新
+    // 策略 B：对于其他静态资源 -> 缓存优先，后台更新 (Stale-While-Revalidate)
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             const fetchPromise = fetch(event.request).then((networkResponse) => {
-                // 如果网络请求成功，更新缓存
                 if (networkResponse && networkResponse.status === 200) {
                     const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
                 }
                 return networkResponse;
             }).catch(() => {
-                // 网络失败不做处理，反正已经有 cachedResponse 了
+                // 网络失败忽略
             });
-
-            // 如果有缓存，直接返回缓存；否则等待网络请求
             return cachedResponse || fetchPromise;
         })
     );

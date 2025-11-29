@@ -26,6 +26,22 @@ let animationID;
 let dotsTimer = null;
 let wheelTimeout = null;
 
+// --- 工具函数：防抖 (Debounce) ---
+// 用于防止拖拽时频繁触发保存请求
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+// 创建一个防抖版本的 saveData，延迟 1000ms 执行
+const debouncedSaveData = debounce(() => {
+    saveData();
+}, 1000);
+
 // --- i18n Logic ---
 const translations = {
     en: {
@@ -95,10 +111,11 @@ const translations = {
         "msg_select_new_avatar": "Tap to change avatar",
         "msg_save_success": "Preferences saved successfully",
         "msg_saving": "Saving...",
-        "msg_saved": "All changes saved",
-        "msg_save_fail": "Save failed",
+        "msg_saved": "Cloud Synced",
+        "msg_save_fail": "Sync Failed",
         "msg_upload_hint": "Max size: 2MB (Auto-compressed)",
-        "msg_img_too_large": "Image too large. Please use built-in icons."
+        "msg_img_too_large": "Image too large. Please use built-in icons.",
+        "msg_sync_success_toast": "Cloud Sync Successful"
     },
     zh: {
         "menu_edit_bookmark": "编辑书签",
@@ -170,7 +187,8 @@ const translations = {
         "msg_saved": "云端已同步",
         "msg_save_fail": "同步失败",
         "msg_upload_hint": "最大 2MB (自动压缩)",
-        "msg_img_too_large": "图片数据过大无法保存，请使用内置图标"
+        "msg_img_too_large": "图片数据过大无法保存，请使用内置图标",
+        "msg_sync_success_toast": "云端数据同步成功"
     }
 };
 
@@ -567,6 +585,8 @@ async function saveData() {
 
             if (error) throw error;
             updateSyncStatus('saved');
+            // 可选：如果希望保存成功后弹出 Toast 提示
+            // showToast(t('msg_sync_success_toast'), 'success');
         } catch (e) {
             console.error("Cloud save fail", e);
             updateSyncStatus('error');
@@ -943,7 +963,13 @@ function initSortable() {
                         if (bookmark && newPages[originalPageIndex]) newPages[originalPageIndex].bookmarks.push(bookmark);
                     });
                 });
-                pages = newPages.filter(p => p.title); saveData(); createVisualPages(); setTimeout(() => { render(); }, 10);
+                pages = newPages.filter(p => p.title);
+
+                // 🟢 修改点：使用防抖保存，并立即给用户视觉反馈
+                updateSyncStatus('saving');
+                debouncedSaveData();
+
+                createVisualPages(); setTimeout(() => { render(); }, 10);
             }
         }); sortableInstances.push(instance);
     });
