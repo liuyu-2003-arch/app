@@ -200,9 +200,24 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 【关键修复】检测并修复双重 hash (##access_token)，让登录流程能继续
-    if (window.location.hash && window.location.hash.startsWith('##')) {
-        window.location.hash = window.location.hash.substring(1);
+    // 【关键修复】检测 URL 是否因为多次重定向导致了畸形 hash (如 ## 或 多个 #)
+    // 这种情况会导致 Supabase 无法解析 Token。
+    // 逻辑：如果有多个 #，取最后一个；如果以 ## 开头，修复为 #
+    if (window.location.hash) {
+        let hash = window.location.hash;
+
+        // 1. 处理双重哈希 ## (如 https://site.com/##access_token...)
+        if (hash.startsWith('##')) {
+            hash = '#' + hash.substring(2);
+            window.history.replaceState(null, '', window.location.pathname + hash);
+        }
+        // 2. 处理叠加哈希 (如 #access_token=...#access_token=...)
+        // 取最后一个 # 之后的内容
+        else if ((hash.match(/#/g) || []).length > 1) {
+            const lastHashIndex = hash.lastIndexOf('#');
+            hash = hash.substring(lastHashIndex);
+            window.history.replaceState(null, '', window.location.pathname + hash);
+        }
     }
 
     document.body.style.visibility = 'hidden';
@@ -357,7 +372,6 @@ async function handleOAuthLogin(provider) {
     showToast(`Navigating to ${provider}...`, "normal");
 
     // 【关键修复】获取纯净的 URL (不带 hash)，防止把旧的 access_token 再次传给 Supabase
-    // 这解决了退出后重新登录出现 ##access_token 的问题
     const redirectUrl = window.location.origin + window.location.pathname;
 
     try {
@@ -425,6 +439,12 @@ async function handleLogout() {
     if (supabaseClient) await supabaseClient.auth.signOut();
     document.getElementById('user-dropdown').classList.remove('active');
     showToast(t("msg_logout"), "normal");
+
+    // 【关键修复】退出登录时，彻底清除 URL hash，防止下次登录时 hash 叠加
+    if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname);
+    }
+
     updateUserStatus(null);
     loadData();
 }
