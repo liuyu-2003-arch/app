@@ -583,7 +583,7 @@ body.dark-mode .user-pill-icon {
     .bookmark-page { position: relative; padding-top: 0; }
 
     .page-title {
-        position: absolute; top: 35px; left: 30px;
+        position: absolute; top: 15px; left: 30px;
         font-size: 22px; margin: 0; z-index: 10;
         text-align: left; padding: 0; width: auto;
     }
