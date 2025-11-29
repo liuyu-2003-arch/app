@@ -18,35 +18,23 @@ body {
     color: #333; /* 默认深灰文字 */
 }
 
-/* --- 深色模式 (JS切换 class) --- */
+/* --- 深色模式核心样式 (由 JS 切换 class) --- */
 body.dark-mode {
-    color: #fff !important;
+    color: #fff !important; /* 强制白字 */
 }
-/* 深色模式下，增强文字阴影，防止背景过亮看不清 */
 body.dark-mode .page-title,
 body.dark-mode .bookmark-title {
-    color: #fff;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0,0,0,0.5);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9); /* 加深阴影，确保在亮色图片上也看不清 */
 }
-/* 深色模式下，反转顶部用户图标颜色 */
-body.dark-mode .user-trigger-area svg {
+body.dark-mode .user-icon-svg {
     fill: #fff;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
-}
-/* 深色模式下，分页点更明显 */
-body.dark-mode .pagination-dots .dot {
-    background: rgba(255, 255, 255, 0.4);
-}
-body.dark-mode .pagination-dots .dot.active {
-    background: #fff;
 }
 
-/* --- 背景层 (基础：SVG 波浪) --- */
+/* --- 背景层 (默认 Default: SVG 波浪) --- */
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-    background-color: #e4d0e5; /* 默认底色，会被JS修改 */
-
-    /* 核心 SVG 波浪背景 */
+    background-color: #e4d0e5;
+    /* 默认保留原有的 SVG 背景 */
     background-image:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0,0L48,26.7C96,53,192,107,288,122.7C384,139,480,117,576,106.7C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E"),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.2)' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E"),
@@ -57,34 +45,31 @@ body.dark-mode .pagination-dots .dot.active {
     transition: background-color 0.5s ease;
 }
 
-/* --- 主题变体：在波浪基础上叠加纹理 --- */
-
-/* 1. Lines Theme: 波浪 + 水平扫描线 */
-.background-layer.bg-pattern-lines {
+/* --- 新增主题 1: Aurora (极光/波浪感) --- */
+.background-layer.bg-pattern-aurora {
     background-image:
-        /* 顶层：水平线纹理 */
-        repeating-linear-gradient(0deg, transparent 0, transparent 4px, rgba(0,0,0,0.05) 5px),
-        /* 底层：保持原有的 SVG 波浪 */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0,0L48,26.7C96,53,192,107,288,122.7C384,139,480,117,576,106.7C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E"),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.2)' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E"),
-        linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%) !important;
-    background-size: auto, 100% 50%, 100% 50%, cover !important;
-    background-position: center, top center, bottom center, center !important;
+        radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.5) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(255, 255, 255, 0.4) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.3) 0px, transparent 50%),
+        linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.4) 100%) !important;
+    background-size: cover !important;
 }
 
-/* 2. Diag. Lines Theme: 波浪 + 斜线 + 渐变光晕 */
+/* --- 新增主题 2: Flow (流动线条感) --- */
+.background-layer.bg-pattern-flow {
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(255,255,255,0.6) 0%, transparent 70%) !important;
+    background-size: 40px 40px, 40px 40px, 100% 100% !important;
+}
+
+/* --- 升级主题 3: Diag. Lines (带渐变效果的斜线) --- */
 .background-layer.bg-pattern-lines-d {
     background-image:
-        /* 顶层：柔和的光晕渐变，增加层次感 */
-        radial-gradient(circle at top right, rgba(255,255,255,0.4) 0%, transparent 60%),
-        /* 中层：斜线纹理 */
-        repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03) 0, rgba(0, 0, 0, 0.03) 1px, transparent 0, transparent 15px),
-        /* 底层：保持原有的 SVG 波浪 */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0,0L48,26.7C96,53,192,107,288,122.7C384,139,480,117,576,106.7C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E"),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.2)' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E"),
-        linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%) !important;
-    background-size: cover, auto, 100% 50%, 100% 50%, cover !important;
-    background-position: center, center, top center, bottom center, center !important;
+        linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%),
+        repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03) 0, rgba(0, 0, 0, 0.03) 1px, transparent 0, transparent 15px) !important;
+    background-size: cover, auto !important;
 }
 
 .container {

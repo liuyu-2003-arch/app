@@ -34,7 +34,8 @@ const translations = {
         "menu_lang": "Language",
         "menu_logout": "Log out",
         "theme_default": "Default (Wave)",
-        "theme_lines": "Lines (Texture)",
+        "theme_aurora": "Aurora",
+        "theme_flow": "Flow",
         "theme_lines_d": "Diag. Lines",
         "btn_add_bookmark": "➕ Add Bookmark",
         "btn_edit_page": "📝 Edit Page",
@@ -90,7 +91,8 @@ const translations = {
         "menu_lang": "语言 / Language",
         "menu_logout": "退出登录",
         "theme_default": "默认 (波浪)",
-        "theme_lines": "水平线条",
+        "theme_aurora": "极光",
+        "theme_flow": "流光",
         "theme_lines_d": "对角线条",
         "btn_add_bookmark": "➕ 添加书签",
         "btn_edit_page": "📝 编辑页面",
@@ -472,6 +474,9 @@ function initTheme() {
 }
 
 // 核心主题切换逻辑
+// color: 背景颜色 (例如 #e4d0e5, #1a1a1a)，如果为 null 则不改颜色
+// element: 被点击的 DOM 元素 (用于 active 状态切换)
+// pattern: 纹理类名 (例如 'bg-pattern-lines', 'none')，如果为 null 则不改纹理
 function changeTheme(color, element, pattern) {
     const bg = document.querySelector('.background-layer');
 
@@ -480,8 +485,8 @@ function changeTheme(color, element, pattern) {
         bg.style.backgroundColor = color;
         localStorage.setItem('themeColor', color);
 
-        // 深色模式处理：通过切换 body 的 class 来控制全局文字反白
-        // 如果颜色是深色 (#1a1a1a)，则添加 .dark-mode 类
+        // 深色模式处理：如果是深色背景 (#1a1a1a)，切换 CSS 类来处理反白
+        // 使用 CSS class 'dark-mode' 来控制全局文字颜色，比直接操作 style 更可靠
         document.body.classList.toggle('dark-mode', color === '#1a1a1a');
 
         // 更新底部色块的 Active 状态
@@ -495,7 +500,7 @@ function changeTheme(color, element, pattern) {
     if (pattern) {
         localStorage.setItem('themePattern', pattern);
         // 移除所有自定义纹理类 (回归默认 SVG)
-        bg.classList.remove('bg-pattern-lines', 'bg-pattern-lines-d');
+        bg.classList.remove('bg-pattern-lines-d', 'bg-pattern-aurora', 'bg-pattern-flow');
 
         // 如果不是 'none'，则添加新的纹理类 (这会覆盖默认 SVG)
         if (pattern !== 'none') {
@@ -793,7 +798,7 @@ function saveBookmark() {
         else { pages[pageIndex].bookmarks[bookmarkIndex] = newItem; }
     } else {
         const newItem = { id: generateUniqueId(), title, url, icon, style };
-        if (!pages[newPageIndex]) pages[newPageIndex] = { title: "New Page", bookmarks: [] };
+        if (!pages[newPageIndex]) pages[newPageIndex] = { title: "新页面", bookmarks: [] };
         pages[newPageIndex].bookmarks.push(newItem); currentPage = newPageIndex;
     }
     saveData(); closeModal(); render();
@@ -805,7 +810,7 @@ function toggleEditMode(enable) {
     else { controls.classList.add('hidden'); sortableInstances.forEach(instance => instance.destroy()); sortableInstances = []; }
     render();
 }
-function addPage() { pages.push({ title: "New Page", bookmarks: [] }); saveData(); if (document.getElementById('page-edit-modal').classList.contains('hidden')) { currentPage = pages.length - 1; render(); } else { renderPageList(); } }
+function addPage() { pages.push({ title: "新页面", bookmarks: [] }); saveData(); if (document.getElementById('page-edit-modal').classList.contains('hidden')) { currentPage = pages.length - 1; render(); } else { renderPageList(); } }
 function deletePage(e, pageIndex) {
     if (pages[pageIndex].bookmarks.length > 0) return showToast("页面不为空", "error");
     const listItem = e.target.closest('.page-list-item'); listItem.classList.add('fading-out');
@@ -838,7 +843,7 @@ function initSortable() {
 }
 function deleteBookmark(e, bookmarkId) {
     e.stopPropagation();
-    if (confirm(t('btn_confirm') + '?')) {
+    if (confirm('确定删除这个书签吗？')) {
         let found = false;
         for (const page of pages) { const index = page.bookmarks.findIndex(b => b.id === bookmarkId); if (index !== -1) { page.bookmarks.splice(index, 1); found = true; break; } }
         if (found) { saveData(); render(); }
@@ -854,7 +859,7 @@ function handleImport(event) {
     const file = event.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
-        try { let importedData = JSON.parse(e.target.result); if (Array.isArray(importedData) && (importedData.length === 0 || importedData[0].hasOwnProperty('bookmarks'))) pages = importedData; else pages = migrateData(importedData); pages = ensureBookmarkIds(pages); saveData(); render(); showToast(t("msg_import_success"), "success"); } catch (err) { showToast(t("msg_import_fail"), "error"); }
+        try { let importedData = JSON.parse(e.target.result); if (Array.isArray(importedData) && (importedData.length === 0 || importedData[0].hasOwnProperty('bookmarks'))) pages = importedData; else pages = migrateData(importedData); pages = ensureBookmarkIds(pages); saveData(); render(); showToast('导入成功', "success"); } catch (err) { showToast('导入失败，格式错误', "error"); }
     }; reader.readAsText(file);
 }
 function initKeyboardControl() {
