@@ -34,7 +34,7 @@ const translations = {
         "menu_pref": "Account Preferences",
         "menu_lang": "Language",
         "menu_logout": "Log out",
-        "menu_feedback": "Feedback", // 新增
+        "menu_feedback": "Feedback",
         "theme_default": "Default (Wave)",
         "theme_aurora": "Aurora",
         "theme_flow": "Flow",
@@ -50,7 +50,7 @@ const translations = {
         "btn_login": "Login",
         "btn_register": "Register",
         "btn_save": "Save Changes",
-        "btn_choose_img": "Choose Image", // 新增
+        "btn_choose_img": "Choose Image",
         "label_url": "URL",
         "label_title": "Title",
         "label_logo": "Logo URL",
@@ -75,8 +75,8 @@ const translations = {
         "style_white": "White",
         "divider_social": "Or use third-party",
         "auth_guest": "Guest",
-        "tab_emoji": "Icons", // 新增
-        "tab_upload": "Upload", // 新增
+        "tab_emoji": "Icons",
+        "tab_upload": "Upload",
         "msg_dev": "Feature in development...",
         "msg_login_success": "Login successful",
         "msg_logout": "Logged out",
@@ -97,7 +97,7 @@ const translations = {
         "msg_saving": "Saving...",
         "msg_saved": "All changes saved",
         "msg_save_fail": "Save failed",
-        "msg_upload_hint": "Max size: 2MB (Auto-compressed)" // 新增
+        "msg_upload_hint": "Max size: 2MB (Auto-compressed)"
     },
     zh: {
         "menu_edit_bookmark": "编辑书签",
@@ -105,7 +105,7 @@ const translations = {
         "menu_pref": "账户设置",
         "menu_lang": "语言 / Language",
         "menu_logout": "退出登录",
-        "menu_feedback": "问题反馈", // 新增
+        "menu_feedback": "问题反馈",
         "theme_default": "默认 (波浪)",
         "theme_aurora": "极光",
         "theme_flow": "流光",
@@ -121,7 +121,7 @@ const translations = {
         "btn_login": "登录",
         "btn_register": "注册",
         "btn_save": "保存更改",
-        "btn_choose_img": "选择图片", // 新增
+        "btn_choose_img": "选择图片",
         "label_url": "网页网址",
         "label_title": "网页标题",
         "label_logo": "图标地址",
@@ -146,8 +146,8 @@ const translations = {
         "style_white": "留白",
         "divider_social": "或使用第三方账号",
         "auth_guest": "游客",
-        "tab_emoji": "图标库", // 新增
-        "tab_upload": "上传图片", // 新增
+        "tab_emoji": "图标库",
+        "tab_upload": "上传图片",
         "msg_dev": "功能开发中...",
         "msg_login_success": "登录成功",
         "msg_logout": "已退出登录",
@@ -168,7 +168,7 @@ const translations = {
         "msg_saving": "正在同步...",
         "msg_saved": "云端已同步",
         "msg_save_fail": "同步失败",
-        "msg_upload_hint": "最大 2MB (自动压缩)" // 新增
+        "msg_upload_hint": "最大 2MB (自动压缩)"
     }
 };
 
@@ -985,7 +985,8 @@ function triggerKeyboardBounce(offset) {
 function handleFeedback() {
     const subject = encodeURIComponent("Homepage Feedback");
     const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
-    window.location.href = `mailto:jemch@qq.com?subject=${subject}&body=${body}`;
+    // 修正：更新为 jemchmi@gmail.com
+    window.location.href = `mailto:jemchmi@gmail.com?subject=${subject}&body=${body}`;
 }
 
 function openPrefModal() {
