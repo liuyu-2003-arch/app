@@ -86,11 +86,16 @@ const translations = {
         "msg_logged_in": "Logged in as",
 
         "modal_pref_title": "Account Preferences",
-        "label_display_name": "Display Name", // 这里的文案已更新
+        "label_display_name": "Display Name",
         "label_phone": "Phone",
         "btn_save": "Save Changes",
         "msg_select_new_avatar": "Tap to change avatar",
-        "msg_save_success": "Preferences saved successfully"
+        "msg_save_success": "Preferences saved successfully",
+
+        // 新增同步状态文本
+        "msg_saving": "Saving...",
+        "msg_saved": "All changes saved",
+        "msg_save_fail": "Save failed"
     },
     zh: {
         "menu_edit": "编辑模式",
@@ -150,11 +155,16 @@ const translations = {
         "msg_logged_in": "已登录",
 
         "modal_pref_title": "账户设置",
-        "label_display_name": "显示名称", // 这里的文案已更新
+        "label_display_name": "显示名称",
         "label_phone": "手机号",
         "btn_save": "保存更改",
         "msg_select_new_avatar": "点击更换头像",
-        "msg_save_success": "设置保存成功"
+        "msg_save_success": "设置保存成功",
+
+        // 新增同步状态文本
+        "msg_saving": "正在同步...",
+        "msg_saved": "云端已同步",
+        "msg_save_fail": "同步失败"
     }
 };
 
@@ -251,13 +261,13 @@ function showToast(message, type = 'normal') {
     setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
+// 修复登录两次的问题：移除手动清理 URL hash 的逻辑
 async function initAuth() {
     if (!supabaseClient) return;
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (window.location.hash && window.location.hash.includes('access_token')) {
-        window.history.replaceState(null, '', window.location.pathname);
-        showToast(t("msg_third_party_success"), "success");
-    }
+
+    // 移除干扰代码，让 Supabase 自动处理
+
     updateUserStatus(session?.user);
     supabaseClient.auth.onAuthStateChange((_event, session) => { updateUserStatus(session?.user); });
 }
@@ -453,13 +463,48 @@ async function loadData() {
     document.body.style.visibility = 'visible';
 }
 
+// 增加同步进度提示的保存函数
 async function saveData() {
     localStorage.setItem('pagedData', JSON.stringify(pages));
+
     if (currentUser && supabaseClient) {
-        const { error } = await supabaseClient
-            .from('user_configs')
-            .upsert({ user_id: currentUser.id, config_data: pages, updated_at: new Date() }, { onConflict: 'user_id' });
-        if (error) console.error(t("msg_cloud_save_fail"), error);
+        updateSyncStatus('saving'); // 显示正在保存
+
+        try {
+            const { error } = await supabaseClient
+                .from('user_configs')
+                .upsert({ user_id: currentUser.id, config_data: pages, updated_at: new Date() }, { onConflict: 'user_id' });
+
+            if (error) throw error;
+
+            updateSyncStatus('saved'); // 显示保存成功
+        } catch (e) {
+            console.error("Cloud save fail", e);
+            updateSyncStatus('error'); // 显示保存失败
+        }
+    }
+}
+
+// 新增：更新同步状态UI
+let syncTimer = null;
+function updateSyncStatus(status) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+
+    if (syncTimer) clearTimeout(syncTimer);
+
+    if (status === 'saving') {
+        el.innerHTML = '<span class="spinner">↻</span> ' + t('msg_saving');
+        el.className = 'sync-status visible saving';
+    } else if (status === 'saved') {
+        el.innerHTML = '✓ ' + t('msg_saved');
+        el.className = 'sync-status visible saved';
+        syncTimer = setTimeout(() => {
+            el.classList.remove('visible');
+        }, 2000);
+    } else if (status === 'error') {
+        el.innerHTML = '⚠ ' + t('msg_save_fail');
+        el.className = 'sync-status visible error';
     }
 }
 
@@ -890,7 +935,7 @@ function triggerKeyboardBounce(offset) {
     setTimeout(() => { swiperWrapper.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; swiperWrapper.style.transform = `translateX(${baseTranslate}px)`; }, 150);
 }
 
-// 新增：打开账户设置弹窗
+// 打开账户设置弹窗
 function openPrefModal() {
     if (!currentUser) {
         showToast(t("msg_login_success") ? "Please login first" : "请先登录", "error");
@@ -918,7 +963,7 @@ function openPrefModal() {
     document.getElementById('pref-modal').classList.remove('hidden');
 }
 
-// 新增：保存账户设置
+// 保存账户设置
 async function savePreferences() {
     if (!supabaseClient || !currentUser) return;
 
