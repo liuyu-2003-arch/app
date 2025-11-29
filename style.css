@@ -15,26 +15,23 @@ body {
     box-sizing: border-box;
     visibility: hidden;
     transition: color 0.3s ease;
-    color: #333; /* 默认深灰文字 */
+    color: #333;
 }
 
-/* --- 深色模式核心样式 (由 JS 切换 class) --- */
 body.dark-mode {
-    color: #fff !important; /* 强制白字 */
+    color: #fff !important;
 }
 body.dark-mode .page-title,
 body.dark-mode .bookmark-title {
-    text-shadow: 0 1px 3px rgba(0,0,0,0.9); /* 加深阴影，确保在亮色图片上也看不清 */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
 }
 body.dark-mode .user-icon-svg {
     fill: #fff;
 }
 
-/* --- 背景层 (默认 Default: SVG 波浪) --- */
 .background-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
     background-color: #e4d0e5;
-    /* 默认保留原有的 SVG 背景 */
     background-image:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M0,0L48,26.7C96,53,192,107,288,122.7C384,139,480,117,576,106.7C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E"),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='rgba(255,255,255,0.2)' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E"),
@@ -45,7 +42,6 @@ body.dark-mode .user-icon-svg {
     transition: background-color 0.5s ease;
 }
 
-/* --- 新增主题 1: Aurora (极光/波浪感) --- */
 .background-layer.bg-pattern-aurora {
     background-image:
         radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.5) 0px, transparent 50%),
@@ -55,7 +51,6 @@ body.dark-mode .user-icon-svg {
     background-size: cover !important;
 }
 
-/* --- 新增主题 2: Flow (流动线条感) --- */
 .background-layer.bg-pattern-flow {
     background-image:
         linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
@@ -64,7 +59,6 @@ body.dark-mode .user-icon-svg {
     background-size: 40px 40px, 40px 40px, 100% 100% !important;
 }
 
-/* --- 升级主题 3: Diag. Lines (带渐变效果的斜线) --- */
 .background-layer.bg-pattern-lines-d {
     background-image:
         linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%),
@@ -78,7 +72,6 @@ body.dark-mode .user-icon-svg {
     padding-top: 6vh; padding-bottom: 0; box-sizing: border-box;
 }
 
-/* --- 滑动区域 --- */
 .bookmark-swiper {
     width: 100%; overflow: hidden; flex-grow: 1;
     touch-action: pan-y;
@@ -108,7 +101,6 @@ body.dark-mode .user-icon-svg {
     padding: 5px; border-radius: 8px;
 }
 
-/* --- 书签图标 --- */
 .bookmark-item {
     display: flex; flex-direction: column; align-items: center;
     width: var(--card-size); cursor: pointer; position: relative;
@@ -141,7 +133,6 @@ body.dark-mode .user-icon-svg {
     font-weight: 500; text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }
 
-/* 编辑模式抖动动画 */
 @keyframes ios-jiggle {
     0% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } 100% { transform: rotate(-1.5deg); }
 }
@@ -170,7 +161,6 @@ body.dark-mode .user-icon-svg {
 }
 .is-editing .delete-btn { display: block; }
 
-/* 编辑控制栏 (通用底部栏) */
 .edit-controls {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: white; padding: 15px 25px; border-radius: 20px;
@@ -187,7 +177,6 @@ body.dark-mode .user-icon-svg {
 .edit-controls .done-btn { background: #007AFF; color: white; padding: 10px 20px; }
 .edit-controls .done-btn:hover { background: #0066d6; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
 
-/* 配色切换 */
 .theme-swatches { display: flex; gap: 8px; margin-right: 5px; }
 .swatch {
     width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
@@ -197,12 +186,10 @@ body.dark-mode .user-icon-svg {
 .swatch:hover { transform: scale(1.1); }
 .swatch.active { border-color: #007AFF; transform: scale(1.1); }
 
-/* 控制栏分割线 */
 .control-divider {
     width: 1px; height: 24px; background: #eee; margin: 0 5px;
 }
 
-/* 主题模式按钮 */
 .theme-patterns {
     display: flex; gap: 8px;
 }
@@ -213,7 +200,6 @@ body.dark-mode .user-icon-svg {
 .pattern-btn:hover { background: #f5f5f5; }
 .pattern-btn.active { background: #007AFF; color: white; border-color: #007AFF; }
 
-/* --- 顶部提示条 (Toast) --- */
 .toast-container {
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
     z-index: 9999; display: flex; flex-direction: column; gap: 10px;
@@ -231,7 +217,6 @@ body.dark-mode .user-icon-svg {
 .toast.success { background: rgba(52, 199, 89, 0.9); }
 .toast.error { background: rgba(255, 59, 48, 0.9); }
 
-/* --- 同步状态指示器 --- */
 .sync-status {
     position: fixed;
     top: 20px;
@@ -258,7 +243,6 @@ body.dark-mode .user-icon-svg {
 .sync-status.error { color: #FF3B30; }
 body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
-/* --- 用户按钮 (Login Button) --- */
 .user-trigger-area {
     position: fixed; top: 0; right: 0;
     width: 100px; height: 100px;
@@ -291,7 +275,6 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 
 .user-fab img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- 登录后下拉菜单 (User Menu) --- */
 .user-menu {
     position: fixed;
     top: 70px; right: 20px; width: 260px;
@@ -323,7 +306,6 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .menu-icon { font-size: 16px; width: 20px; text-align: center; color: #787774; }
 .menu-label { font-size: 11px; color: #999; font-weight: 600; padding: 8px 16px 4px; text-transform: uppercase; }
 
-/* --- 社交登录按钮 --- */
 .social-login-section { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
 .social-icons { display: flex; gap: 25px; justify-content: center; }
 .social-btn {
@@ -335,7 +317,6 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .auth-divider { width: 100%; display: flex; align-items: center; justify-content: center; margin: 10px 0 20px 0; color: #999; font-size: 12px; }
 .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
 
-/* --- 头像选择器 (使用 Flex 居中) --- */
 .avatar-grid {
     display: flex;
     justify-content: center;
@@ -351,7 +332,6 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .avatar-option:hover { transform: scale(1.1); }
 .avatar-option.selected { border-color: #007AFF; box-shadow: 0 0 0 2px rgba(0,122,255,0.3); }
 
-/* --- 弹窗样式 --- */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;
@@ -359,7 +339,7 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 }
 .modal-content {
     background: white; padding: 25px; border-radius: 24px;
-    min-width: 350px; /* 默认宽度调整为 350px */
+    min-width: 350px; /* 默认宽度 */
     max-width: 800px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 18px;
     animation: popUp 0.3s ease;
@@ -395,7 +375,6 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .input-row { display: flex; align-items: center; gap: 10px; }
 .input-label { font-size: 13px; color: #666; width: 65px; text-align: right; flex-shrink: 0; font-weight: 500; }
 
-/* 修改输入框样式：添加 input[type="tel"] 以统一手机号输入框样式 */
 .modal-content input[type="text"],
 .modal-content input[type="email"],
 .modal-content input[type="password"],
@@ -454,26 +433,7 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 }
 .pagination-dots .dot:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
 
-@media (max-width: 768px) {
-    /* ... 前面的代码保持不变 ... */
-
-    /* 找到这段输入框的样式，修改 height 和 font-size */
-    .modal-content input[type="text"],
-    .modal-content input[type="email"],
-    .modal-content input[type="password"],
-    .modal-content input[type="tel"] {
-        flex: none !important;
-        width: 65% !important;      /* 宽度保持 65% */
-        height: 48px !important;    /* ★关键修改：高度从 38px 增加到 48px */
-        font-size: 15px !important; /* ★关键修改：字号加大，看起来更清晰 */
-        padding: 0 12px;            /* 稍微增加内边距 */
-        border-radius: 12px;        /* 圆角也稍微加大一点，更圆润 */
-    }
-}
-
 /* --- 头像选择器升级样式 --- */
-
-/* Tab 切换条 */
 .avatar-tabs {
     display: flex;
     border-bottom: 1px solid #eee;
@@ -511,17 +471,15 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     background: #007AFF;
 }
 
-/* 图标网格区域 (带滚动条) */
 .avatar-grid-scroll {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 一行 6 个 */
+    grid-template-columns: repeat(6, 1fr);
     gap: 8px;
-    max-height: 200px; /* 限制高度 */
-    overflow-y: auto;  /* 允许滚动 */
+    max-height: 200px;
+    overflow-y: auto;
     padding: 5px;
 }
 
-/* 单个图标项 */
 .emoji-item {
     font-size: 24px;
     width: 40px;
@@ -544,12 +502,10 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     border: 1px solid #007AFF;
 }
 
-/* 隐藏 */
 .avatar-panel.hidden {
     display: none;
 }
 
-/* 次级按钮 (上传用) */
 .secondary-btn {
     background: white;
     border: 1px solid #ddd;
@@ -563,4 +519,54 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .secondary-btn:hover {
     background: #f5f5f5;
     border-color: #ccc;
+}
+
+/* --- 移动端适配 (包含登录框修复) --- */
+@media (max-width: 768px) {
+    .container { padding-top: 50px; }
+    .bookmark-page { padding-top: 0; }
+    .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
+    .page-title { text-align: left; margin-bottom: 0; padding-left: 4px; }
+    .pagination-dots { bottom: 40px; }
+    .edit-controls { display: none !important; }
+    .user-trigger-area { top: 10px; right: 10px; }
+
+    /* 1. 弹窗容器 */
+    .modal-content {
+        min-width: unset !important;
+        width: 92%;
+        max-width: 350px;
+        padding: 20px 15px;
+    }
+
+    /* 2. 保持横向排列，两端对齐 */
+    .input-row {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 0;
+    }
+
+    /* 3. 让标签自动适应宽度，不要固定死 */
+    .input-label {
+        width: auto !important;
+        flex-shrink: 0;
+        text-align: left !important;
+        font-size: 13px;
+        padding-right: 10px;
+    }
+
+    /* 4. 强制缩小输入框宽度，解决遮挡问题 */
+    .modal-content input[type="text"],
+    .modal-content input[type="email"],
+    .modal-content input[type="password"],
+    .modal-content input[type="tel"] {
+        flex: none !important;
+        width: 65% !important;      /* 强制只占 65% 的宽度 */
+        height: 48px !important;    /* 增加高度，方便点击 */
+        font-size: 15px !important; /* 加大字号 */
+        padding: 0 10px;
+        border-radius: 12px;
+    }
 }

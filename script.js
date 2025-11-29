@@ -34,6 +34,7 @@ const translations = {
         "menu_pref": "Account Preferences",
         "menu_lang": "Language",
         "menu_logout": "Log out",
+        "menu_feedback": "Feedback", // 新增
         "theme_default": "Default (Wave)",
         "theme_aurora": "Aurora",
         "theme_flow": "Flow",
@@ -48,12 +49,16 @@ const translations = {
         "btn_add_page": "➕ Add New Page",
         "btn_login": "Login",
         "btn_register": "Register",
+        "btn_save": "Save Changes",
+        "btn_choose_img": "Choose Image", // 新增
         "label_url": "URL",
         "label_title": "Title",
         "label_logo": "Logo URL",
         "label_page": "Page",
         "label_email": "Email",
         "label_password": "Password",
+        "label_display_name": "Display Name",
+        "label_phone": "Phone",
         "ph_url": "e.g. bilibili.com",
         "ph_title": "Title",
         "ph_icon": "Icon URL (Optional)",
@@ -63,12 +68,15 @@ const translations = {
         "modal_page_title": "Edit Pages",
         "modal_auth_title": "Login / Register",
         "modal_auth_hint": "Choose an avatar (for registration)",
+        "modal_pref_title": "Account Preferences",
         "preview_title": "Preview",
         "style_full": "Full",
         "style_fit": "Fit",
         "style_white": "White",
         "divider_social": "Or use third-party",
         "auth_guest": "Guest",
+        "tab_emoji": "Icons", // 新增
+        "tab_upload": "Upload", // 新增
         "msg_dev": "Feature in development...",
         "msg_login_success": "Login successful",
         "msg_logout": "Logged out",
@@ -84,21 +92,12 @@ const translations = {
         "msg_import_success": "Import successful",
         "msg_import_fail": "Import failed, format error",
         "msg_logged_in": "Logged in as",
-        "modal_pref_title": "Account Preferences",
-        "label_display_name": "Display Name",
-        "label_phone": "Phone",
-        "btn_save": "Save Changes",
         "msg_select_new_avatar": "Tap to change avatar",
         "msg_save_success": "Preferences saved successfully",
         "msg_saving": "Saving...",
         "msg_saved": "All changes saved",
-        "msg_save_fail": "Save failed"
-        // 在 translations.en 中添加：
-        "menu_feedback": "Feedback",
-        "tab_emoji": "Icons",
-        "tab_upload": "Upload",
-        "btn_choose_img": "Choose Image",
-        "msg_upload_hint": "Max size: 2MB (Auto-compressed)",
+        "msg_save_fail": "Save failed",
+        "msg_upload_hint": "Max size: 2MB (Auto-compressed)" // 新增
     },
     zh: {
         "menu_edit_bookmark": "编辑书签",
@@ -106,6 +105,7 @@ const translations = {
         "menu_pref": "账户设置",
         "menu_lang": "语言 / Language",
         "menu_logout": "退出登录",
+        "menu_feedback": "问题反馈", // 新增
         "theme_default": "默认 (波浪)",
         "theme_aurora": "极光",
         "theme_flow": "流光",
@@ -120,12 +120,16 @@ const translations = {
         "btn_add_page": "➕ 添加新页面",
         "btn_login": "登录",
         "btn_register": "注册",
+        "btn_save": "保存更改",
+        "btn_choose_img": "选择图片", // 新增
         "label_url": "网页网址",
         "label_title": "网页标题",
         "label_logo": "图标地址",
         "label_page": "所在页面",
         "label_email": "邮箱",
         "label_password": "密码",
+        "label_display_name": "显示名称",
+        "label_phone": "手机号",
         "ph_url": "例如 bilibili.com",
         "ph_title": "标题",
         "ph_icon": "图标链接 (选填)",
@@ -135,12 +139,15 @@ const translations = {
         "modal_page_title": "编辑页面",
         "modal_auth_title": "登录 / 注册",
         "modal_auth_hint": "选择一个头像 (用于注册)",
+        "modal_pref_title": "账户设置",
         "preview_title": "标题预览",
         "style_full": "铺满",
         "style_fit": "适中",
         "style_white": "留白",
         "divider_social": "或使用第三方账号",
         "auth_guest": "游客",
+        "tab_emoji": "图标库", // 新增
+        "tab_upload": "上传图片", // 新增
         "msg_dev": "功能开发中...",
         "msg_login_success": "登录成功",
         "msg_logout": "已退出登录",
@@ -156,21 +163,12 @@ const translations = {
         "msg_import_success": "导入成功",
         "msg_import_fail": "导入失败，格式错误",
         "msg_logged_in": "已登录",
-        "modal_pref_title": "账户设置",
-        "label_display_name": "显示名称",
-        "label_phone": "手机号",
-        "btn_save": "保存更改",
         "msg_select_new_avatar": "点击更换头像",
         "msg_save_success": "设置保存成功",
         "msg_saving": "正在同步...",
         "msg_saved": "云端已同步",
-        "msg_save_fail": "同步失败"
-        // 在 translations.zh 中添加：
-        "menu_feedback": "问题反馈",
-        "tab_emoji": "图标库",
-        "tab_upload": "上传图片",
-        "btn_choose_img": "选择图片",
-        "msg_upload_hint": "最大 2MB (自动压缩)",
+        "msg_save_fail": "同步失败",
+        "msg_upload_hint": "最大 2MB (自动压缩)" // 新增
     }
 };
 
@@ -206,7 +204,7 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 【修复1】修复双重hash导致的登录问题
+    // 修复 Hash 登录问题
     if (window.location.hash) {
         let hash = window.location.hash;
         if (hash.startsWith('##')) {
@@ -225,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSwiper();
     initKeyboardControl();
 
+    // 注册页面的头像选择器
     createAvatarSelector('avatar-selector', (url) => {
         selectedAvatarUrl = url;
     });
@@ -249,9 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
-// 【修复2】新增：页面显示时强制刷新本地数据 (解决返回后书签消失的问题)
 window.addEventListener('pageshow', (event) => {
-    // 如果是从缓存恢复(BFCache)，或者为了保险起见，优先读取本地最新数据并渲染
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
@@ -302,11 +299,11 @@ function updateUserStatus(user) {
     const fab = document.querySelector('.user-fab');
     const svgIcon = document.getElementById('user-icon-svg');
     const imgIcon = document.getElementById('user-avatar-img');
-    const formGroup = document.querySelector('.form-group');
+    const formGroup = document.querySelector('#auth-modal .form-group');
     const socialSection = document.querySelector('.social-login-section');
     const divider = document.querySelector('.auth-divider');
-    const loginBtn = document.querySelector('.modal-actions button:not(.primary)');
-    const actionBtn = document.querySelector('.modal-actions .primary');
+    const loginBtn = document.querySelector('#auth-modal .modal-actions button:not(.primary)');
+    const actionBtn = document.querySelector('#auth-modal .modal-actions .primary');
     const modalTitle = document.getElementById('auth-title');
     const infoPanel = document.getElementById('user-info-panel');
     const menuUserName = document.getElementById('menu-user-name');
@@ -337,7 +334,8 @@ function updateUserStatus(user) {
         if(menuUserEmail) menuUserEmail.innerText = user.email;
         if(menuUserAvatar) menuUserAvatar.src = avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
 
-        document.getElementById('current-email').innerText = user.email;
+        const emailEl = document.getElementById('current-email');
+        if(emailEl) emailEl.innerText = user.email;
         loadData();
     } else {
         fab.classList.remove('logged-in');
@@ -513,16 +511,14 @@ async function handleLogout() {
     loadData();
 }
 
-// 【修复3】loadData 优化：优先加载本地数据以实现秒开，随后再后台同步云端
 async function loadData() {
-    // 1. 优先加载本地数据 (防止白屏或数据滞后)
+    // 优先加载本地数据
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
         render();
-        document.body.style.visibility = 'visible'; // 确保立即显示
+        document.body.style.visibility = 'visible';
     } else {
-        // 如果没有本地数据，尝试加载默认配置
         try {
             const response = await fetch('homepage_config.json');
             if (response.ok) {
@@ -532,10 +528,9 @@ async function loadData() {
                 pages = ensureBookmarkIds(pages);
                 render();
             }
-        } catch (e) { /* error loading default */ }
+        } catch (e) { /* error */ }
     }
 
-    // 2. 如果已登录，后台静默拉取云端数据
     if (currentUser && supabaseClient) {
         try {
             const { data, error } = await supabaseClient
@@ -547,8 +542,8 @@ async function loadData() {
             if (data && data.config_data) {
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
-                localStorage.setItem('pagedData', JSON.stringify(pages)); // 更新本地
-                render(); // 再次渲染云端数据
+                localStorage.setItem('pagedData', JSON.stringify(pages));
+                render();
             }
         } catch (e) {
             console.error("Cloud load error", e);
@@ -632,12 +627,6 @@ function createVisualPages() {
     if (visualPages.length === 0) visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
 }
 
-function rgbToHex(col) {
-    if(col.charAt(0)=='#') return col;
-    let rgb = col.match(/\d+/g);
-    if(!rgb) return '#e4d0e5';
-    return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
-}
 function render() {
     const oldScrollTops = [];
     document.querySelectorAll('.bookmark-page').forEach(p => oldScrollTops.push(p.scrollTop));
@@ -926,13 +915,6 @@ function saveBookmark() {
     }
     saveData(); closeModal(); render();
 }
-function toggleEditMode(enable) {
-    isEditing = enable; document.body.classList.toggle('is-editing', enable);
-    const controls = document.getElementById('edit-controls');
-    if (enable) controls.classList.remove('hidden');
-    else { controls.classList.add('hidden'); sortableInstances.forEach(instance => instance.destroy()); sortableInstances = []; }
-    render();
-}
 function addPage() { pages.push({ title: "新页面", bookmarks: [] }); saveData(); if (document.getElementById('page-edit-modal').classList.contains('hidden')) { currentPage = pages.length - 1; render(); } else { renderPageList(); } }
 function deletePage(e, pageIndex) {
     if (pages[pageIndex].bookmarks.length > 0) return showToast("页面不为空", "error");
@@ -1000,42 +982,40 @@ function triggerKeyboardBounce(offset) {
     setTimeout(() => { swiperWrapper.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; swiperWrapper.style.transform = `translateX(${baseTranslate}px)`; }, 150);
 }
 
-// 打开账户设置弹窗
+function handleFeedback() {
+    const subject = encodeURIComponent("Homepage Feedback");
+    const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
+    window.location.href = `mailto:jemch@qq.com?subject=${subject}&body=${body}`;
+}
+
 function openPrefModal() {
     if (!currentUser) {
         showToast(t("msg_login_success") ? "Please login first" : "请先登录", "error");
         return;
     }
 
-    // 1. 填充当前数据
     const meta = currentUser.user_metadata || {};
     document.getElementById('pref-name').value = meta.full_name || meta.display_name || '';
     document.getElementById('pref-phone').value = meta.phone_number || meta.phone || '';
 
-    // 2. 显示当前头像
     const currentAvatar = meta.avatar_url || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
     document.getElementById('pref-current-img').src = currentAvatar;
     prefAvatarUrl = currentAvatar;
 
-    // 3. 渲染选择器（不选中任何新头像，除非用户点击）
-    createAvatarSelector('pref-avatar-selector', (url) => {
-        prefAvatarUrl = url;
-        document.getElementById('pref-current-img').src = url; // 实时预览
-    });
+    // 初始化头像网格
+    renderAvatarGrid();
+    switchAvatarTab('emoji');
 
-    // 4. 显示弹窗并关闭菜单
     document.getElementById('user-dropdown').classList.remove('active');
     document.getElementById('pref-modal').classList.remove('hidden');
 }
 
-// 保存账户设置
 async function savePreferences() {
     if (!supabaseClient || !currentUser) return;
 
     const name = document.getElementById('pref-name').value;
     const phone = document.getElementById('pref-phone').value;
 
-    // 准备更新数据
     const updates = {
         data: {
             full_name: name,
@@ -1051,14 +1031,10 @@ async function savePreferences() {
 
     try {
         const { data, error } = await supabaseClient.auth.updateUser(updates);
-
         if (error) throw error;
-
         showToast(t("msg_save_success"), "success");
         document.getElementById('pref-modal').classList.add('hidden');
-
         updateUserStatus(data.user);
-
     } catch (e) {
         showToast(e.message, "error");
     } finally {
@@ -1067,37 +1043,21 @@ async function savePreferences() {
     }
 }
 
-/* --- 新增：反馈功能 --- */
-function handleFeedback() {
-    // 简单实现：跳转发送邮件
-    const subject = encodeURIComponent("Homepage Feedback");
-    const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
-    window.location.href = `mailto:jemch@qq.com?subject=${subject}&body=${body}`;
-    // 如果你有具体的反馈页面 URL，可以用: window.open('https://your-feedback-url.com', '_blank');
-}
-
-/* --- 新增：头像选择器逻辑 --- */
-
-// 1. Tab 切换
+// 头像选择器逻辑
 function switchAvatarTab(tabName) {
-    // 切换 Tab 样式
     document.querySelectorAll('.avatar-tab-item').forEach(el => {
         el.classList.remove('active');
         if(el.getAttribute('onclick').includes(tabName)) el.classList.add('active');
     });
-
-    // 切换内容显示
     document.getElementById('avatar-panel-emoji').classList.add('hidden');
     document.getElementById('avatar-panel-upload').classList.add('hidden');
     document.getElementById(`avatar-panel-${tabName}`).classList.remove('hidden');
 }
 
-// 2. 渲染图标库 (Emoji + DiceBear)
 function renderAvatarGrid() {
     const container = document.getElementById('pref-avatar-grid');
     container.innerHTML = '';
 
-    // A. 常用 Emoji 列表 (模仿 Notion 风格)
     const emojis = [
         "😀", "😎", "🤖", "👻", "👽", "👾",
         "🐱", "🐶", "🦊", "🦁", "🐼", "🐨",
@@ -1107,23 +1067,17 @@ function renderAvatarGrid() {
         "🚀", "✈️", "🚲", "🚗", "🏠", "⛺"
     ];
 
-    // B. DiceBear 风格头像
     const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear', 'Molly', 'Simba', 'Coco'];
 
-    // 渲染 Emoji
     emojis.forEach(emoji => {
         const div = document.createElement('div');
         div.className = 'emoji-item';
         div.textContent = emoji;
-        // 使用 DiceBear API 生成 emoji 图像链接 (为了统一存储格式)
-        // 或者直接存 Emoji 字符也可以，但为了 img src 兼容性，这里我们生成 svg URL
         const url = `https://api.dicebear.com/9.x/initials/svg?seed=${emoji}&backgroundColor=transparent&fontSize=40`;
-
-        div.onclick = () => selectNewAvatar(div, url, true); // true 表示这是 emoji 字符，特殊处理
+        div.onclick = () => selectNewAvatar(div, url, true);
         container.appendChild(div);
     });
 
-    // 渲染 DiceBear 头像
     seeds.forEach(seed => {
         const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}`;
         const div = document.createElement('div');
@@ -1134,42 +1088,25 @@ function renderAvatarGrid() {
     });
 }
 
-// 选中头像
 function selectNewAvatar(el, url, isEmoji = false) {
     document.querySelectorAll('.emoji-item').forEach(item => item.classList.remove('selected'));
     el.classList.add('selected');
-
-    // 如果是 Emoji，我们可以直接存 svg api 链接，或者存 DiceBear 的 emoji 样式
-    if(isEmoji) {
-         // 这里为了简单，我们使用 emoji 的 SVG 接口，或者你可以直接存字符
-         // 这里的 url 已经在上面生成好了
-    }
-
     prefAvatarUrl = url;
     document.getElementById('pref-current-img').src = url;
 }
 
-// 3. 处理文件上传 (转 Base64 预览)
 function handleAvatarFile(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-
-        // 限制大小 2MB
         if (file.size > 2 * 1024 * 1024) {
             showToast("Image too large (Max 2MB)", "error");
             return;
         }
-
         const reader = new FileReader();
         reader.onload = function(e) {
-            // 这里我们直接用 Base64 字符串作为 URL
-            // 注意：Supabase Auth Metadata 对字段长度有限制，大图片可能会失败。
-            // 最佳实践是上传到 Storage Bucket，但为了不改动后端逻辑，这里先用 Base64。
             const base64Url = e.target.result;
             prefAvatarUrl = base64Url;
             document.getElementById('pref-current-img').src = base64Url;
-
-            // 清除 Grid 的选中状态
             document.querySelectorAll('.emoji-item').forEach(item => item.classList.remove('selected'));
         }
         reader.readAsDataURL(file);
