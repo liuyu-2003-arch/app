@@ -25,155 +25,8 @@ let animationID;
 let dotsTimer = null;
 let wheelTimeout = null;
 
-// --- i18n Logic ---
-const translations = {
-    en: {
-        "menu_edit": "Edit Mode",
-        "menu_pref": "Account Preferences",
-        "menu_theme": "Theme",
-        "menu_lang": "Language",
-        "menu_logout": "Log out",
-        "theme_dark": "Dark",
-        "theme_grid": "Grid",
-        "theme_lines_h": "Horiz. Lines",
-        "theme_lines_d": "Diag. Lines",
-        "btn_add_bookmark": "➕ Add Bookmark",
-        "btn_edit_page": "📝 Edit Page",
-        "btn_import": "📥 Import",
-        "btn_export": "📤 Export",
-        "btn_done": "Done",
-        "btn_cancel": "Cancel",
-        "btn_confirm": "Confirm",
-        "btn_add_page": "➕ Add New Page",
-        "btn_login": "Login",
-        "btn_register": "Register / Update",
-        "label_url": "URL",
-        "label_title": "Title",
-        "label_logo": "Logo URL",
-        "label_page": "Page",
-        "label_email": "Email",
-        "label_password": "Password",
-        "ph_url": "e.g. bilibili.com",
-        "ph_title": "Title",
-        "ph_icon": "Icon URL (Optional)",
-        "ph_email": "Email Address",
-        "ph_password": "Password (min 6 chars)",
-        "modal_edit_title": "Edit/Add Bookmark",
-        "modal_page_title": "Edit Pages",
-        "modal_auth_title": "Login / Register",
-        "modal_auth_hint": "Choose an avatar (for registration or update)",
-        "preview_title": "Preview",
-        "style_full": "Full",
-        "style_fit": "Fit",
-        "style_white": "White",
-        "divider_social": "Or use third-party",
-        "auth_guest": "Guest",
-        "msg_dev": "Feature in development...",
-        "msg_login_success": "Login successful",
-        "msg_logout": "Logged out",
-        "msg_sdk_error": "SDK Error/Not Initialized",
-        "msg_third_party_success": "Third-party login successful!",
-        "msg_input_req": "Please enter information",
-        "msg_email_pass_req": "Please enter email and password",
-        "msg_reg_success": "Registration successful, please check email",
-        "msg_update_success": "Update successful",
-        "msg_select_avatar": "Please select an avatar",
-        "msg_title_url_req": "Title and URL are required",
-        "msg_page_not_empty": "Page is not empty",
-        "msg_import_success": "Import successful",
-        "msg_import_fail": "Import failed, format error",
-        "msg_logged_in": "Logged in as"
-    },
-    zh: {
-        "menu_edit": "编辑模式",
-        "menu_pref": "账户设置",
-        "menu_theme": "主题",
-        "menu_lang": "语言 / Language",
-        "menu_logout": "退出登录",
-        "theme_dark": "深色模式",
-        "theme_grid": "网格线条",
-        "theme_lines_h": "水平线条",
-        "theme_lines_d": "对角线条",
-        "btn_add_bookmark": "➕ 添加书签",
-        "btn_edit_page": "📝 编辑页面",
-        "btn_import": "📥 导入配置",
-        "btn_export": "📤 导出配置",
-        "btn_done": "完成",
-        "btn_cancel": "取消",
-        "btn_confirm": "确定",
-        "btn_add_page": "➕ 添加新页面",
-        "btn_login": "登录",
-        "btn_register": "注册 / 更新",
-        "label_url": "网页网址",
-        "label_title": "网页标题",
-        "label_logo": "图标地址",
-        "label_page": "所在页面",
-        "label_email": "邮箱",
-        "label_password": "密码",
-        "ph_url": "例如 bilibili.com",
-        "ph_title": "标题",
-        "ph_icon": "图标链接 (选填)",
-        "ph_email": "邮箱地址",
-        "ph_password": "密码 (至少6位)",
-        "modal_edit_title": "编辑/添加书签",
-        "modal_page_title": "编辑页面",
-        "modal_auth_title": "登录 / 注册",
-        "modal_auth_hint": "选择一个头像 (注册或更新资料时生效)",
-        "preview_title": "标题预览",
-        "style_full": "铺满",
-        "style_fit": "适中",
-        "style_white": "留白",
-        "divider_social": "或使用第三方账号",
-        "auth_guest": "游客",
-        "msg_dev": "功能开发中...",
-        "msg_login_success": "登录成功",
-        "msg_logout": "已退出登录",
-        "msg_sdk_error": "SDK 未初始化",
-        "msg_third_party_success": "第三方登录成功！",
-        "msg_input_req": "请输入信息",
-        "msg_email_pass_req": "请输入邮箱密码",
-        "msg_reg_success": "注册成功，请查收邮件",
-        "msg_update_success": "更新成功",
-        "msg_select_avatar": "请先选择头像",
-        "msg_title_url_req": "标题和网址是必填的",
-        "msg_page_not_empty": "页面不为空",
-        "msg_import_success": "导入成功",
-        "msg_import_fail": "导入失败，格式错误",
-        "msg_logged_in": "已登录"
-    }
-};
-
-let currentLang = localStorage.getItem('appLang') || 'en';
-
-function t(key) {
-    return translations[currentLang][key] || key;
-}
-
-function updateTexts() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (key) {
-            el.textContent = t(key);
-        }
-    });
-    // Update placeholders
-    document.getElementById('input-url').placeholder = t('ph_url');
-    document.getElementById('input-title').placeholder = t('ph_title');
-    document.getElementById('input-icon').placeholder = t('ph_icon');
-    document.getElementById('auth-email').placeholder = t('ph_email');
-    document.getElementById('auth-password').placeholder = t('ph_password');
-}
-
-function changeLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('appLang', lang);
-    updateTexts();
-}
-// --- End i18n Logic ---
-
 document.addEventListener('DOMContentLoaded', () => {
     document.body.style.visibility = 'hidden';
-    updateTexts(); // Initialize texts
     initTheme();
     initSwiper();
     initKeyboardControl();
@@ -234,7 +87,7 @@ async function initAuth() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (window.location.hash && window.location.hash.includes('access_token')) {
         window.history.replaceState(null, '', window.location.pathname);
-        showToast(t("msg_third_party_success"), "success");
+        showToast("第三方登录成功！", "success");
     }
     updateUserStatus(session?.user);
     supabaseClient.auth.onAuthStateChange((_event, session) => { updateUserStatus(session?.user); });
@@ -252,7 +105,6 @@ function updateUserStatus(user) {
     const actionBtn = document.querySelector('.modal-actions .primary');
     const modalTitle = document.getElementById('auth-title');
     const infoPanel = document.getElementById('user-info-panel');
-    const menuUserName = document.getElementById('menu-user-name');
 
     if (user) {
         fab.classList.add('logged-in');
@@ -267,8 +119,6 @@ function updateUserStatus(user) {
             svgIcon.setAttribute('fill', '#333');
         }
         if(infoPanel) infoPanel.classList.remove('hidden');
-        if(menuUserName) menuUserName.innerText = user.user_metadata?.full_name || user.email.split('@')[0];
-        document.getElementById('current-email').innerText = user.email;
         loadData();
     } else {
         fab.classList.remove('logged-in');
@@ -279,10 +129,9 @@ function updateUserStatus(user) {
         if(socialSection) socialSection.style.display = 'flex';
         if(divider) divider.style.display = 'flex';
         if(loginBtn) loginBtn.style.display = 'block';
-        if(actionBtn) actionBtn.textContent = t("btn_register");
-        if(modalTitle) modalTitle.textContent = t("modal_auth_title");
+        if(actionBtn) actionBtn.textContent = "注册 / 更新";
+        if(modalTitle) modalTitle.textContent = "登录 / 注册";
         if(infoPanel) infoPanel.classList.add('hidden');
-        if(menuUserName) menuUserName.innerText = t("auth_guest");
     }
 }
 
@@ -305,41 +154,42 @@ function handleMenuEdit() {
     toggleEditMode(true);
 }
 
-function quickChangeTheme(color, pattern = 'none') {
+// 快速切换函数（用于右上角菜单切换纹理，或 Edit Mode 切换颜色）
+// color: 颜色值，如果为 null 则保持当前颜色
+// pattern: 纹理类名，如果为 null 则保持当前纹理
+function quickChangeTheme(color, pattern) {
     changeTheme(color, null, pattern);
-    // Dark mode text color adjustment
-    document.body.style.color = (color === '#1a1a1a') ? '#fff' : '#333';
 }
 
 async function handleOAuthLogin(provider) {
-    if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
-    showToast(`Navigating to ${provider}...`, "normal");
+    if (!supabaseClient) return showToast("SDK 未初始化", "error");
+    showToast(`正在前往 ${provider} 认证...`, "normal");
     try {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: provider,
             options: { redirectTo: window.location.href, queryParams: { access_type: 'offline', prompt: 'consent' } }
         });
         if (error) throw error;
-    } catch (e) { showToast(e.message, "error"); }
+    } catch (e) { showToast("登录失败: " + e.message, "error"); }
 }
 
 async function handleRegister() {
-    if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
+    if (!supabaseClient) return showToast("SDK Error", "error");
     if (currentUser) {
-        if (!selectedAvatarUrl) return showToast(t("msg_select_avatar"), "error");
+        if (!selectedAvatarUrl) return showToast("请先选择头像", "error");
         const { data, error } = await supabaseClient.auth.updateUser({ data: { avatar_url: selectedAvatarUrl } });
         if (error) showToast(error.message, "error");
-        else { showToast(t("msg_update_success"), "success"); document.getElementById('auth-modal').classList.add('hidden'); updateUserStatus(data.user); }
+        else { showToast("更新成功", "success"); document.getElementById('auth-modal').classList.add('hidden'); updateUserStatus(data.user); }
         return;
     }
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    if(!email || !password) return showToast(t("msg_email_pass_req"), "error");
+    if(!email || !password) return showToast("请输入邮箱密码", "error");
     try {
         const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { avatar_url: selectedAvatarUrl } } });
         if (error) showToast(error.message, "error");
         else {
-            showToast(t("msg_reg_success"), "success");
+            showToast("注册成功，请查收邮件", "success");
             document.getElementById('auth-modal').classList.add('hidden');
             if (data && data.user && data.session) {
                 updateUserStatus(data.user);
@@ -351,17 +201,16 @@ async function handleRegister() {
 async function handleLogin() {
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    if(!email || !password) return showToast(t("msg_input_req"), "error");
-    if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
+    if(!email || !password) return showToast("请输入信息", "error");
+    if (!supabaseClient) return showToast("SDK Error", "error");
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if (error) {
         showToast(error.message, "error");
     } else {
-        showToast(t("msg_login_success"), "success");
+        showToast("登录成功", "success");
         document.getElementById('auth-modal').classList.add('hidden');
-
         if (data && data.user) {
             updateUserStatus(data.user);
         }
@@ -371,7 +220,7 @@ async function handleLogin() {
 async function handleLogout() {
     if (supabaseClient) await supabaseClient.auth.signOut();
     document.getElementById('user-dropdown').classList.remove('active');
-    showToast(t("msg_logout"), "normal");
+    showToast("已退出登录", "normal");
     updateUserStatus(null);
     loadData();
 }
@@ -386,20 +235,24 @@ async function loadData() {
                 .maybeSingle();
 
             if (error) {
-                console.warn("Cloud query error:", error.message);
+                console.warn("云端查询轻微异常:", error.message);
             } else if (data && data.config_data) {
+                console.log("云端数据加载成功");
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
                 localStorage.setItem('pagedData', JSON.stringify(pages));
                 render();
                 document.body.style.visibility = 'visible';
                 return;
+            } else {
+                console.log("新用户或云端无数据，使用本地/默认配置");
             }
         } catch (e) {
-            console.error("Cloud load error", e);
+            console.error("云端加载严重错误", e);
         }
     }
 
+    console.log("加载本地数据");
     const storedData = localStorage.getItem('pagedData');
     if (storedData) {
         pages = JSON.parse(storedData);
@@ -412,7 +265,7 @@ async function loadData() {
                 else pages = migrateData(data);
             }
         } catch (e) {
-            pages = [{ title: "My Collection", bookmarks: [
+            pages = [{ title: "个人收藏", bookmarks: [
                 { title: "GitHub", url: "https://github.com", icon: "https://manifest.im/icon/github.com", style: "white" },
                 { title: "Bilibili", url: "https://www.bilibili.com", icon: "https://manifest.im/icon/bilibili.com", style: "fit" }
             ]}];
@@ -429,7 +282,7 @@ async function saveData() {
         const { error } = await supabaseClient
             .from('user_configs')
             .upsert({ user_id: currentUser.id, config_data: pages, updated_at: new Date() }, { onConflict: 'user_id' });
-        if (error) console.error(t("msg_cloud_save_fail"), error);
+        if (error) console.error("云端保存失败:", error);
     }
 }
 
@@ -440,12 +293,12 @@ function ensureBookmarkIds(pages) {
 }
 function migrateData(oldData) {
     const itemsPerPage = 32; const newPages = [];
-    const pageTitles = oldData.pageTitles || ["Page 1", "Page 2", "Page 3"];
+    const pageTitles = oldData.pageTitles || ["个人收藏", "常用工具", "学习资源"];
     let bookmarks = oldData.bookmarks || oldData;
     if (!Array.isArray(bookmarks)) bookmarks = [];
     const totalPages = Math.max(pageTitles.length, Math.ceil(bookmarks.length / itemsPerPage));
     for (let i = 0; i < totalPages; i++) {
-        newPages.push({ title: pageTitles[i] || `Page ${i+1}`, bookmarks: bookmarks.slice(i * itemsPerPage, (i + 1) * itemsPerPage) });
+        newPages.push({ title: pageTitles[i] || "新页面", bookmarks: bookmarks.slice(i * itemsPerPage, (i + 1) * itemsPerPage) });
     }
     return ensureBookmarkIds(newPages);
 }
@@ -463,43 +316,59 @@ function createVisualPages() {
             }
         }
     });
-    if (visualPages.length === 0) visualPages.push({ title: "New Page", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
+    if (visualPages.length === 0) visualPages.push({ title: "新页面", bookmarks: [], originalPageIndex: 0, chunkIndex: 0 });
 }
+
 function initTheme() {
-    const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
+    // 默认背景改为浅灰色/Default (#f5f7f9)
+    const savedColor = localStorage.getItem('themeColor') || '#f5f7f9';
     const savedPattern = localStorage.getItem('themePattern') || 'none';
 
     changeTheme(savedColor, null, savedPattern);
-
-    // Restore dark mode text if needed
-    if (savedColor === '#1a1a1a') {
-        document.body.style.color = '#fff';
-    }
 }
 
+// 核心主题切换逻辑
+// color: 背景颜色 (例如 #f5f7f9, #1a1a1a)
+// element: 被点击的 DOM 元素 (用于 active 状态切换)
+// pattern: 纹理类名 (例如 'bg-pattern-lines', 'none')
 function changeTheme(color, element, pattern) {
     const bg = document.querySelector('.background-layer');
-    bg.style.backgroundColor = color;
-    localStorage.setItem('themeColor', color);
 
-    // Handle Pattern
-    if (pattern !== undefined) {
+    // 1. 处理颜色
+    if (color) {
+        bg.style.backgroundColor = color;
+        localStorage.setItem('themeColor', color);
+
+        // 深色模式处理：如果是深色背景 (#1a1a1a)，文字反白
+        if (color === '#1a1a1a') {
+            document.body.style.color = '#fff';
+        } else {
+            document.body.style.color = '#333';
+        }
+    }
+
+    // 2. 处理纹理
+    if (pattern !== undefined && pattern !== null) {
         localStorage.setItem('themePattern', pattern);
-        // Remove all pattern classes
-        bg.classList.remove('bg-pattern-grid', 'bg-pattern-lines-h', 'bg-pattern-lines-d');
-        if (pattern && pattern !== 'none') {
+        // 移除所有旧的纹理类
+        bg.classList.remove('bg-pattern-lines', 'bg-pattern-lines-d', 'bg-pattern-grid', 'bg-pattern-lines-h');
+
+        if (pattern !== 'none') {
             bg.classList.add(pattern);
         }
     }
 
-    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-    if (element) element.classList.add('active');
+    // 3. 处理底部编辑栏的选中状态 (如果传入了 element)
+    if (element) {
+        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+        element.classList.add('active');
+    }
 }
 
 function rgbToHex(col) {
     if(col.charAt(0)=='#') return col;
     let rgb = col.match(/\d+/g);
-    if(!rgb) return '#e4d0e5';
+    if(!rgb) return '#f5f7f9';
     return "#" + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
 }
 function render() {
@@ -522,7 +391,7 @@ function render() {
         content.className = 'bookmark-page-content';
         const title = document.createElement('h2');
         title.className = 'page-title';
-        title.textContent = vPage.title || 'New Page';
+        title.textContent = vPage.title || '新页面';
         content.appendChild(title);
 
         vPage.bookmarks.forEach((item) => {
@@ -661,7 +530,7 @@ function renderPaginationDots() {
         const dot = document.createElement('div');
         dot.className = 'dot';
         if (i === currentPage) dot.classList.add('active');
-        dot.setAttribute('data-title', visualPages[i].title || `Page ${i + 1}`);
+        dot.setAttribute('data-title', visualPages[i].title || `第 ${i + 1} 页`);
         dot.onclick = (e) => { e.stopPropagation(); currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
         dotsContainer.appendChild(dot);
     }
@@ -671,7 +540,7 @@ function selectPage(element) { document.querySelectorAll('.page-option').forEach
 function renderPageOptions(selectedPageIndex) {
     const container = document.getElementById('page-options-container'); container.innerHTML = '';
     pages.forEach((page, index) => {
-        const option = document.createElement('div'); option.className = 'page-option'; option.textContent = page.title || `Page ${index + 1}`; option.dataset.index = index;
+        const option = document.createElement('div'); option.className = 'page-option'; option.textContent = page.title || `第 ${index + 1} 页`; option.dataset.index = index;
         option.onclick = () => selectPage(option);
         if (index === selectedPageIndex) option.classList.add('active'); container.appendChild(option);
     });
@@ -766,7 +635,7 @@ function autoFillInfo() {
     }, 500);
 }
 function updatePreview() {
-    const titleVal = document.getElementById('input-title').value || t("preview_title"); const iconVal = document.getElementById('input-icon').value; const styleEl = document.querySelector('.style-option.active'); const styleVal = styleEl ? styleEl.dataset.style : 'full';
+    const titleVal = document.getElementById('input-title').value || "标题预览"; const iconVal = document.getElementById('input-icon').value; const styleEl = document.querySelector('.style-option.active'); const styleVal = styleEl ? styleEl.dataset.style : 'full';
     const previewCard = document.getElementById('preview-card'); const previewImg = document.getElementById('preview-img'); const previewText = document.getElementById('preview-text'); const previewTitle = document.getElementById('preview-title');
     previewTitle.innerText = titleVal; previewCard.classList.remove('style-white', 'style-fit');
     if (styleVal === 'white') previewCard.classList.add('style-white'); else if (styleVal === 'fit') previewCard.classList.add('style-fit');
@@ -776,7 +645,7 @@ function updatePreview() {
 }
 function saveBookmark() {
     const title = document.getElementById('input-title').value; let url = document.getElementById('input-url').value; const icon = document.getElementById('input-icon').value; const styleEl = document.querySelector('.style-option.active'); const style = styleEl ? styleEl.dataset.style : 'full'; const pageEl = document.querySelector('.page-option.active'); const newPageIndex = pageEl ? parseInt(pageEl.dataset.index) : 0;
-    if (!title || !url) return showToast(t("msg_title_url_req"), "error");
+    if (!title || !url) return showToast('标题和网址是必填的', "error");
     if (!url.startsWith('http')) url = 'https://' + url;
     const { pageIndex, bookmarkIndex } = currentEditInfo;
     if (pageIndex >= 0 && bookmarkIndex >= 0) {
@@ -785,7 +654,7 @@ function saveBookmark() {
         else { pages[pageIndex].bookmarks[bookmarkIndex] = newItem; }
     } else {
         const newItem = { id: generateUniqueId(), title, url, icon, style };
-        if (!pages[newPageIndex]) pages[newPageIndex] = { title: "New Page", bookmarks: [] };
+        if (!pages[newPageIndex]) pages[newPageIndex] = { title: "新页面", bookmarks: [] };
         pages[newPageIndex].bookmarks.push(newItem); currentPage = newPageIndex;
     }
     saveData(); closeModal(); render();
@@ -797,9 +666,9 @@ function toggleEditMode(enable) {
     else { controls.classList.add('hidden'); sortableInstances.forEach(instance => instance.destroy()); sortableInstances = []; }
     render();
 }
-function addPage() { pages.push({ title: "New Page", bookmarks: [] }); saveData(); if (document.getElementById('page-edit-modal').classList.contains('hidden')) { currentPage = pages.length - 1; render(); } else { renderPageList(); } }
+function addPage() { pages.push({ title: "新页面", bookmarks: [] }); saveData(); if (document.getElementById('page-edit-modal').classList.contains('hidden')) { currentPage = pages.length - 1; render(); } else { renderPageList(); } }
 function deletePage(e, pageIndex) {
-    if (pages[pageIndex].bookmarks.length > 0) return showToast(t("msg_page_not_empty"), "error");
+    if (pages[pageIndex].bookmarks.length > 0) return showToast("页面不为空", "error");
     const listItem = e.target.closest('.page-list-item'); listItem.classList.add('fading-out');
     setTimeout(() => { pages.splice(pageIndex, 1); saveData(); if (currentPage >= pages.length) currentPage = Math.max(0, pages.length - 1); render(); renderPageList(); }, 300);
 }
@@ -830,7 +699,7 @@ function initSortable() {
 }
 function deleteBookmark(e, bookmarkId) {
     e.stopPropagation();
-    if (confirm(t('btn_confirm') + '?')) {
+    if (confirm('确定删除这个书签吗？')) {
         let found = false;
         for (const page of pages) { const index = page.bookmarks.findIndex(b => b.id === bookmarkId); if (index !== -1) { page.bookmarks.splice(index, 1); found = true; break; } }
         if (found) { saveData(); render(); }
@@ -846,7 +715,7 @@ function handleImport(event) {
     const file = event.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
-        try { let importedData = JSON.parse(e.target.result); if (Array.isArray(importedData) && (importedData.length === 0 || importedData[0].hasOwnProperty('bookmarks'))) pages = importedData; else pages = migrateData(importedData); pages = ensureBookmarkIds(pages); saveData(); render(); showToast(t("msg_import_success"), "success"); } catch (err) { showToast(t("msg_import_fail"), "error"); }
+        try { let importedData = JSON.parse(e.target.result); if (Array.isArray(importedData) && (importedData.length === 0 || importedData[0].hasOwnProperty('bookmarks'))) pages = importedData; else pages = migrateData(importedData); pages = ensureBookmarkIds(pages); saveData(); render(); showToast('导入成功', "success"); } catch (err) { showToast('导入失败，格式错误', "error"); }
     }; reader.readAsText(file);
 }
 function initKeyboardControl() {
