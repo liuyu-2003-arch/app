@@ -455,52 +455,18 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .pagination-dots .dot:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
 
 @media (max-width: 768px) {
-    /* --- 原有布局适配 (保持不变) --- */
-    .container { padding-top: 50px; }
-    .bookmark-page { padding-top: 0; }
-    .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
-    .page-title { text-align: left; margin-bottom: 0; padding-left: 4px; }
-    .pagination-dots { bottom: 40px; }
-    .edit-controls { display: none !important; }
-    .user-trigger-area { top: 10px; right: 10px; }
+    /* ... 前面的代码保持不变 ... */
 
-    /* --- 登录弹窗修复 (强制缩小输入框版) --- */
-
-    /* 1. 弹窗容器 */
-    .modal-content {
-        min-width: unset !important;
-        width: 92%;
-        max-width: 350px;
-        padding: 20px 15px;
-    }
-
-    /* 2. 保持横向排列，两端对齐 */
-    .input-row {
-        display: flex !important;
-        flex-direction: row !important;       /* 强制横向 */
-        justify-content: space-between !important; /* 标签在左，输入框在右 */
-        align-items: center !important;
-        gap: 0; /* 间距由 space-between 控制 */
-    }
-
-    /* 3. 让标签自动适应宽度，不要固定死 */
-    .input-label {
-        width: auto !important;     /* 宽度自动，容纳 "Password" */
-        flex-shrink: 0;             /* 禁止标签被压缩 */
-        text-align: left !important;
-        font-size: 13px;
-        padding-right: 10px;        /* 给右边留点空隙 */
-    }
-
-    /* 4. 强制缩小输入框宽度，解决遮挡问题 */
+    /* 找到这段输入框的样式，修改 height 和 font-size */
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="password"],
     .modal-content input[type="tel"] {
-        flex: none !important;      /* 取消自动充满 */
-        width: 65% !important;      /* ★关键：强制只占 65% 的宽度 */
-        height: 38px;
-        font-size: 13px;
-        padding: 0 10px;
+        flex: none !important;
+        width: 65% !important;      /* 宽度保持 65% */
+        height: 48px !important;    /* ★关键修改：高度从 38px 增加到 48px */
+        font-size: 15px !important; /* ★关键修改：字号加大，看起来更清晰 */
+        padding: 0 12px;            /* 稍微增加内边距 */
+        border-radius: 12px;        /* 圆角也稍微加大一点，更圆润 */
     }
 }
