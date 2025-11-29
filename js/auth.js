@@ -128,6 +128,7 @@ export async function handleRegister(email, password, avatarUrl) {
     } catch(e) { showToast(e.message, "error"); }
 }
 
+
 export async function handleLogout() {
     const sb = getSupabase();
     if (sb) await sb.auth.signOut();

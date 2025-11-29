@@ -11,6 +11,7 @@ import {
 import { t, showToast } from './utils.js';
 import { state } from './state.js';
 
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. 初始化基础配置
     document.body.style.visibility = 'hidden';
