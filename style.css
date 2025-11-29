@@ -606,6 +606,7 @@ body.dark-mode .user-pill-icon {
         font-weight: 600;
     }
 
+
     /* 4. 输入框样式：自动填满剩余空间，且更大 */
     .modal-content input[type="text"],
     .modal-content input[type="email"],

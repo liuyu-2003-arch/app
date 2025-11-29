@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🔥 核心修复：挂载所有交互函数到 window
     // ============================================================
 
+
     // --- 弹窗逻辑 (重点修复) ---
     window.autoFillInfo = autoFillInfo; // 修复自动填充
     window.updatePreview = updatePreview; // 修复实时预览
