@@ -45,6 +45,7 @@ export function render() {
                 if (state.isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
+                    // --- 修复：确保只有真正的拖拽才拦截点击 ---
                     if (!state.hasDragged) window.location.href = item.url;
                 }
             };
@@ -70,8 +71,6 @@ export function render() {
 function createVisualPages() {
     state.visualPages = [];
     const isMobile = window.innerWidth < 768;
-
-    // 修改点：移动端改为 20 (4列 x 5行)，桌面端保持 32
     const chunkSize = isMobile ? 20 : 32;
 
     if (!state.pages || state.pages.length === 0) {
@@ -79,7 +78,6 @@ function createVisualPages() {
     }
 
     state.pages.forEach((page, originalPageIndex) => {
-        // ... (保持循环逻辑不变) ...
         if (page.bookmarks.length === 0 && state.isEditing) {
             state.visualPages.push({ title: page.title, bookmarks: [], originalPageIndex: originalPageIndex, chunkIndex: 0 });
         } else if (page.bookmarks.length > 0) {
@@ -93,10 +91,9 @@ function createVisualPages() {
              }
         }
     });
-    // ...
 }
 
-// --- 模态框与书签逻辑 ---
+// --- 模态框与书签逻辑 (保持不变) ---
 export function openModal(pageIndex = -1, bookmarkIndex = -1) {
     state.currentEditInfo = { pageIndex, bookmarkIndex };
     document.getElementById('modal').classList.remove('hidden');
@@ -185,7 +182,7 @@ export function deleteBookmark(e, bookmarkId) {
     }
 }
 
-// --- 自动填充与图标 ---
+// --- 自动填充与图标 (保持不变) ---
 export function autoFillInfo() {
     if (autoFillTimer) clearTimeout(autoFillTimer);
     autoFillTimer = setTimeout(() => {
@@ -610,13 +607,12 @@ export function initSwiper() {
 
         const swiper = document.getElementById('bookmark-swiper');
         const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
-        const bounceOffset = swiperWidth * 0.2; // 定义回弹距离为屏幕宽度的 20%
+        const bounceOffset = swiperWidth * 0.2;
 
         if (e.key === 'ArrowLeft') {
             if (state.currentPage > 0) {
                 state.currentPage--; updateSwiperPosition(true); renderPaginationDots();
             } else {
-                // 第一页向左翻，触发回弹
                 triggerKeyboardBounce(bounceOffset);
             }
         }
@@ -624,7 +620,6 @@ export function initSwiper() {
             if (state.currentPage < state.visualPages.length - 1) {
                 state.currentPage++; updateSwiperPosition(true); renderPaginationDots();
             } else {
-                // 最后一页向右翻，触发回弹
                 triggerKeyboardBounce(-bounceOffset);
             }
         }
@@ -639,11 +634,9 @@ function triggerKeyboardBounce(offset) {
     const swiperWidth = swiper.clientWidth;
     const baseTranslate = state.currentPage * -swiperWidth;
 
-    // 1. 拉动动画
     swiperWrapper.style.transition = 'transform 0.15s cubic-bezier(0.215, 0.610, 0.355, 1.000)';
     swiperWrapper.style.transform = `translateX(${baseTranslate + offset}px)`;
 
-    // 2. 回弹动画
     setTimeout(() => {
         swiperWrapper.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         swiperWrapper.style.transform = `translateX(${baseTranslate}px)`;
@@ -654,6 +647,8 @@ function dragStart(e) {
     if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
     state.isDragging = true; state.hasDragged = false;
     state.startPos = getPositionX(e);
+    // --- 修复：记录 Y 轴起始点 ---
+    state.startPosY = getPositionY(e);
     state.animationID = requestAnimationFrame(animation);
     const wrapper = document.getElementById('bookmark-swiper-wrapper');
     if(wrapper) wrapper.style.transition = 'none';
@@ -662,7 +657,14 @@ function dragStart(e) {
 function drag(e) {
     if (state.isDragging) {
         const currentPosition = getPositionX(e);
+        const currentPositionY = getPositionY(e); // --- 修复：获取 Y 轴位置 ---
         const diff = currentPosition - state.startPos;
+        const diffY = currentPositionY - state.startPosY; // --- 修复：计算 Y 轴位移 ---
+
+        // --- 修复核心：如果垂直位移明显大于水平位移，则认为是垂直滚动，不触发 Swiper 拖拽 ---
+        // 这样可以避免手指在尝试上下滚动时，被误判为水平拖拽，导致 hasDragged = true，进而阻止了点击事件
+        if (Math.abs(diffY) > Math.abs(diff) && Math.abs(diffY) > 5) return;
+
         if (Math.abs(diff) > 10) state.hasDragged = true;
         if (state.hasDragged) {
             state.currentTranslate = state.prevTranslate + diff;
@@ -689,6 +691,9 @@ function dragEnd(e) {
 }
 
 function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
+// --- 修复：新增获取 Y 轴位置函数 ---
+function getPositionY(e) { return e.type.includes('mouse') ? e.pageY : e.touches[0].clientY; }
+
 function animation() { setSwiperPosition(); if (state.isDragging) requestAnimationFrame(animation); }
 function setSwiperPosition() {
     const wrapper = document.getElementById('bookmark-swiper-wrapper');
@@ -711,7 +716,6 @@ function handleWheel(e) {
     if(!swiperWrapper) return;
     swiperWrapper.style.transition = 'none';
 
-    // 修改点：提高滑动系数 (0.5 -> 0.75)
     state.currentTranslate -= (e.deltaX * 0.75);
     setSwiperPosition();
 
@@ -736,6 +740,10 @@ function renderPaginationDots() {
         const dot = document.createElement('div');
         dot.className = 'dot';
         if (i === state.currentPage) dot.classList.add('active');
+
+        // --- 修复：添加 data-title 属性，配合 CSS 显示悬停/点击标题 ---
+        dot.setAttribute('data-title', state.visualPages[i].title || `Page ${i + 1}`);
+
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
         dotsContainer.appendChild(dot);
     }
@@ -744,7 +752,7 @@ function renderPaginationDots() {
     state.dotsTimer = setTimeout(() => dotsContainer.classList.remove('visible'), 2000);
 }
 
-// --- 编辑与交互 ---
+// --- 编辑与交互 (保持不变) ---
 export function toggleEditMode(enable) {
     state.isEditing = enable;
     document.body.classList.toggle('is-editing', enable);
