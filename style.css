@@ -470,3 +470,97 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
         border-radius: 12px;        /* 圆角也稍微加大一点，更圆润 */
     }
 }
+
+/* --- 头像选择器升级样式 --- */
+
+/* Tab 切换条 */
+.avatar-tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.avatar-tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.avatar-tab-item:hover {
+    color: #333;
+    background: #f9f9f9;
+}
+
+.avatar-tab-item.active {
+    color: #007AFF;
+}
+
+.avatar-tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #007AFF;
+}
+
+/* 图标网格区域 (带滚动条) */
+.avatar-grid-scroll {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 一行 6 个 */
+    gap: 8px;
+    max-height: 200px; /* 限制高度 */
+    overflow-y: auto;  /* 允许滚动 */
+    padding: 5px;
+}
+
+/* 单个图标项 */
+.emoji-item {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.emoji-item:hover {
+    background: #f0f0f0;
+}
+
+.emoji-item.selected {
+    background: #e6f2ff;
+    border: 1px solid #007AFF;
+}
+
+/* 隐藏 */
+.avatar-panel.hidden {
+    display: none;
+}
+
+/* 次级按钮 (上传用) */
+.secondary-btn {
+    background: white;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.secondary-btn:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+}

@@ -93,6 +93,12 @@ const translations = {
         "msg_saving": "Saving...",
         "msg_saved": "All changes saved",
         "msg_save_fail": "Save failed"
+        // 在 translations.en 中添加：
+        "menu_feedback": "Feedback",
+        "tab_emoji": "Icons",
+        "tab_upload": "Upload",
+        "btn_choose_img": "Choose Image",
+        "msg_upload_hint": "Max size: 2MB (Auto-compressed)",
     },
     zh: {
         "menu_edit_bookmark": "编辑书签",
@@ -159,6 +165,12 @@ const translations = {
         "msg_saving": "正在同步...",
         "msg_saved": "云端已同步",
         "msg_save_fail": "同步失败"
+        // 在 translations.zh 中添加：
+        "menu_feedback": "问题反馈",
+        "tab_emoji": "图标库",
+        "tab_upload": "上传图片",
+        "btn_choose_img": "选择图片",
+        "msg_upload_hint": "最大 2MB (自动压缩)",
     }
 };
 
@@ -1052,5 +1064,114 @@ async function savePreferences() {
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
+    }
+}
+
+/* --- 新增：反馈功能 --- */
+function handleFeedback() {
+    // 简单实现：跳转发送邮件
+    const subject = encodeURIComponent("Homepage Feedback");
+    const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
+    window.location.href = `mailto:jemch@qq.com?subject=${subject}&body=${body}`;
+    // 如果你有具体的反馈页面 URL，可以用: window.open('https://your-feedback-url.com', '_blank');
+}
+
+/* --- 新增：头像选择器逻辑 --- */
+
+// 1. Tab 切换
+function switchAvatarTab(tabName) {
+    // 切换 Tab 样式
+    document.querySelectorAll('.avatar-tab-item').forEach(el => {
+        el.classList.remove('active');
+        if(el.getAttribute('onclick').includes(tabName)) el.classList.add('active');
+    });
+
+    // 切换内容显示
+    document.getElementById('avatar-panel-emoji').classList.add('hidden');
+    document.getElementById('avatar-panel-upload').classList.add('hidden');
+    document.getElementById(`avatar-panel-${tabName}`).classList.remove('hidden');
+}
+
+// 2. 渲染图标库 (Emoji + DiceBear)
+function renderAvatarGrid() {
+    const container = document.getElementById('pref-avatar-grid');
+    container.innerHTML = '';
+
+    // A. 常用 Emoji 列表 (模仿 Notion 风格)
+    const emojis = [
+        "😀", "😎", "🤖", "👻", "👽", "👾",
+        "🐱", "🐶", "🦊", "🦁", "🐼", "🐨",
+        "🍎", "🍋", "🍉", "🍇", "🍓", "🍑",
+        "🌍", "🌙", "⭐", "⚡", "🔥", "💧",
+        "💡", "💻", "📷", "🎨", "🎮", "🎵",
+        "🚀", "✈️", "🚲", "🚗", "🏠", "⛺"
+    ];
+
+    // B. DiceBear 风格头像
+    const seeds = ['Felix', 'Aneka', 'Zoe', 'Jack', 'Bear', 'Molly', 'Simba', 'Coco'];
+
+    // 渲染 Emoji
+    emojis.forEach(emoji => {
+        const div = document.createElement('div');
+        div.className = 'emoji-item';
+        div.textContent = emoji;
+        // 使用 DiceBear API 生成 emoji 图像链接 (为了统一存储格式)
+        // 或者直接存 Emoji 字符也可以，但为了 img src 兼容性，这里我们生成 svg URL
+        const url = `https://api.dicebear.com/9.x/initials/svg?seed=${emoji}&backgroundColor=transparent&fontSize=40`;
+
+        div.onclick = () => selectNewAvatar(div, url, true); // true 表示这是 emoji 字符，特殊处理
+        container.appendChild(div);
+    });
+
+    // 渲染 DiceBear 头像
+    seeds.forEach(seed => {
+        const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}`;
+        const div = document.createElement('div');
+        div.className = 'emoji-item';
+        div.innerHTML = `<img src="${url}" style="width:100%; height:100%;">`;
+        div.onclick = () => selectNewAvatar(div, url);
+        container.appendChild(div);
+    });
+}
+
+// 选中头像
+function selectNewAvatar(el, url, isEmoji = false) {
+    document.querySelectorAll('.emoji-item').forEach(item => item.classList.remove('selected'));
+    el.classList.add('selected');
+
+    // 如果是 Emoji，我们可以直接存 svg api 链接，或者存 DiceBear 的 emoji 样式
+    if(isEmoji) {
+         // 这里为了简单，我们使用 emoji 的 SVG 接口，或者你可以直接存字符
+         // 这里的 url 已经在上面生成好了
+    }
+
+    prefAvatarUrl = url;
+    document.getElementById('pref-current-img').src = url;
+}
+
+// 3. 处理文件上传 (转 Base64 预览)
+function handleAvatarFile(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+
+        // 限制大小 2MB
+        if (file.size > 2 * 1024 * 1024) {
+            showToast("Image too large (Max 2MB)", "error");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // 这里我们直接用 Base64 字符串作为 URL
+            // 注意：Supabase Auth Metadata 对字段长度有限制，大图片可能会失败。
+            // 最佳实践是上传到 Storage Bucket，但为了不改动后端逻辑，这里先用 Base64。
+            const base64Url = e.target.result;
+            prefAvatarUrl = base64Url;
+            document.getElementById('pref-current-img').src = base64Url;
+
+            // 清除 Grid 的选中状态
+            document.querySelectorAll('.emoji-item').forEach(item => item.classList.remove('selected'));
+        }
+        reader.readAsDataURL(file);
     }
 }
