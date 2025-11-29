@@ -33,8 +33,9 @@ const translations = {
         "menu_theme": "Theme (Pattern)",
         "menu_lang": "Language",
         "menu_logout": "Log out",
-        "theme_default": "Default",
-        "theme_lines": "Lines",
+        "theme_default": "Default (Wave)",
+        "theme_aurora": "Aurora",
+        "theme_flow": "Flow",
         "theme_lines_d": "Diag. Lines",
         "btn_add_bookmark": "➕ Add Bookmark",
         "btn_edit_page": "📝 Edit Page",
@@ -89,8 +90,9 @@ const translations = {
         "menu_theme": "主题样式",
         "menu_lang": "语言 / Language",
         "menu_logout": "退出登录",
-        "theme_default": "默认",
-        "theme_lines": "水平线条",
+        "theme_default": "默认 (波浪)",
+        "theme_aurora": "极光",
+        "theme_flow": "流光",
         "theme_lines_d": "对角线条",
         "btn_add_bookmark": "➕ 添加书签",
         "btn_edit_page": "📝 编辑页面",
@@ -304,7 +306,6 @@ function handleMenuEdit() {
 }
 
 // 快速切换辅助函数 (Quick Toggle Helper)
-// 当点击下拉菜单时，只传 pattern
 function quickChangeTheme(color, pattern) {
     changeTheme(color, null, pattern);
 }
@@ -465,9 +466,8 @@ function createVisualPages() {
 }
 
 function initTheme() {
-    // 恢复之前的颜色，如果没存过则用默认粉色
+    // 恢复之前的颜色，默认使用粉色 (#e4d0e5)
     const savedColor = localStorage.getItem('themeColor') || '#e4d0e5';
-    // 恢复之前的纹理，如果没存过则用 none (即 SVG 默认)
     const savedPattern = localStorage.getItem('themePattern') || 'none';
 
     changeTheme(savedColor, null, savedPattern);
@@ -485,12 +485,9 @@ function changeTheme(color, element, pattern) {
         bg.style.backgroundColor = color;
         localStorage.setItem('themeColor', color);
 
-        // 深色模式处理：如果是深色背景 (#1a1a1a)，文字反白
-        if (color === '#1a1a1a') {
-            document.body.style.color = '#fff';
-        } else {
-            document.body.style.color = '#333';
-        }
+        // 深色模式处理：如果是深色背景 (#1a1a1a)，切换 CSS 类来处理反白
+        // 使用 CSS class 'dark-mode' 来控制全局文字颜色，比直接操作 style 更可靠
+        document.body.classList.toggle('dark-mode', color === '#1a1a1a');
 
         // 更新底部色块的 Active 状态
         if (element) {
@@ -503,7 +500,7 @@ function changeTheme(color, element, pattern) {
     if (pattern) {
         localStorage.setItem('themePattern', pattern);
         // 移除所有自定义纹理类 (回归默认 SVG)
-        bg.classList.remove('bg-pattern-lines', 'bg-pattern-lines-d');
+        bg.classList.remove('bg-pattern-lines-d', 'bg-pattern-aurora', 'bg-pattern-flow');
 
         // 如果不是 'none'，则添加新的纹理类 (这会覆盖默认 SVG)
         if (pattern !== 'none') {
@@ -677,7 +674,7 @@ function renderPaginationDots() {
         const dot = document.createElement('div');
         dot.className = 'dot';
         if (i === currentPage) dot.classList.add('active');
-        dot.setAttribute('data-title', visualPages[i].title || `第 ${i + 1} 页`);
+        dot.setAttribute('data-title', visualPages[i].title || `Page ${i + 1}`);
         dot.onclick = (e) => { e.stopPropagation(); currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
         dotsContainer.appendChild(dot);
     }
@@ -687,7 +684,7 @@ function selectPage(element) { document.querySelectorAll('.page-option').forEach
 function renderPageOptions(selectedPageIndex) {
     const container = document.getElementById('page-options-container'); container.innerHTML = '';
     pages.forEach((page, index) => {
-        const option = document.createElement('div'); option.className = 'page-option'; option.textContent = page.title || `第 ${index + 1} 页`; option.dataset.index = index;
+        const option = document.createElement('div'); option.className = 'page-option'; option.textContent = page.title || `Page ${index + 1}`; option.dataset.index = index;
         option.onclick = () => selectPage(option);
         if (index === selectedPageIndex) option.classList.add('active'); container.appendChild(option);
     });
