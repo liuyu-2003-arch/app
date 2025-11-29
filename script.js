@@ -194,6 +194,7 @@ function changeLanguage(lang) {
 // --- End i18n Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 【修复1】修复双重hash导致的登录问题
     if (window.location.hash) {
         let hash = window.location.hash;
         if (hash.startsWith('##')) {
@@ -236,6 +237,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('import-file-input').addEventListener('change', handleImport);
 });
 
+// 【修复2】新增：页面显示时强制刷新本地数据 (解决返回后书签消失的问题)
+window.addEventListener('pageshow', (event) => {
+    // 如果是从缓存恢复(BFCache)，或者为了保险起见，优先读取本地最新数据并渲染
+    const storedData = localStorage.getItem('pagedData');
+    if (storedData) {
+        pages = JSON.parse(storedData);
+        render();
+    }
+});
+
 function createAvatarSelector(containerId, onSelect) {
     const container = document.getElementById(containerId);
     if(!container) return;
@@ -270,7 +281,6 @@ function showToast(message, type = 'normal') {
 async function initAuth() {
     if (!supabaseClient) return;
     const { data: { session } } = await supabaseClient.auth.getSession();
-
     updateUserStatus(session?.user);
     supabaseClient.auth.onAuthStateChange((_event, session) => { updateUserStatus(session?.user); });
 }
@@ -349,10 +359,6 @@ function toggleAuthModal() {
     }
 }
 
-// ----------------------------------------------------
-// New: Edit Bookmark & Edit Theme Controls
-// ----------------------------------------------------
-
 function handleMenuEdit() {
     const menu = document.getElementById('user-dropdown');
     if (menu) menu.classList.remove('active');
@@ -363,7 +369,6 @@ function toggleEditMode(enable) {
     isEditing = enable; document.body.classList.toggle('is-editing', enable);
     const controls = document.getElementById('edit-controls');
 
-    // 确保 Theme Controls 关闭
     document.getElementById('theme-controls').classList.add('hidden');
 
     if (enable) controls.classList.remove('hidden');
@@ -374,10 +379,7 @@ function toggleEditMode(enable) {
 function openThemeControls() {
     const menu = document.getElementById('user-dropdown');
     if (menu) menu.classList.remove('active');
-
-    // 关闭 Edit Bookmark 栏
     toggleEditMode(false);
-
     document.getElementById('theme-controls').classList.remove('hidden');
 }
 
@@ -413,14 +415,11 @@ function changeTheme(color, element, pattern) {
             bg.classList.add(pattern);
         }
 
-        // 更新底部栏 Pattern 按钮的选中状态
         document.querySelectorAll('.pattern-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.pattern === pattern);
         });
     }
 }
-
-// ----------------------------------------------------
 
 async function handleOAuthLogin(provider) {
     if (!supabaseClient) return showToast(t("msg_sdk_error"), "error");
@@ -502,7 +501,29 @@ async function handleLogout() {
     loadData();
 }
 
+// 【修复3】loadData 优化：优先加载本地数据以实现秒开，随后再后台同步云端
 async function loadData() {
+    // 1. 优先加载本地数据 (防止白屏或数据滞后)
+    const storedData = localStorage.getItem('pagedData');
+    if (storedData) {
+        pages = JSON.parse(storedData);
+        render();
+        document.body.style.visibility = 'visible'; // 确保立即显示
+    } else {
+        // 如果没有本地数据，尝试加载默认配置
+        try {
+            const response = await fetch('homepage_config.json');
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data) && (data.length === 0 || data[0].hasOwnProperty('bookmarks'))) pages = data;
+                else pages = migrateData(data);
+                pages = ensureBookmarkIds(pages);
+                render();
+            }
+        } catch (e) { /* error loading default */ }
+    }
+
+    // 2. 如果已登录，后台静默拉取云端数据
     if (currentUser && supabaseClient) {
         try {
             const { data, error } = await supabaseClient
@@ -511,41 +532,17 @@ async function loadData() {
                 .eq('user_id', currentUser.id)
                 .maybeSingle();
 
-            if (error) {
-                console.warn("Cloud query error:", error.message);
-            } else if (data && data.config_data) {
+            if (data && data.config_data) {
                 pages = data.config_data;
                 pages = ensureBookmarkIds(pages);
-                localStorage.setItem('pagedData', JSON.stringify(pages));
-                render();
-                document.body.style.visibility = 'visible';
-                return;
+                localStorage.setItem('pagedData', JSON.stringify(pages)); // 更新本地
+                render(); // 再次渲染云端数据
             }
         } catch (e) {
             console.error("Cloud load error", e);
         }
     }
 
-    const storedData = localStorage.getItem('pagedData');
-    if (storedData) {
-        pages = JSON.parse(storedData);
-    } else {
-        try {
-            const response = await fetch('homepage_config.json');
-            if (response.ok) {
-                const data = await response.json();
-                if (Array.isArray(data) && (data.length === 0 || data[0].hasOwnProperty('bookmarks'))) pages = data;
-                else pages = migrateData(data);
-            }
-        } catch (e) {
-            pages = [{ title: "My Collection", bookmarks: [
-                { title: "GitHub", url: "https://github.com", icon: "https://manifest.im/icon/github.com", style: "white" },
-                { title: "Bilibili", url: "https://www.bilibili.com", icon: "https://manifest.im/icon/bilibili.com", style: "fit" }
-            ]}];
-        }
-    }
-    pages = ensureBookmarkIds(pages);
-    render();
     document.body.style.visibility = 'visible';
 }
 
