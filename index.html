@@ -24,11 +24,14 @@
     <div id="sync-status" class="sync-status"></div>
 
     <div class="user-trigger-area">
-        <div class="user-fab" onclick="toggleAuthModal()">
-            <svg id="user-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="white">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-            <img id="user-avatar-img" src="" style="display: none;" alt="User Avatar">
+        <div id="user-pill" class="user-pill" onclick="toggleAuthModal()">
+            <div class="user-pill-icon">
+                <svg id="user-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <img id="user-avatar-img" src="" style="display: none;" alt="User Avatar">
+            </div>
+            <span id="user-pill-text" class="user-pill-text" data-i18n="btn_login">Login</span>
         </div>
     </div>
 
