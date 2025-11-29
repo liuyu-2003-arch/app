@@ -83,6 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     window.handleMenuEdit = () => {
         document.getElementById('user-dropdown').classList.remove('active');
+
+        // 新增：移动端拦截逻辑
+        if (window.innerWidth < 768) {
+            showToast(t("msg_mobile_edit"), "normal");
+            return;
+        }
+
         toggleEditMode(true);
     };
     window.openModal = openModal;

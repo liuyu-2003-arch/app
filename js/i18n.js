@@ -72,6 +72,7 @@ const translations = {
         "msg_upload_hint": "Max size: 2MB (Auto-compressed)",
         "msg_img_too_large": "Image too large. Please use built-in icons.",
         "msg_sync_success_toast": "Cloud Sync Successful"
+        "msg_mobile_edit": "Please edit bookmarks on Desktop" // 新增
     },
     zh: {
         "menu_edit_bookmark": "编辑书签",
@@ -145,6 +146,7 @@ const translations = {
         "msg_upload_hint": "最大 2MB (自动压缩)",
         "msg_img_too_large": "图片数据过大无法保存，请使用内置图标",
         "msg_sync_success_toast": "云端数据同步成功"
+        "msg_mobile_edit": "为了更好的体验，请在电脑端编辑书签" // 新增
     }
 };
 

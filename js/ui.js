@@ -71,15 +71,15 @@ function createVisualPages() {
     state.visualPages = [];
     const isMobile = window.innerWidth < 768;
 
-    // 修改点：移动端改为 25 (5列 x 5行)，桌面端保持 32
-    const chunkSize = isMobile ? 25 : 32;
+    // 修改点：移动端改为 20 (4列 x 5行)，桌面端保持 32
+    const chunkSize = isMobile ? 20 : 32;
 
     if (!state.pages || state.pages.length === 0) {
         state.pages = [{ title: "Home", bookmarks: [] }];
     }
 
     state.pages.forEach((page, originalPageIndex) => {
-        // ... (循环逻辑保持不变) ...
+        // ... (保持循环逻辑不变) ...
         if (page.bookmarks.length === 0 && state.isEditing) {
             state.visualPages.push({ title: page.title, bookmarks: [], originalPageIndex: originalPageIndex, chunkIndex: 0 });
         } else if (page.bookmarks.length > 0) {

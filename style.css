@@ -179,12 +179,18 @@ body.dark-mode .user-icon-svg {
 
 .theme-swatches { display: flex; gap: 8px; margin-right: 5px; }
 .swatch {
-    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    width: 24px; height: 24px;
+    border-radius: 6px; /* 从 50% 改为 6px，实现扁平化圆角 */
+    cursor: pointer;
     border: 2px solid transparent; transition: transform 0.2s;
     box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
 }
 .swatch:hover { transform: scale(1.1); }
-.swatch.active { border-color: #007AFF; transform: scale(1.1); }
+.swatch.active {
+    border-color: #007AFF;
+    transform: scale(1.1);
+    border-radius: 6px; /* 保持一致 */
+}
 
 .control-divider {
     width: 1px; height: 24px; background: #eee; margin: 0 5px;
@@ -571,130 +577,78 @@ body.dark-mode .user-pill-icon {
 /* --- 移动端适配 (包含登录框修复) --- */
 /* --- 移动端适配 (重点修改区域) --- */
 @media (max-width: 768px) {
-    /* 1. 整体上移，减少顶部留白 */
-    .container {
-        padding-top: 10px;
-    }
+    /* ... (Container 和 Page Title 样式保持上一步的修改) ... */
+    .container { padding-top: 10px; }
 
-    /* 2. 标题样式调整：与右上角 Logo 对齐 */
-    .bookmark-page {
-        position: relative;
-        padding-top: 0;
-    }
+    .bookmark-page { position: relative; padding-top: 0; }
 
     .page-title {
-        position: absolute;
-        top: 25px;       /* 垂直居中对齐右上角按钮 */
-        left: 20px;
-        font-size: 22px;
-        margin: 0;
-        z-index: 10;
-        text-align: left;
-        padding: 0;
-        width: auto;
+        position: absolute; top: 25px; left: 20px;
+        font-size: 22px; margin: 0; z-index: 10;
+        text-align: left; padding: 0; width: auto;
     }
 
-    /* 3. 内容区域：下移避开标题，5 列布局 */
+    /* 2. 修改为 4列 布局 */
     .bookmark-page-content {
         margin-top: 70px;
         justify-content: center;
         align-content: flex-start;
         padding-bottom: 80px;
         max-width: 100%;
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: 10px; padding-right: 10px;
 
-        /* 强制 5 列布局 */
-        --mobile-card-size: 58px;
-        --mobile-gap: 12px;
+        /* 核心修改：4列布局 */
+        --mobile-card-size: 64px; /* 4列时图标可以稍微大一点点，或者保持 58px */
+        --mobile-gap: 15px;       /* 间距也可以稍微大一点 */
 
         display: grid;
-        grid-template-columns: repeat(5, var(--mobile-card-size));
+        grid-template-columns: repeat(4, var(--mobile-card-size)); /* 改为 4 */
         gap: var(--mobile-gap);
         width: auto;
     }
 
-    /* 4. 图标微调 */
     .bookmark-item { width: var(--mobile-card-size); }
     .icon-box {
-        width: var(--mobile-card-size);
-        height: var(--mobile-card-size);
-        border-radius: 14px;
+        width: var(--mobile-card-size); height: var(--mobile-card-size);
+        border-radius: 16px;
     }
-    .text-icon { font-size: 24px; }
-    .bookmark-title {
-        font-size: 11px;
-        margin-top: 4px;
-        width: 130%;
-    }
+    .text-icon { font-size: 26px; }
+    .bookmark-title { font-size: 12px; margin-top: 5px; width: 130%; }
 
-    /* 5. 隐藏“编辑书签”入口 */
-    .user-menu .menu-item[onclick*="handleMenuEdit"] {
-        display: none !important;
-    }
+    /* 3. 恢复“编辑书签”按钮显示 */
+    /* 删除之前添加的 .user-menu .menu-item[onclick*="handleMenuEdit"] { display: none } 代码 */
+    /* 这里不需要写任何代码，只要确保之前隐藏它的代码被删除即可 */
 
-    /* 6. 底部控件修复 */
+    /* 底部控件样式保持之前的修复 */
+    #edit-controls.edit-controls { display: none !important; }
 
-    /* 彻底隐藏书签编辑条 */
-    #edit-controls.edit-controls {
-        display: none !important;
-    }
-
-    /* 修复主题控制器：
-       去掉 !important，允许 JS 通过 .hidden 类来切换显示/隐藏。
-       但保留 flex 布局属性以确保显示时样式正确。
-    */
     #theme-controls.edit-controls {
-        display: flex; /* 关键修改：去掉 !important */
-        width: 90%;
-        padding: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-        bottom: 30px;
-        z-index: 1001;
+        display: flex;
+        width: 90%; padding: 15px;
+        flex-wrap: wrap; justify-content: center;
+        bottom: 30px; z-index: 1001;
     }
-
-    /* 确保 hidden 类生效 (防止 ID 选择器优先级过高) */
-    #theme-controls.edit-controls.hidden {
-        display: none !important;
-    }
-
+    #theme-controls.edit-controls.hidden { display: none !important; }
     #theme-controls .control-divider { display: none; }
 
-    /* 7. 其他 UI 调整 */
+    /* ... (User Pill 和 Modal 样式保持不变) ... */
     .user-trigger-area { padding: 15px; }
     .user-pill { padding: 4px 12px 4px 4px; }
     .pagination-dots { bottom: 30px; }
 
-    /* Modal 适配 */
     .modal-content {
-        min-width: unset !important;
-        width: 92%;
-        max-width: 350px;
-        padding: 25px 20px;
+        min-width: unset !important; width: 92%; max-width: 350px; padding: 25px 20px;
     }
     .input-row {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
-        gap: 15px !important;
+        display: flex !important; flex-direction: row !important;
+        justify-content: flex-start !important; align-items: center !important; gap: 15px !important;
     }
     .input-label {
-        width: auto !important;
-        min-width: 40px;
-        flex-shrink: 0;
-        text-align: left !important;
-        padding-right: 0;
+        width: auto !important; min-width: 40px; flex-shrink: 0;
+        text-align: left !important; padding-right: 0;
     }
-    .modal-content input[type="text"],
-    .modal-content input[type="email"],
-    .modal-content input[type="password"],
-    .modal-content input[type="tel"] {
-        flex: 1 !important;
-        width: auto !important;
-        height: 52px !important;
-        font-size: 16px !important;
-        padding: 0 15px;
+    .modal-content input {
+        flex: 1 !important; width: auto !important; height: 52px !important;
+        font-size: 16px !important; padding: 0 15px;
     }
 }
