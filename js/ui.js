@@ -1,6 +1,5 @@
 import { state } from './state.js';
-import { saveData } from './api.js'; // 修正：这里不再引入 updateSyncStatus
-// 修正：updateSyncStatus 必须从 utils.js 引入
+import { saveData } from './api.js';
 import { debounce, t, showToast, generateUniqueId, updateSyncStatus } from './utils.js';
 
 export const debouncedSaveData = debounce(() => saveData(), 1000);
@@ -96,7 +95,7 @@ function createVisualPages() {
     }
 }
 
-// --- 模态框与书签逻辑 (Modal Logic) ---
+// --- 模态框与书签逻辑 ---
 export function openModal(pageIndex = -1, bookmarkIndex = -1) {
     state.currentEditInfo = { pageIndex, bookmarkIndex };
     document.getElementById('modal').classList.remove('hidden');
@@ -114,20 +113,17 @@ export function openModal(pageIndex = -1, bookmarkIndex = -1) {
         iconInput.value = item.icon || "";
         currentStyle = item.style || 'full';
         targetPageIndex = pageIndex;
-        // 编辑时也触发一次自动获取逻辑，主要是为了加载图标候选
         autoFillInfo();
     } else {
-        // 新增模式
         const currentVisualPage = state.visualPages[state.currentPage];
         titleInput.value = '';
         urlInput.value = '';
         iconInput.value = '';
         targetPageIndex = currentVisualPage ? currentVisualPage.originalPageIndex : 0;
         document.getElementById('icon-candidates').innerHTML = '';
-        renderRandomButtons(document.getElementById('icon-candidates')); // 默认显示随机图标
+        renderRandomButtons(document.getElementById('icon-candidates'));
     }
 
-    // 更新样式选择状态
     document.querySelectorAll('.style-option').forEach(opt => {
         opt.classList.toggle('active', opt.dataset.style === currentStyle);
     });
@@ -147,7 +143,6 @@ export function saveBookmark() {
     const styleEl = document.querySelector('.style-option.active');
     const style = styleEl ? styleEl.dataset.style : 'full';
 
-    // 获取当前选中的页面
     const pageEl = document.querySelector('.page-option.active');
     const newPageIndex = pageEl ? parseInt(pageEl.dataset.index) : 0;
 
@@ -157,24 +152,20 @@ export function saveBookmark() {
     const { pageIndex, bookmarkIndex } = state.currentEditInfo;
 
     if (pageIndex >= 0 && bookmarkIndex >= 0) {
-        // 编辑现有
         const itemToUpdate = state.pages[pageIndex].bookmarks[bookmarkIndex];
         const newItem = { ...itemToUpdate, title, url, icon, style };
 
         if (pageIndex !== newPageIndex) {
-            // 如果换了页面，从旧页面删除，加到新页面
             state.pages[pageIndex].bookmarks.splice(bookmarkIndex, 1);
             state.pages[newPageIndex].bookmarks.push(newItem);
         } else {
-            // 原地更新
             state.pages[pageIndex].bookmarks[bookmarkIndex] = newItem;
         }
     } else {
-        // 新增
         const newItem = { id: generateUniqueId(), title, url, icon, style };
         if (!state.pages[newPageIndex]) state.pages[newPageIndex] = { title: "New Page", bookmarks: [] };
         state.pages[newPageIndex].bookmarks.push(newItem);
-        state.currentPage = newPageIndex; // 跳转到新加的页面
+        state.currentPage = newPageIndex;
     }
     saveData();
     closeModal();
@@ -193,7 +184,7 @@ export function deleteBookmark(e, bookmarkId) {
     }
 }
 
-// --- 🔄 自动填充与图标逻辑 (Auto-fill & Icons) ---
+// --- 自动填充与图标 ---
 export function autoFillInfo() {
     if (autoFillTimer) clearTimeout(autoFillTimer);
     autoFillTimer = setTimeout(() => {
@@ -201,7 +192,7 @@ export function autoFillInfo() {
         const titleInput = document.getElementById('input-title');
         const iconInput = document.getElementById('input-icon');
 
-        generateIconCandidates(urlVal); // 生成图标候选
+        generateIconCandidates(urlVal);
 
         if (urlVal && urlVal.includes('.') && urlVal.length > 4) {
             let safeUrl = urlVal;
@@ -211,9 +202,7 @@ export function autoFillInfo() {
                 let domain = urlObj.hostname;
                 if (domain.endsWith('.')) domain = domain.slice(0, -1);
 
-                // 如果图标为空，自动填一个默认的
                 if (!iconInput.value) iconInput.value = `https://manifest.im/icon/${domain}`;
-                // 如果标题为空，尝试从域名提取
                 if (!titleInput.value) {
                     let domainName = domain.replace('www.', '').split('.')[0];
                     if(domainName) titleInput.value = domainName.charAt(0).toUpperCase() + domainName.slice(1);
@@ -246,7 +235,7 @@ export function generateIconCandidates(urlVal) {
         return;
     }
 
-    renderRandomButtons(list); // 先放随机按钮
+    renderRandomButtons(list);
 
     const sources = [
         { name: 'Manifest', url: `https://manifest.im/icon/${domain}` },
@@ -256,7 +245,6 @@ export function generateIconCandidates(urlVal) {
         { name: 'Direct', url: `${protocol}//${domain}/favicon.ico` }
     ];
 
-    // 倒序插入，让 Manifest 在最前
     for (let i = sources.length - 1; i >= 0; i--) {
         const src = sources[i];
         const item = document.createElement('div');
@@ -618,17 +606,47 @@ export function initSwiper() {
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+
+        const swiper = document.getElementById('bookmark-swiper');
+        const swiperWidth = swiper ? swiper.clientWidth : window.innerWidth;
+        const bounceOffset = swiperWidth * 0.2; // 定义回弹距离为屏幕宽度的 20%
+
         if (e.key === 'ArrowLeft') {
             if (state.currentPage > 0) {
                 state.currentPage--; updateSwiperPosition(true); renderPaginationDots();
+            } else {
+                // 第一页向左翻，触发回弹
+                triggerKeyboardBounce(bounceOffset);
             }
         }
         else if (e.key === 'ArrowRight') {
             if (state.currentPage < state.visualPages.length - 1) {
                 state.currentPage++; updateSwiperPosition(true); renderPaginationDots();
+            } else {
+                // 最后一页向右翻，触发回弹
+                triggerKeyboardBounce(-bounceOffset);
             }
         }
     });
+}
+
+function triggerKeyboardBounce(offset) {
+    const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
+    const swiper = document.getElementById('bookmark-swiper');
+    if (!swiperWrapper || !swiper) return;
+
+    const swiperWidth = swiper.clientWidth;
+    const baseTranslate = state.currentPage * -swiperWidth;
+
+    // 1. 拉动动画
+    swiperWrapper.style.transition = 'transform 0.15s cubic-bezier(0.215, 0.610, 0.355, 1.000)';
+    swiperWrapper.style.transform = `translateX(${baseTranslate + offset}px)`;
+
+    // 2. 回弹动画
+    setTimeout(() => {
+        swiperWrapper.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        swiperWrapper.style.transform = `translateX(${baseTranslate}px)`;
+    }, 150);
 }
 
 function dragStart(e) {
@@ -691,8 +709,11 @@ function handleWheel(e) {
     const swiperWrapper = document.getElementById('bookmark-swiper-wrapper');
     if(!swiperWrapper) return;
     swiperWrapper.style.transition = 'none';
-    state.currentTranslate -= (e.deltaX * 0.5);
+
+    // 修改点：提高滑动系数 (0.5 -> 0.75)
+    state.currentTranslate -= (e.deltaX * 0.75);
     setSwiperPosition();
+
     clearTimeout(state.wheelTimeout);
     state.wheelTimeout = setTimeout(() => {
         const swiper = document.getElementById('bookmark-swiper');
