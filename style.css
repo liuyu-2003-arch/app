@@ -455,7 +455,7 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
 .pagination-dots .dot:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
 
 @media (max-width: 768px) {
-    /* --- 原有布局适配 --- */
+    /* --- 原有布局适配 (保持不变) --- */
     .container { padding-top: 50px; }
     .bookmark-page { padding-top: 0; }
     .bookmark-page-content { justify-content: flex-start; gap: 15px; max-width: 92%; padding-bottom: 80px; }
@@ -464,34 +464,41 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     .edit-controls { display: none !important; }
     .user-trigger-area { top: 10px; right: 10px; }
 
-    /* --- 登录弹窗修复 (修正版) --- */
+    /* --- 登录弹窗修复 (垂直堆叠版) --- */
+
+    /* 1. 弹窗容器调整 */
     .modal-content {
         min-width: unset !important;
-        width: 90%;           /* 宽度占比 90% */
-        max-width: 350px;     /* 最大宽度限制 */
-        padding: 20px 15px;   /* 左右内边距 15px */
+        width: 88%;           /* 宽度占比 */
+        max-width: 340px;     /* 限制最大宽度 */
+        padding: 24px 20px;   /* 增加一点内边距，让视觉更舒适 */
     }
 
+    /* 2. 关键修改：将输入行改为“垂直排列” */
     .input-row {
-        gap: 8px;             /* 标签和输入框的间距 */
+        flex-direction: column !important; /* 强制标签在上，输入框在下 */
+        align-items: flex-start !important;/* 左对齐 */
+        gap: 6px;                          /* 标签和输入框之间的间距 */
     }
 
-    /* 关键修改：增加宽度到 70px 以容纳 "Password" */
+    /* 3. 标签样式重置 */
     .input-label {
-        font-size: 13px;
-        width: 70px !important; /* 从 35px 改为 70px，解决遮挡问题 */
-        text-align: right;      /* 文字右对齐，显得更整齐 */
-        white-space: nowrap;    /* 防止换行 */
-        flex-shrink: 0;         /* 防止被压缩 */
+        width: 100% !important; /* 占满整行 */
+        text-align: left !important; /* 文字左对齐 */
+        font-size: 14px;        /* 字体大小适中 */
+        font-weight: 600;       /* 加粗一点，作为标题 */
+        color: #444;
     }
 
+    /* 4. 输入框样式 */
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="password"],
     .modal-content input[type="tel"] {
-        padding: 0 10px;
-        font-size: 13px;
-        height: 40px;
-        width: 100%;            /* 确保填满剩余空间 */
+        width: 100%;            /* 输入框占满整行 */
+        height: 42px;           /* 增加高度，方便手指点击 */
+        padding: 0 12px;
+        box-sizing: border-box; /* 确保 padding 不会撑大宽度 */
+        margin-top: 0;
     }
 }
