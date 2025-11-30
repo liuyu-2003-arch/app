@@ -34,8 +34,6 @@ export function t(key) {
 export function updateSyncStatus(status) {
     const el = document.getElementById('sync-status');
     if (!el) return;
-
-    // 简单处理，实际项目中可以把 timer 放在 state 中
     if (window._syncTimer) clearTimeout(window._syncTimer);
 
     if (status === 'saving') {
@@ -49,4 +47,44 @@ export function updateSyncStatus(status) {
         el.innerHTML = '⚠ ' + t('msg_save_fail');
         el.className = 'sync-status visible error';
     }
+}
+
+// --- 核心新增：全局胶囊动画控制 ---
+let shrinkTimer = null;
+let hideTimer = null;
+
+export function startPillAnimation() {
+    const pill = document.getElementById('user-pill');
+    if (!pill) return;
+
+    // 1. 立即重置状态：显示并展开
+    pill.classList.remove('shrunk', 'hidden-anim');
+    if (shrinkTimer) clearTimeout(shrinkTimer);
+    if (hideTimer) clearTimeout(hideTimer);
+
+    // 2. 检查阻塞条件 (如果正在交互，则不启动倒计时)
+    // 直接检查 DOM 类名，避免复杂的依赖引用
+    const isEditing = document.body.classList.contains('is-editing');
+    const isMenuOpen = document.getElementById('user-dropdown')?.classList.contains('active');
+
+    // 检查所有可能的弹窗
+    const modalIds = ['auth-modal', 'pref-modal', 'page-edit-modal', 'modal', 'theme-controls'];
+    const isAnyModalOpen = modalIds.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden');
+    });
+
+    // 如果处于任何一种交互状态，保持常亮，不启动定时器
+    if (isEditing || isMenuOpen || isAnyModalOpen) {
+        return;
+    }
+
+    // 3. 启动倒计时 (空闲状态)
+    shrinkTimer = setTimeout(() => {
+        if(pill) pill.classList.add('shrunk');
+    }, 10000); // 10秒后收缩
+
+    hideTimer = setTimeout(() => {
+        if(pill) pill.classList.add('hidden-anim');
+    }, 12000); // 10秒+2秒后隐藏
 }

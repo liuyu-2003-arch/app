@@ -8,7 +8,7 @@ import {
     openPrefModal, switchAvatarTab, handleAvatarFile, selectNewAvatar, createAvatarSelector,
     autoFillInfo, updatePreview, selectStyle, selectPage
 } from './ui.js';
-import { t, showToast } from './utils.js';
+import { t, showToast, startPillAnimation } from './utils.js'; // 引入 startPillAnimation
 import { state } from './state.js';
 
 
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. 初始化 Supabase
     const sb = initSupabase();
     if (sb) {
-        // initAuth 成功后会调用 updateUserStatus，如果 auth.js 报错这里就会卡住
         initAuth().then(() => { if (!state.currentUser) loadData(); });
     } else {
         loadData();
@@ -45,6 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = encodeURIComponent("Hi Developer,\n\nI have some feedback:");
         window.location.href = `mailto:jemchmi@gmail.com?subject=${subject}&body=${body}`;
     };
+
+    // --- 新增：鼠标悬停触发动画重置 ---
+    const userTriggerArea = document.querySelector('.user-trigger-area');
+    if (userTriggerArea) {
+        userTriggerArea.addEventListener('mouseenter', startPillAnimation);
+        userTriggerArea.addEventListener('mousemove', startPillAnimation); // 持续移动也重置
+    }
 
     // ============================================================
     // 🔥 核心修复：挂载所有交互函数到 window
@@ -133,12 +139,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 核心修复：更新点击监听器 ---
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('user-dropdown');
-        const pill = document.getElementById('user-pill'); // 使用新的 ID
+        const pill = document.getElementById('user-pill');
 
         if (menu && menu.classList.contains('active')) {
             // 检查点击目标是否在菜单或按钮外部
             if (!menu.contains(e.target) && (!pill || !pill.contains(e.target))) {
                 menu.classList.remove('active');
+                // 菜单关闭后，重新开始动画计时
+                startPillAnimation();
             }
         }
     });

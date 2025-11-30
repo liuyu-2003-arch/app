@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { saveData } from './api.js';
-import { debounce, t, showToast, generateUniqueId, updateSyncStatus } from './utils.js';
+// 引入 startPillAnimation
+import { debounce, t, showToast, generateUniqueId, updateSyncStatus, startPillAnimation } from './utils.js';
 
 export const debouncedSaveData = debounce(() => saveData(), 1000);
 let autoFillTimer = null;
@@ -136,6 +137,8 @@ export function openModal(pageIndex = -1, bookmarkIndex = -1) {
 
 export function closeModal() {
     document.getElementById('modal').classList.add('hidden');
+    // 关闭时恢复动画
+    startPillAnimation();
 }
 
 export function saveBookmark() {
@@ -367,6 +370,8 @@ export function openPageEditModal() {
 export function closePageEditModal() {
     document.getElementById('page-edit-modal').classList.add('hidden');
     render();
+    // 关闭时恢复动画
+    startPillAnimation();
 }
 
 export function renderPageList() {
@@ -448,6 +453,8 @@ export function openThemeControls() {
 
 export function closeThemeControls() {
     document.getElementById('theme-controls').classList.add('hidden');
+    // 关闭时恢复动画
+    startPillAnimation();
 }
 
 export function quickChangeTheme(color, pattern) {
@@ -816,6 +823,8 @@ export function toggleEditMode(enable) {
         controls.classList.add('hidden');
         state.sortableInstances.forEach(instance => instance.destroy());
         state.sortableInstances = [];
+        // 退出编辑时恢复动画
+        startPillAnimation();
     }
     render();
 }

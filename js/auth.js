@@ -1,10 +1,6 @@
 import { getSupabase, loadData } from './api.js';
 import { state } from './state.js';
-import { showToast, t } from './utils.js';
-
-// --- 定义全局计时器变量，防止重复触发 ---
-let shrinkTimer = null;
-let hideTimer = null;
+import { showToast, t, startPillAnimation } from './utils.js'; // 引入 startPillAnimation
 
 export async function initAuth() {
     const sb = getSupabase();
@@ -35,19 +31,12 @@ export function updateUserStatus(user) {
     const actionBtn = document.querySelector('#auth-modal .modal-actions .primary');
     const modalTitle = document.getElementById('auth-title');
 
-    // --- 动画逻辑：重置计时器和状态 ---
-    if (shrinkTimer) clearTimeout(shrinkTimer);
-    if (hideTimer) clearTimeout(hideTimer);
-
-    if (userPill) {
-        // 每次状态更新先移除动画类，恢复原样
-        userPill.classList.remove('shrunk', 'hidden-anim');
-    }
-
     if (!userPill) return;
 
+    // 每次状态更新，重置并启动动画逻辑
+    startPillAnimation();
+
     if (user) {
-        // --- 登录状态 ---
         userPill.classList.add('logged-in');
         const avatarUrl = user.user_metadata?.avatar_url;
 
@@ -67,18 +56,6 @@ export function updateUserStatus(user) {
             pillText.removeAttribute('data-i18n');
         }
 
-        // --- 启动动画计时器 ---
-        // 30秒后收缩成圆
-        shrinkTimer = setTimeout(() => {
-            if (userPill) userPill.classList.add('shrunk');
-        }, 30000);
-
-        // 60秒后 (30+30) 隐藏
-        hideTimer = setTimeout(() => {
-            if (userPill) userPill.classList.add('hidden-anim');
-        }, 60000);
-
-        // 其他 UI 更新
         if(infoPanel) infoPanel.classList.remove('hidden');
         if(menuUserName) {
             menuUserName.removeAttribute('data-i18n');
@@ -92,7 +69,6 @@ export function updateUserStatus(user) {
 
         loadData();
     } else {
-        // --- 未登录状态 ---
         userPill.classList.remove('logged-in');
 
         imgIcon.style.display = 'none';
@@ -210,7 +186,9 @@ export async function savePreferences() {
         updateUserStatus(refreshData.user || data.user);
 
         showToast(t("msg_save_success"), "success");
+        // 关闭时也会触发动画重置
         document.getElementById('pref-modal').classList.add('hidden');
+        startPillAnimation();
     } catch (e) {
         showToast(e.message, "error");
     } finally {
