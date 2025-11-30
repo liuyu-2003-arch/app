@@ -2,6 +2,10 @@ import { getSupabase, loadData } from './api.js';
 import { state } from './state.js';
 import { showToast, t } from './utils.js';
 
+// --- 定义全局计时器变量，防止重复触发 ---
+let shrinkTimer = null;
+let hideTimer = null;
+
 export async function initAuth() {
     const sb = getSupabase();
     if (!sb) return;
@@ -13,7 +17,6 @@ export async function initAuth() {
 export function updateUserStatus(user) {
     state.currentUser = user;
 
-    // --- 核心修复：获取新的 pill 元素 ---
     const userPill = document.getElementById('user-pill');
     const svgIcon = document.getElementById('user-icon-svg');
     const imgIcon = document.getElementById('user-avatar-img');
@@ -32,14 +35,22 @@ export function updateUserStatus(user) {
     const actionBtn = document.querySelector('#auth-modal .modal-actions .primary');
     const modalTitle = document.getElementById('auth-title');
 
-    // 检查元素是否存在，防止报错
+    // --- 动画逻辑：重置计时器和状态 ---
+    if (shrinkTimer) clearTimeout(shrinkTimer);
+    if (hideTimer) clearTimeout(hideTimer);
+
+    if (userPill) {
+        // 每次状态更新先移除动画类，恢复原样
+        userPill.classList.remove('shrunk', 'hidden-anim');
+    }
+
     if (!userPill) return;
 
     if (user) {
+        // --- 登录状态 ---
         userPill.classList.add('logged-in');
         const avatarUrl = user.user_metadata?.avatar_url;
 
-        // 显示头像图片，隐藏图标
         if (avatarUrl) {
             imgIcon.src = avatarUrl;
             imgIcon.style.display = 'block';
@@ -50,13 +61,24 @@ export function updateUserStatus(user) {
             svgIcon.setAttribute('fill', '#333');
         }
 
-        // 设置按钮文字为用户名
         const userName = user.user_metadata?.full_name || user.user_metadata?.display_name || user.email.split('@')[0];
         if (pillText) {
             pillText.innerText = userName;
             pillText.removeAttribute('data-i18n');
         }
 
+        // --- 启动动画计时器 ---
+        // 30秒后收缩成圆
+        shrinkTimer = setTimeout(() => {
+            if (userPill) userPill.classList.add('shrunk');
+        }, 30000);
+
+        // 60秒后 (30+30) 隐藏
+        hideTimer = setTimeout(() => {
+            if (userPill) userPill.classList.add('hidden-anim');
+        }, 60000);
+
+        // 其他 UI 更新
         if(infoPanel) infoPanel.classList.remove('hidden');
         if(menuUserName) {
             menuUserName.removeAttribute('data-i18n');
@@ -65,20 +87,18 @@ export function updateUserStatus(user) {
         if(menuUserEmail) menuUserEmail.innerText = user.email;
         if(menuUserAvatar) menuUserAvatar.src = avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
 
-        // 登录后显示邮件地址
         const currentEmailEl = document.getElementById('current-email');
         if(currentEmailEl) currentEmailEl.innerText = user.email;
 
         loadData();
     } else {
+        // --- 未登录状态 ---
         userPill.classList.remove('logged-in');
 
-        // 显示默认图标
         imgIcon.style.display = 'none';
         svgIcon.style.display = 'block';
-        svgIcon.setAttribute('fill', 'white'); // 未登录时白色图标
+        svgIcon.setAttribute('fill', 'white');
 
-        // 重置文字为 Login
         if (pillText) {
             pillText.setAttribute('data-i18n', 'btn_login');
             pillText.innerText = t('btn_login');
