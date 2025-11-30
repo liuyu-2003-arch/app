@@ -180,16 +180,16 @@ body.dark-mode .user-icon-svg {
 .theme-swatches { display: flex; gap: 8px; margin-right: 5px; }
 .swatch {
     width: 24px; height: 24px;
-    border-radius: 6px; /* 从 50% 改为 6px，实现扁平化圆角 */
+    border-radius: 50%; /* 改回圆形 */
     cursor: pointer;
-    border: 2px solid transparent; transition: transform 0.2s;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    border: none; /* 去掉边框 */
+    transition: transform 0.2s;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); /* 保留内阴影以区分浅色背景 */
 }
 .swatch:hover { transform: scale(1.1); }
 .swatch.active {
-    border-color: #007AFF;
-    transform: scale(1.1);
-    border-radius: 6px; /* 保持一致 */
+    transform: scale(1.2); /* 稍微放大一点表示选中 */
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2); /* 加深阴影表示选中 */
 }
 
 .control-divider {
@@ -254,16 +254,8 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     position: fixed; top: 0; right: 0;
     width: auto; height: auto;
     z-index: 100;
-
-    /* --- 核心修改：扩大触发热区 --- */
-    /* 上、右保持 20px，确保图标视觉位置不变 */
-    /* 下、左增加到 120px，大幅扩大鼠标感应范围 */
     padding: 20px 20px 120px 120px;
-
     box-sizing: border-box;
-
-    /* 开发调试用：如果您想看到这个区域有多大，可以暂时取消下面这行的注释 */
-    /* background: rgba(255, 0, 0, 0.1); */
 }
 
 .user-pill {
@@ -278,7 +270,6 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     padding: 4px 14px 4px 4px;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     gap: 8px;
 }
 
@@ -664,8 +655,6 @@ body.dark-mode .user-pill-icon {
         font-size: 16px !important; padding: 0 15px;
     }
 }
-
-/* --- 右上角胶囊动画扩展 --- */
 
 /* --- 右上角胶囊动画扩展 (优化版) --- */
 

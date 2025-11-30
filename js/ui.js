@@ -1,6 +1,5 @@
 import { state } from './state.js';
 import { saveData } from './api.js';
-// 引入 startPillAnimation
 import { debounce, t, showToast, generateUniqueId, updateSyncStatus, startPillAnimation } from './utils.js';
 
 export const debouncedSaveData = debounce(() => saveData(), 1000);
@@ -42,16 +41,16 @@ export function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // --- 核心修复：将 URL 绑定到 DOM，供手动点击逻辑使用 ---
+            // 将 URL 绑定到 DOM，供手动点击逻辑使用
             div.dataset.url = item.url;
 
-            // 桌面端点击逻辑 (手机端主要靠 dragEnd 中的手动检测)
+            // 桌面端点击逻辑
             div.onclick = (e) => {
                 if (state.isEditing) {
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // 只有在非触摸设备或点击事件穿透时才执行
-                    if (!state.hasDragged) window.location.href = item.url;
+                    // --- 修改：在新窗口打开链接 ---
+                    if (!state.hasDragged) window.open(item.url, '_blank');
                 }
             };
 
@@ -732,7 +731,8 @@ function dragEnd(e) {
             // 执行跳转或打开编辑
             if (!state.isEditing) {
                 const url = item.dataset.url;
-                if (url) window.location.href = url;
+                // --- 修改：在新窗口打开链接 ---
+                if (url) window.open(url, '_blank');
             }
             // 编辑模式下的点击由 Sortable 或其他逻辑处理，或者如果需要也可在此添加
         }
