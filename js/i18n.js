@@ -1,166 +1,36 @@
 // js/i18n.js
-const translations = {
-    en: {
-        "menu_edit_bookmark": "Edit Bookmark",
-        "menu_edit_theme": "Edit Theme",
-        "menu_pref": "Account Preferences",
-        "menu_lang": "Language",
-        "menu_logout": "Log out",
-        "menu_feedback": "Feedback",
-        "theme_default": "Default",
-        "theme_aurora": "Aurora",
-        "theme_flow": "Flow",
-        "theme_lines_d": "Lines",
-        "btn_add_bookmark": "➕ Add Bookmark",
-        "btn_edit_page": "📝 Edit Page",
-        "btn_import": "📥 Import",
-        "btn_export": "📤 Export",
-        "btn_done": "Done",
-        "btn_cancel": "Cancel",
-        "btn_confirm": "Confirm",
-        "btn_add_page": "➕ Add New Page",
-        "btn_login": "Login",
-        "btn_register": "Register",
-        "btn_save": "Save Changes",
-        "btn_choose_img": "Choose Image",
-        "label_url": "URL",
-        "label_title": "Title",
-        "label_logo": "Logo URL",
-        "label_page": "Page",
-        "label_email": "Email",
-        "label_password": "Password",
-        "label_display_name": "Display Name",
-        "label_phone": "Phone",
-        "ph_url": "e.g. bilibili.com",
-        "ph_title": "Title",
-        "ph_icon": "Icon URL (Optional)",
-        "ph_email": "Email Address",
-        "ph_password": "Password (min 6 chars)",
-        "modal_edit_title": "Edit/Add Bookmark",
-        "modal_page_title": "Edit Pages",
-        "modal_auth_title": "Login / Register",
-        "modal_auth_hint": "Choose an avatar (for registration)",
-        "modal_pref_title": "Account Preferences",
-        "preview_title": "Preview",
-        "style_full": "Full",
-        "style_fit": "Fit",
-        "style_white": "White",
-        "divider_social": "Or use third-party",
-        "auth_guest": "Guest",
-        "tab_emoji": "Icons",
-        "tab_upload": "Upload",
-        "msg_dev": "Feature in development...",
-        "msg_login_success": "Login successful",
-        "msg_logout": "Logged out",
-        "msg_sdk_error": "SDK Error/Not Initialized",
-        "msg_third_party_success": "Third-party login successful!",
-        "msg_input_req": "Please enter information",
-        "msg_email_pass_req": "Please enter email and password",
-        "msg_reg_success": "Registration successful, please check email",
-        "msg_update_success": "Update successful",
-        "msg_select_avatar": "Please select an avatar",
-        "msg_title_url_req": "Title and URL are required",
-        "msg_page_not_empty": "Page is not empty",
-        "msg_import_success": "Import successful",
-        "msg_import_fail": "Import failed, format error",
-        "msg_logged_in": "Logged in as",
-        "msg_select_new_avatar": "Tap to change avatar",
-        "msg_save_success": "Preferences saved successfully",
-        "msg_saving": "Saving...",
-        "msg_saved": "Cloud Synced",
-        "msg_save_fail": "Sync Failed",
-        "msg_upload_hint": "Max size: 2MB (Auto-compressed)",
-        "msg_img_too_large": "Image too large. Please use built-in icons.",
-        "msg_sync_success_toast": "Cloud Sync Successful",
-        "msg_mobile_edit": "Please edit bookmarks on Desktop"
-    },
-    zh: {
-        "menu_edit_bookmark": "编辑书签",
-        "menu_edit_theme": "编辑主题",
-        "menu_pref": "账户设置",
-        "menu_lang": "语言 / Language",
-        "menu_logout": "退出登录",
-        "menu_feedback": "问题反馈",
-        "theme_default": "默认",
-        "theme_aurora": "极光",
-        "theme_flow": "流光",
-        "theme_lines_d": "线条",
-        "btn_add_bookmark": "➕ 添加书签",
-        "btn_edit_page": "📝 编辑页面",
-        "btn_import": "📥 导入配置",
-        "btn_export": "📤 导出配置",
-        "btn_done": "完成",
-        "btn_cancel": "取消",
-        "btn_confirm": "确定",
-        "btn_add_page": "➕ 添加新页面",
-        "btn_login": "登录",
-        "btn_register": "注册",
-        "btn_save": "保存更改",
-        "btn_choose_img": "选择图片",
-        "label_url": "网页网址",
-        "label_title": "网页标题",
-        "label_logo": "图标地址",
-        "label_page": "所在页面",
-        "label_email": "邮箱",
-        "label_password": "密码",
-        "label_display_name": "显示名称",
-        "label_phone": "手机号",
-        "ph_url": "例如 bilibili.com",
-        "ph_title": "标题",
-        "ph_icon": "图标链接 (选填)",
-        "ph_email": "邮箱地址",
-        "ph_password": "密码 (至少6位)",
-        "modal_edit_title": "编辑/添加书签",
-        "modal_page_title": "编辑页面",
-        "modal_auth_title": "登录 / 注册",
-        "modal_auth_hint": "选择一个头像 (用于注册)",
-        "modal_pref_title": "账户设置",
-        "preview_title": "标题预览",
-        "style_full": "铺满",
-        "style_fit": "适中",
-        "style_white": "留白",
-        "divider_social": "或使用第三方账号",
-        "auth_guest": "游客",
-        "tab_emoji": "图标库",
-        "tab_upload": "上传图片",
-        "msg_dev": "功能开发中...",
-        "msg_login_success": "登录成功",
-        "msg_logout": "已退出登录",
-        "msg_sdk_error": "SDK 未初始化",
-        "msg_third_party_success": "第三方登录成功！",
-        "msg_input_req": "请输入信息",
-        "msg_email_pass_req": "请输入邮箱密码",
-        "msg_reg_success": "注册成功，请查收邮件",
-        "msg_update_success": "更新成功",
-        "msg_select_avatar": "请先选择头像",
-        "msg_title_url_req": "标题和网址是必填的",
-        "msg_page_not_empty": "页面不为空",
-        "msg_import_success": "导入成功",
-        "msg_import_fail": "导入失败，格式错误",
-        "msg_logged_in": "已登录",
-        "msg_select_new_avatar": "点击更换头像",
-        "msg_save_success": "设置保存成功",
-        "msg_saving": "正在同步...",
-        "msg_saved": "云端已同步",
-        "msg_save_fail": "同步失败",
-        "msg_upload_hint": "最大 2MB (自动压缩)",
-        "msg_img_too_large": "图片数据过大无法保存，请使用内置图标",
-        "msg_sync_success_toast": "云端数据同步成功",
-        "msg_mobile_edit": "为了更好的体验，请在电脑端编辑书签"
+
+let translations = {};
+
+async function fetchTranslations(lang) {
+    try {
+        const response = await fetch(`locales/${lang}.json`);
+        if (!response.ok) {
+            throw new Error(`Could not load ${lang}.json`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        // Fallback to English if the language file is not found
+        if (lang !== 'en') {
+            return await fetchTranslations('en');
+        }
+        return {};
     }
-};
+}
 
 export const i18n = {
     currentLang: localStorage.getItem('appLang') || 'en',
 
-    t(key) {
-        return translations[this.currentLang][key] || key;
-    },
-
-    setLang(lang) {
+    async loadTranslations(lang) {
+        translations = await fetchTranslations(lang);
         this.currentLang = lang;
         localStorage.setItem('appLang', lang);
         this.updateTexts();
+    },
+
+    t(key) {
+        return translations[key] || key;
     },
 
     updateTexts() {

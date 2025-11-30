@@ -60,12 +60,16 @@
             <span class="menu-icon">🎨</span> <span data-i18n="menu_edit_theme">Edit Theme</span>
         </div>
 
-        <div class="menu-label" data-i18n="menu_lang">Language</div>
-        <div class="menu-item" onclick="changeLanguage('en')">
-            <span class="menu-icon">🇺🇸</span> English
-        </div>
-        <div class="menu-item" onclick="changeLanguage('zh')">
-            <span class="menu-icon">🇨🇳</span> 中文
+        <div class="menu-item has-submenu">
+            <span class="menu-icon">🌐</span>
+            <span data-i18n="menu_lang">Language</span>
+            <div class="submenu">
+                <div class="submenu-item" onclick="changeLanguage('en')"><span class="menu-icon">🇺🇸</span> English</div>
+                <div class="submenu-item" onclick="changeLanguage('zh')"><span class="menu-icon">🇨🇳</span> 中文</div>
+                <div class="submenu-item" onclick="changeLanguage('ja')"><span class="menu-icon">🇯🇵</span> 日本語</div>
+                <div class="submenu-item" onclick="changeLanguage('fr')"><span class="menu-icon">🇫🇷</span> Français</div>
+                <div class="submenu-item" onclick="changeLanguage('es')"><span class="menu-icon">🇪🇸</span> Español</div>
+            </div>
         </div>
 
         <div class="menu-divider"></div>

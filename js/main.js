@@ -12,10 +12,10 @@ import { t, showToast, startPillAnimation } from './utils.js'; // 引入 startPi
 import { state } from './state.js';
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // 1. 初始化基础配置
     document.body.style.visibility = 'hidden';
-    i18n.updateTexts();
+    await i18n.loadTranslations(i18n.currentLang);
     initTheme();
     initSwiper();
 
@@ -129,9 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.selectNewAvatar = selectNewAvatar;
 
     // --- 语言 ---
-    window.changeLanguage = (lang) => {
-        i18n.setLang(lang);
-        location.reload();
+    window.changeLanguage = async (lang) => {
+        await i18n.loadTranslations(lang);
     };
 
     window.addEventListener('resize', () => { render(); });
