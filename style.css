@@ -614,7 +614,7 @@ body.dark-mode .user-pill-icon {
     flex-direction: column;
 }
 
-/* 右侧面板宽度增加到 520px */
+/* 右侧面板宽度增加到 520px，并设置最小高度防止跳动 */
 .pref-avatar-panel {
     width: 520px;
     background: #f7f7f7;
@@ -627,12 +627,27 @@ body.dark-mode .user-pill-icon {
     transform: translateX(100%);
     opacity: 0;
     visibility: hidden;
+
+    /* 关键修改：设置最小高度，防止切换到 Upload 标签时高度塌陷 */
+    min-height: 600px;
 }
 
 .pref-avatar-panel .avatar-panel-content {
     flex-grow: 1;
     overflow-y: auto;
     padding: 20px;
+    /* 确保内容区域也能撑满 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 新增：让 Upload 标签内容垂直居中 */
+#avatar-panel-upload {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 底部按钮居中且宽度减少为 33% */
@@ -693,6 +708,9 @@ body.dark-mode .user-pill-icon {
         opacity: 1; /* Keep it opaque for the height transition */
         visibility: visible; /* Keep it visible for the height transition */
         transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* 移动端重置最小高度 */
+        min-height: 0;
     }
     .pref-avatar-panel.visible {
         height: auto;
