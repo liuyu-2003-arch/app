@@ -41,14 +41,15 @@ export function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // --- 核心修复：点击事件 ---
+            // --- 修复：将 URL 绑定到 DOM，供手动点击逻辑使用 ---
+            div.dataset.url = item.url;
+
+            // 桌面端点击逻辑 (手机端主要靠 dragEnd 中的手动检测)
             div.onclick = (e) => {
                 if (state.isEditing) {
-                    // 编辑模式
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // 正常模式：只有当 hasDragged 为 false 时才允许跳转
-                    // 新的 drag 逻辑保证了微小的抖动不会将 hasDragged 设为 true
+                    // 只有在非触摸设备或点击事件穿透时才执行
                     if (!state.hasDragged) window.location.href = item.url;
                 }
             };
@@ -646,24 +647,25 @@ function triggerKeyboardBounce(offset) {
     }, 150);
 }
 
-// --- 核心修复：统一使用 clientX/Y，避免滚动条干扰 ---
+// --- 统一坐标获取 ---
 function getPositionX(e) { return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; }
 function getPositionY(e) { return e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; }
 
-// --- 核心修复：更稳健的拖拽检测 ---
 function dragStart(e) {
+    // 编辑模式下点书签，交给 Sortable，我们不管
     if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
 
     state.isDragging = true;
     state.hasDragged = false;
 
-    // 初始化状态，用于方向锁定
+    // 初始化锁定状态
     state.isScrolling = false;
     state.dragDirectionLocked = false;
 
-    // 记录初始坐标
+    // 记录起始数据，用于方向判断和“手动点击”判断
     state.startPos = getPositionX(e);
     state.startPosY = getPositionY(e);
+    state.touchStartTime = Date.now();
 
     state.animationID = requestAnimationFrame(animation);
     const wrapper = document.getElementById('bookmark-swiper-wrapper');
@@ -672,43 +674,34 @@ function dragStart(e) {
 
 function drag(e) {
     if (!state.isDragging) return;
-
-    // 1. 如果已经判定为滚动模式，直接忽略水平拖拽，允许浏览器默认行为
-    if (state.isScrolling) return;
+    if (state.isScrolling) return; // 已锁定为滚动，忽略水平移动
 
     const cx = getPositionX(e);
     const cy = getPositionY(e);
     const diffX = cx - state.startPos;
     const diffY = cy - state.startPosY;
 
-    // 2. 方向锁定逻辑 (Dead Zone Locking)
-    // 如果尚未锁定方向...
+    // --- 方向锁定逻辑 (Dead Zone) ---
     if (!state.dragDirectionLocked) {
-        // 只有当移动距离足够大 (超过 15px) 时才判断方向，避免微小抖动误判
         const absX = Math.abs(diffX);
         const absY = Math.abs(diffY);
 
         if (absX > 15 || absY > 15) {
             state.dragDirectionLocked = true;
-
-            // 如果垂直移动更多，判定为滚动 -> 标记为 Scrolling，不进行拖拽
             if (absY > absX) {
                 state.isScrolling = true;
                 return;
             }
-            // 否则判定为水平拖拽，继续向下执行
         } else {
-            // 移动 < 15px，属于死区，不做任何响应，也不拦截点击
+            // 移动小于 15px，视为死区，不动作，也不标记 hasDragged
             return;
         }
     }
 
-    // 3. 执行逻辑
-    // 只有明确标记为"已拖拽" (超过15px且横向移动) 后，才开始移动滑块和拦截点击
+    // 只有明确为水平移动且超过死区，才标记为“已拖拽”
     state.hasDragged = true;
     state.currentTranslate = state.prevTranslate + diffX;
 
-    // 阻止浏览器默认行为 (如原生侧滑翻页)
     if (e.cancelable) e.preventDefault();
 }
 
@@ -716,12 +709,34 @@ function dragEnd(e) {
     if (!state.isDragging) return;
     state.isDragging = false;
     cancelAnimationFrame(state.animationID);
+
+    // --- 核心修复：手动接管“点击”逻辑 (Manual Tap) ---
+    // 如果没有发生拖拽，没有发生滚动，且按住时间很短，则视为“点击”
+    const duration = Date.now() - state.touchStartTime;
+    const isTap = !state.hasDragged && !state.isScrolling && duration < 600;
+
+    // 仅针对触摸设备 (touchend) 启用手动接管，鼠标继续用 onclick
+    if (isTap && e.type === 'touchend') {
+        const item = e.target.closest('.bookmark-item');
+        // 排除删除按钮 (删除按钮有自己的 onclick)
+        if (item && !e.target.closest('.delete-btn')) {
+            e.preventDefault(); // 阻止浏览器触发默认 click，防止双重触发
+
+            // 执行跳转或打开编辑
+            if (!state.isEditing) {
+                const url = item.dataset.url;
+                if (url) window.location.href = url;
+            }
+            // 编辑模式下的点击由 Sortable 或其他逻辑处理，或者如果需要也可在此添加
+        }
+    }
+
+    // 处理翻页逻辑
     const movedBy = state.currentTranslate - state.prevTranslate;
     const swiper = document.getElementById('bookmark-swiper');
     const swiperWidth = swiper ? swiper.clientWidth : 1;
     let targetPage = state.currentPage;
 
-    // 只有发生过有效拖拽，才计算翻页
     if (state.hasDragged) {
         if (movedBy < -swiperWidth * 0.15 && state.currentPage < state.visualPages.length - 1) targetPage++;
         else if (movedBy > swiperWidth * 0.15 && state.currentPage > 0) targetPage--;
@@ -778,7 +793,7 @@ function renderPaginationDots() {
         dot.className = 'dot';
         if (i === state.currentPage) dot.classList.add('active');
 
-        // --- 修复：添加 data-title 属性，配合 CSS 显示悬停/点击标题 ---
+        // 配合 CSS 显示标题
         dot.setAttribute('data-title', state.visualPages[i].title || `Page ${i + 1}`);
 
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
