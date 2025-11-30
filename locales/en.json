@@ -28,7 +28,7 @@
     "label_email": "Email",
     "label_password": "Password",
     "label_nickname": "Nickname",
-    "label_phone": "Phone",
+    "label_phone_no": "Phone No.",
     "ph_url": "e.g. bilibili.com",
     "ph_title": "Title",
     "ph_icon": "Icon URL (Optional)",
