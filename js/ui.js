@@ -508,7 +508,15 @@ export function openPrefModal() {
 
     document.getElementById('user-dropdown').classList.remove('active');
     document.getElementById('pref-modal').classList.remove('hidden');
+    // Hide avatar panel initially
+    document.getElementById('pref-avatar-panel').classList.remove('visible');
 }
+
+export function closePrefModal() {
+    document.getElementById('pref-modal').classList.add('hidden');
+    startPillAnimation();
+}
+
 
 export function switchAvatarTab(tabName) {
     document.querySelectorAll('.avatar-tab-item').forEach(el => {
