@@ -589,11 +589,16 @@ body.dark-mode .user-pill-icon {
 .pref-modal-content {
     display: flex;
     flex-direction: row;
-    width: 680px;
+    width: 380px; /* Initial width */
     max-width: 90vw;
     padding: 0;
     gap: 0;
     overflow: hidden;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pref-modal-content.avatar-panel-visible {
+    width: 680px; /* Expanded width */
 }
 
 .pref-main-panel {
@@ -611,15 +616,16 @@ body.dark-mode .user-pill-icon {
     box-sizing: border-box;
     padding: 20px;
     flex-shrink: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     transform: translateX(100%);
     opacity: 0;
-    display: block !important; /* Override hidden */
+    visibility: hidden;
 }
 
 .pref-avatar-panel.visible {
     transform: translateX(0);
     opacity: 1;
+    visibility: visible;
 }
 
 @media (max-width: 768px) {
@@ -629,7 +635,14 @@ body.dark-mode .user-pill-icon {
         max-width: 380px;
         height: auto;
         max-height: 85vh;
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    .pref-modal-content.avatar-panel-visible {
+        /* On mobile, we expand height instead of width */
+        width: 92%;
+    }
+
     .pref-main-panel {
         width: 100%;
         padding-bottom: 20px;
@@ -642,7 +655,9 @@ body.dark-mode .user-pill-icon {
         border-left: none;
         border-top: 1px solid #e0e0e0;
         overflow: hidden;
-        opacity: 1;
+        opacity: 1; /* Keep it opaque for the height transition */
+        visibility: visible; /* Keep it visible for the height transition */
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .pref-avatar-panel.visible {
         height: auto;

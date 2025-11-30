@@ -155,8 +155,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const prefAvatarContainer = document.getElementById('pref-avatar-container');
     if (prefAvatarContainer) {
         prefAvatarContainer.addEventListener('click', () => {
+            const modalContent = document.querySelector('.pref-modal-content');
             const panel = document.getElementById('pref-avatar-panel');
-            panel.classList.toggle('visible');
+            
+            const isVisible = panel.classList.contains('visible');
+            
+            modalContent.classList.toggle('avatar-panel-visible', !isVisible);
+            panel.classList.toggle('visible', !isVisible);
         });
     }
 });
