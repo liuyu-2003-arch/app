@@ -536,13 +536,14 @@ body.dark-mode .user-pill-icon {
     background: #007AFF;
 }
 
+/* 优化后的头像网格：自动填充列，无滚动条限制 */
 .avatar-grid-scroll {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 5px;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 12px;
+    max-height: none;
+    overflow-y: visible;
+    padding: 15px;
 }
 
 .emoji-item {
@@ -597,8 +598,9 @@ body.dark-mode .user-pill-icon {
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 展开宽度增加到 900px */
 .pref-modal-content.avatar-panel-visible {
-    width: 720px; /* Expanded width */
+    width: 900px;
 }
 
 .pref-main-panel {
@@ -609,8 +611,9 @@ body.dark-mode .user-pill-icon {
     position: relative;
 }
 
+/* 右侧面板宽度增加到 520px */
 .pref-avatar-panel {
-    width: 340px;
+    width: 520px;
     background: #f7f7f7;
     border-left: 1px solid #e0e0e0;
     box-sizing: border-box;
@@ -629,9 +632,16 @@ body.dark-mode .user-pill-icon {
     padding: 20px;
 }
 
+/* 底部按钮居中且宽度为 50% */
 .pref-avatar-panel .modal-actions {
     padding: 20px;
     border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: center;
+}
+
+.pref-avatar-panel .modal-actions button {
+    width: 50%;
 }
 
 .pref-avatar-panel.visible {

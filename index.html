@@ -198,9 +198,13 @@
                 <h3 data-i18n="modal_pref_title" style="margin-bottom: 20px;">Account Preferences</h3>
 
                 <div style="text-align: center; margin-bottom: 25px;">
-                    <div id="pref-avatar-container" class="user-avatar-small" style="width: 70px; height: 70px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 2px solid #eee; cursor: pointer;">
-                        <img id="pref-current-img" src="" style="width: 100%; height: 100%; object-fit: cover;" alt="Current Avatar">
+                    <div id="pref-avatar-container" class="user-pill" style="margin: 0 auto; width: fit-content; cursor: pointer; background: #f3f3f3; border: 1px solid #e0e0e0; padding-right: 15px;">
+                        <div class="user-pill-icon" style="width: 40px; height: 40px;">
+                            <img id="pref-current-img" src="" style="display: block;" alt="Current Avatar">
+                        </div>
+                        <span id="pref-preview-name" class="user-pill-text" style="font-size: 16px; color: #333;">Guest</span>
                     </div>
+                    <p style="font-size: 12px; color: #999; margin-top: 8px;" data-i18n="msg_select_new_avatar">Tap to change avatar</p>
                 </div>
 
                 <div class="centered-form-group">

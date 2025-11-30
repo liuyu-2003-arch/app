@@ -496,12 +496,31 @@ export function openPrefModal() {
         return;
     }
     const meta = state.currentUser.user_metadata || {};
-    document.getElementById('pref-name').value = meta.full_name || meta.display_name || '';
+
+    const nameInput = document.getElementById('pref-name');
+    nameInput.value = meta.full_name || meta.display_name || '';
     document.getElementById('pref-phone').value = meta.phone_number || meta.phone || '';
 
     const currentAvatar = meta.avatar_url || "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
     document.getElementById('pref-current-img').src = currentAvatar;
     state.prefAvatarUrl = currentAvatar;
+
+    // --- 新增逻辑：初始化预览昵称并添加监听 ---
+    const previewName = document.getElementById('pref-preview-name');
+    if (previewName) {
+        // 初始化显示
+        previewName.textContent = nameInput.value || "Guest";
+
+        // 移除旧的监听器（防止重复绑定），这是一种简单的处理方式
+        const newNameInput = nameInput.cloneNode(true);
+        nameInput.parentNode.replaceChild(newNameInput, nameInput);
+
+        // 绑定输入监听，实时更新预览
+        newNameInput.addEventListener('input', (e) => {
+            previewName.textContent = e.target.value || "Guest";
+        });
+    }
+    // ---------------------------------------
 
     renderAvatarGrid(currentAvatar);
     switchAvatarTab('emoji');
