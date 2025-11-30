@@ -603,12 +603,15 @@ body.dark-mode .user-pill-icon {
     width: 900px;
 }
 
+/* 修正：使用 Flex 布局并让按钮自动推到底部 */
 .pref-main-panel {
     width: 380px;
     padding: 25px;
     box-sizing: border-box;
     flex-shrink: 0;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 /* 右侧面板宽度增加到 520px */
@@ -632,7 +635,7 @@ body.dark-mode .user-pill-icon {
     padding: 20px;
 }
 
-/* 底部按钮居中且宽度为 50% */
+/* 底部按钮居中且宽度减少为 33% */
 .pref-avatar-panel .modal-actions {
     padding: 20px;
     border-top: 1px solid #e0e0e0;
@@ -641,13 +644,18 @@ body.dark-mode .user-pill-icon {
 }
 
 .pref-avatar-panel .modal-actions button {
-    width: 50%;
+    width: 33%;
 }
 
 .pref-avatar-panel.visible {
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
+}
+
+/* 修正：让左侧按钮区域推到最底部 */
+.pref-main-panel .modal-actions {
+    margin-top: auto;
 }
 
 .centered-form-group {
