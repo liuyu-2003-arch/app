@@ -27,7 +27,7 @@
     "label_page": "Page",
     "label_email": "Email",
     "label_password": "Password",
-    "label_display_name": "Display Name",
+    "label_nickname": "Nickname",
     "label_phone": "Phone",
     "ph_url": "e.g. bilibili.com",
     "ph_title": "Title",
@@ -42,6 +42,7 @@
     "preview_title": "Preview",
     "style_full": "Full",
     "style_fit": "Fit",
+
     "style_white": "White",
     "divider_social": "Or use third-party",
     "auth_guest": "Guest",

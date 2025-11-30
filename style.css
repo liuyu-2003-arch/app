@@ -586,6 +586,72 @@ body.dark-mode .user-pill-icon {
     border-color: #ccc;
 }
 
+.pref-modal-content {
+    display: flex;
+    flex-direction: row;
+    width: 680px;
+    max-width: 90vw;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+}
+
+.pref-main-panel {
+    width: 380px;
+    padding: 25px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.pref-avatar-panel {
+    width: 300px;
+    background: #f7f7f7;
+    border-left: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    padding: 20px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    display: block !important; /* Override hidden */
+}
+
+.pref-avatar-panel.visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .pref-modal-content {
+        flex-direction: column;
+        width: 92%;
+        max-width: 380px;
+        height: auto;
+        max-height: 85vh;
+    }
+    .pref-main-panel {
+        width: 100%;
+        padding-bottom: 20px;
+    }
+    .pref-avatar-panel {
+        width: 100%;
+        height: 0;
+        padding: 0 20px;
+        transform: translateY(20px);
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+        overflow: hidden;
+        opacity: 1;
+    }
+    .pref-avatar-panel.visible {
+        height: auto;
+        padding: 20px;
+        transform: translateY(0);
+    }
+}
+
+
 /* --- 移动端适配 (包含登录框修复) --- */
 @media (max-width: 768px) {
     /* 1. 整体上移 */

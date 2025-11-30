@@ -5,10 +5,10 @@ import {
     render, toggleEditMode, initSwiper, saveBookmark, deleteBookmark, openModal, closeModal,
     addPage, deletePage, openPageEditModal, closePageEditModal, renderPageList,
     initTheme, changeTheme, quickChangeTheme, openThemeControls, closeThemeControls,
-    openPrefModal, switchAvatarTab, handleAvatarFile, selectNewAvatar, createAvatarSelector,
+    openPrefModal, closePrefModal, switchAvatarTab, handleAvatarFile, selectNewAvatar, createAvatarSelector,
     autoFillInfo, updatePreview, selectStyle, selectPage
 } from './ui.js';
-import { t, showToast, startPillAnimation } from './utils.js'; // 引入 startPillAnimation
+import { t, showToast, startPillAnimation } from './utils.js';
 import { state } from './state.js';
 
 
@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 偏好设置 ---
     window.openPrefModal = openPrefModal;
+    window.closePrefModal = closePrefModal;
     window.switchAvatarTab = switchAvatarTab;
     window.handleAvatarFile = handleAvatarFile;
     window.selectNewAvatar = selectNewAvatar;
@@ -149,4 +150,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+
+    // --- 新增：偏好设置弹窗交互 ---
+    const prefAvatarContainer = document.getElementById('pref-avatar-container');
+    if (prefAvatarContainer) {
+        prefAvatarContainer.addEventListener('click', () => {
+            const panel = document.getElementById('pref-avatar-panel');
+            panel.classList.toggle('visible');
+        });
+    }
 });

@@ -192,46 +192,49 @@
     </div>
 
     <div id="pref-modal" class="modal hidden">
-        <div class="modal-content" style="max-width: 380px; position: relative;">
-            <button class="close-modal-btn" onclick="document.getElementById('pref-modal').classList.add('hidden')">×</button>
+        <div class="modal-content pref-modal-content">
+            <div class="pref-main-panel">
+                <button class="close-modal-btn" onclick="closePrefModal()">×</button>
+                <h3 data-i18n="modal_pref_title">Account Preferences</h3>
 
-            <h3 data-i18n="modal_pref_title">Account Preferences</h3>
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <div id="pref-avatar-container" class="user-avatar-small" style="width: 70px; height: 70px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 2px solid #eee; cursor: pointer;">
+                        <img id="pref-current-img" src="" style="width: 100%; height: 100%; object-fit: cover;" alt="Current Avatar">
+                    </div>
+                </div>
 
-            <div style="text-align: center; margin-bottom: 15px;">
-                <div class="user-avatar-small" style="width: 70px; height: 70px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 2px solid #eee;">
-                    <img id="pref-current-img" src="" style="width: 100%; height: 100%; object-fit: cover;" alt="Current Avatar">
+                <div class="form-group" style="margin-top: 15px;">
+                    <div class="input-row">
+                        <label for="pref-name" class="input-label" style="width: 90px;" data-i18n="label_nickname">Nickname</label>
+                        <input type="text" id="pref-name" placeholder="Nickname">
+                    </div>
+                    <div class="input-row">
+                        <label for="pref-phone" class="input-label" style="width: 90px;" data-i18n="label_phone">Phone</label>
+                        <input type="tel" id="pref-phone" placeholder="Your Phone Number">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button onclick="closePrefModal()" data-i18n="btn_cancel">Cancel</button>
+                    <button class="primary" onclick="savePreferences()" data-i18n="btn_save">Save Changes</button>
                 </div>
             </div>
 
-            <div class="avatar-tabs">
-                <div class="avatar-tab-item active" onclick="switchAvatarTab('emoji')" data-i18n="tab_emoji">Icons</div>
-                <div class="avatar-tab-item" onclick="switchAvatarTab('upload')" data-i18n="tab_upload">Upload</div>
-            </div>
-
-            <div id="avatar-panel-emoji" class="avatar-panel">
-                <div id="pref-avatar-grid" class="avatar-grid-scroll"></div>
-            </div>
-
-            <div id="avatar-panel-upload" class="avatar-panel hidden" style="text-align: center; padding: 20px 0;">
-                <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;" onchange="handleAvatarFile(this)">
-                <button class="secondary-btn" onclick="document.getElementById('avatar-upload-input').click()" data-i18n="btn_choose_img">Choose Image</button>
-                <p style="font-size: 12px; color: #999; margin-top: 10px;" data-i18n="msg_upload_hint">Max size: 2MB</p>
-            </div>
-
-            <div class="form-group" style="margin-top: 15px;">
-                <div class="input-row">
-                    <label for="pref-name" class="input-label" style="width: 90px;" data-i18n="label_display_name">Display Name</label>
-                    <input type="text" id="pref-name" placeholder="Display Name">
+            <div id="pref-avatar-panel" class="pref-avatar-panel hidden">
+                <div class="avatar-tabs">
+                    <div class="avatar-tab-item active" onclick="switchAvatarTab('emoji')" data-i18n="tab_emoji">Icons</div>
+                    <div class="avatar-tab-item" onclick="switchAvatarTab('upload')" data-i18n="tab_upload">Upload</div>
                 </div>
-                <div class="input-row">
-                    <label for="pref-phone" class="input-label" style="width: 90px;" data-i18n="label_phone">Phone</label>
-                    <input type="tel" id="pref-phone" placeholder="Your Phone Number">
-                </div>
-            </div>
 
-            <div class="modal-actions">
-                <button onclick="document.getElementById('pref-modal').classList.add('hidden')" data-i18n="btn_cancel">Cancel</button>
-                <button class="primary" onclick="savePreferences()" data-i18n="btn_save">Save Changes</button>
+                <div id="avatar-panel-emoji" class="avatar-panel">
+                    <div id="pref-avatar-grid" class="avatar-grid-scroll"></div>
+                </div>
+
+                <div id="avatar-panel-upload" class="avatar-panel hidden" style="text-align: center; padding: 20px 0;">
+                    <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;" onchange="handleAvatarFile(this)">
+                    <button class="secondary-btn" onclick="document.getElementById('avatar-upload-input').click()" data-i18n="btn_choose_img">Choose Image</button>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;" data-i18n="msg_upload_hint">Max size: 2MB</p>
+                </div>
             </div>
         </div>
     </div>
