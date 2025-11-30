@@ -41,13 +41,14 @@ export function render() {
             div.className = `bookmark-item ${styleClass}`;
             div.dataset.id = item.id;
 
-            // --- 核心：点击事件 ---
+            // --- 核心修复：点击事件 ---
             div.onclick = (e) => {
                 if (state.isEditing) {
+                    // 编辑模式
                     if (!e.target.classList.contains('delete-btn')) openModal(originalPageIndex, originalBookmarkIndex);
                 } else {
-                    // 只有在明确标记为“已拖拽”时才阻止跳转
-                    // 微小的抖动（<10px）不会设置 hasDragged，因此可以正常点击
+                    // 正常模式：只有当 hasDragged 为 false 时才允许跳转
+                    // 新的 drag 逻辑保证了微小的抖动不会将 hasDragged 设为 true
                     if (!state.hasDragged) window.location.href = item.url;
                 }
             };
@@ -645,11 +646,11 @@ function triggerKeyboardBounce(offset) {
     }, 150);
 }
 
-// --- 核心修复：统一获取坐标 ---
+// --- 核心修复：统一使用 clientX/Y，避免滚动条干扰 ---
 function getPositionX(e) { return e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; }
 function getPositionY(e) { return e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; }
 
-// --- 核心修复：更健壮的拖拽逻辑 ---
+// --- 核心修复：更稳健的拖拽检测 ---
 function dragStart(e) {
     if (state.isEditing && e.target.closest('.bookmark-item')) { state.isDragging = false; return; }
 
@@ -680,34 +681,35 @@ function drag(e) {
     const diffX = cx - state.startPos;
     const diffY = cy - state.startPosY;
 
-    // 2. 方向锁定逻辑 (Direction Locking)
-    // 在移动初期 (5px以内)，判断用户意图是“横向翻页”还是“纵向滚动”
+    // 2. 方向锁定逻辑 (Dead Zone Locking)
+    // 如果尚未锁定方向...
     if (!state.dragDirectionLocked) {
+        // 只有当移动距离足够大 (超过 15px) 时才判断方向，避免微小抖动误判
         const absX = Math.abs(diffX);
         const absY = Math.abs(diffY);
 
-        if (absX > 5 || absY > 5) {
+        if (absX > 15 || absY > 15) {
             state.dragDirectionLocked = true;
+
+            // 如果垂直移动更多，判定为滚动 -> 标记为 Scrolling，不进行拖拽
             if (absY > absX) {
-                // 垂直移动更多 -> 判定为滚动 -> 退出并忽略后续水平移动
                 state.isScrolling = true;
                 return;
             }
-            // 否则 -> 判定为横向翻页 -> 继续执行下方逻辑
+            // 否则判定为水平拖拽，继续向下执行
         } else {
-            // 移动距离太小，视为点击抖动，暂不处理
+            // 移动 < 15px，属于死区，不做任何响应，也不拦截点击
             return;
         }
     }
 
-    // 3. 只有明确判定为横向翻页，且位移超过 10px，才激活“已拖拽”状态
-    if (Math.abs(diffX) > 10) state.hasDragged = true;
+    // 3. 执行逻辑
+    // 只有明确标记为"已拖拽" (超过15px且横向移动) 后，才开始移动滑块和拦截点击
+    state.hasDragged = true;
+    state.currentTranslate = state.prevTranslate + diffX;
 
-    if (state.hasDragged) {
-        state.currentTranslate = state.prevTranslate + diffX;
-        // 阻止默认事件（防止页面左右反弹或干扰）
-        if (e.cancelable) e.preventDefault();
-    }
+    // 阻止浏览器默认行为 (如原生侧滑翻页)
+    if (e.cancelable) e.preventDefault();
 }
 
 function dragEnd(e) {
@@ -718,6 +720,8 @@ function dragEnd(e) {
     const swiper = document.getElementById('bookmark-swiper');
     const swiperWidth = swiper ? swiper.clientWidth : 1;
     let targetPage = state.currentPage;
+
+    // 只有发生过有效拖拽，才计算翻页
     if (state.hasDragged) {
         if (movedBy < -swiperWidth * 0.15 && state.currentPage < state.visualPages.length - 1) targetPage++;
         else if (movedBy > swiperWidth * 0.15 && state.currentPage > 0) targetPage--;
@@ -774,7 +778,7 @@ function renderPaginationDots() {
         dot.className = 'dot';
         if (i === state.currentPage) dot.classList.add('active');
 
-        // --- 修复：添加 data-title 属性 ---
+        // --- 修复：添加 data-title 属性，配合 CSS 显示悬停/点击标题 ---
         dot.setAttribute('data-title', state.visualPages[i].title || `Page ${i + 1}`);
 
         dot.onclick = (e) => { e.stopPropagation(); state.currentPage = i; updateSwiperPosition(true); renderPaginationDots(); };
