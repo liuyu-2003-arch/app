@@ -614,12 +614,24 @@ body.dark-mode .user-pill-icon {
     background: #f7f7f7;
     border-left: 1px solid #e0e0e0;
     box-sizing: border-box;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
     flex-shrink: 0;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     transform: translateX(100%);
     opacity: 0;
     visibility: hidden;
+}
+
+.pref-avatar-panel .avatar-panel-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.pref-avatar-panel .modal-actions {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
 }
 
 .pref-avatar-panel.visible {

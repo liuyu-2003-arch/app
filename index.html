@@ -223,21 +223,23 @@
             </div>
 
             <div id="pref-avatar-panel" class="pref-avatar-panel">
-                <div class="avatar-tabs">
-                    <div class="avatar-tab-item active" onclick="switchAvatarTab('emoji')" data-i18n="tab_emoji">Icons</div>
-                    <div class="avatar-tab-item" onclick="switchAvatarTab('upload')" data-i18n="tab_upload">Upload</div>
-                </div>
+                <div class="avatar-panel-content">
+                    <div class="avatar-tabs">
+                        <div class="avatar-tab-item active" onclick="switchAvatarTab('emoji')" data-i18n="tab_emoji">Icons</div>
+                        <div class="avatar-tab-item" onclick="switchAvatarTab('upload')" data-i18n="tab_upload">Upload</div>
+                    </div>
 
-                <div id="avatar-panel-emoji" class="avatar-panel">
-                    <div id="pref-avatar-grid" class="avatar-grid-scroll"></div>
-                </div>
+                    <div id="avatar-panel-emoji" class="avatar-panel">
+                        <div id="pref-avatar-grid" class="avatar-grid-scroll"></div>
+                    </div>
 
-                <div id="avatar-panel-upload" class="avatar-panel" style="text-align: center; padding: 20px 0;">
-                    <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;" onchange="handleAvatarFile(this)">
-                    <button class="secondary-btn" onclick="document.getElementById('avatar-upload-input').click()" data-i18n="btn_choose_img">Choose Image</button>
-                    <p style="font-size: 12px; color: #999; margin-top: 10px;" data-i18n="msg_upload_hint">Max size: 2MB</p>
+                    <div id="avatar-panel-upload" class="avatar-panel" style="text-align: center; padding: 20px 0;">
+                        <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;" onchange="handleAvatarFile(this)">
+                        <button class="secondary-btn" onclick="document.getElementById('avatar-upload-input').click()" data-i18n="btn_choose_img">Choose Image</button>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;" data-i18n="msg_upload_hint">Max size: 2MB</p>
+                    </div>
                 </div>
-                <div class="modal-actions" style="padding: 0 20px 20px 20px;">
+                <div class="modal-actions">
                     <button class="primary" onclick="closeAvatarPanel()" data-i18n="btn_select">Select</button>
                 </div>
             </div>
