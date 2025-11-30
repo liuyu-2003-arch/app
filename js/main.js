@@ -128,6 +128,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.switchAvatarTab = switchAvatarTab;
     window.handleAvatarFile = handleAvatarFile;
     window.selectNewAvatar = selectNewAvatar;
+    window.closeAvatarPanel = () => {
+        const modalContent = document.querySelector('.pref-modal-content');
+        const panel = document.getElementById('pref-avatar-panel');
+        modalContent.classList.remove('avatar-panel-visible');
+        panel.classList.remove('visible');
+    };
 
     // --- 语言 ---
     window.changeLanguage = async (lang) => {

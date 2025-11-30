@@ -538,7 +538,7 @@ body.dark-mode .user-pill-icon {
 
 .avatar-grid-scroll {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 8px;
     max-height: 200px;
     overflow-y: auto;
@@ -598,7 +598,7 @@ body.dark-mode .user-pill-icon {
 }
 
 .pref-modal-content.avatar-panel-visible {
-    width: 680px; /* Expanded width */
+    width: 720px; /* Expanded width */
 }
 
 .pref-main-panel {
@@ -610,7 +610,7 @@ body.dark-mode .user-pill-icon {
 }
 
 .pref-avatar-panel {
-    width: 300px;
+    width: 340px;
     background: #f7f7f7;
     border-left: 1px solid #e0e0e0;
     box-sizing: border-box;
@@ -626,6 +626,11 @@ body.dark-mode .user-pill-icon {
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
+}
+
+.centered-form-group {
+    display: flex;
+    justify-content: center;
 }
 
 @media (max-width: 768px) {
