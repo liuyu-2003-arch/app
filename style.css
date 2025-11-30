@@ -171,7 +171,7 @@ body.dark-mode .user-icon-svg {
 @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 .edit-controls button {
     background: #f0f0f0; border: none; padding: 10px 15px; border-radius: 10px;
-    cursor: pointer; font-size: 14px; font-weight: 500; color: #333; transition: all 0.2s; white-space: nowrap;
+    cursor: pointer; font-size: 14px; font-weight: 500; color: #333; transition: background-color 0.2s, transform 0.2s; white-space: nowrap;
 }
 .edit-controls button:hover { background: #e0e0e0; transform: translateY(-2px); }
 .edit-controls .done-btn { background: #007AFF; color: white; padding: 10px 20px; }
@@ -201,7 +201,7 @@ body.dark-mode .user-icon-svg {
 }
 .pattern-btn {
     background: transparent; border: 1px solid #ddd; padding: 6px 12px;
-    border-radius: 8px; font-size: 13px; color: #555; cursor: pointer; transition: all 0.2s;
+    border-radius: 8px; font-size: 13px; color: #555; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 .pattern-btn:hover { background: #f5f5f5; }
 .pattern-btn.active { background: #007AFF; color: white; border-color: #007AFF; }
@@ -216,7 +216,7 @@ body.dark-mode .user-icon-svg {
     border-radius: 30px; font-size: 14px; font-weight: 500;
     backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     text-align: center; opacity: 0; transform: translateY(-20px) scale(0.9);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: auto;
 }
 .toast.visible { opacity: 1; transform: translateY(0) scale(1); }
@@ -237,7 +237,7 @@ body.dark-mode .user-icon-svg {
     z-index: 9000;
     opacity: 0;
     transform: translateY(-10px);
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     pointer-events: none;
     display: flex;
     align-items: center;
@@ -335,7 +335,7 @@ body.dark-mode .user-pill-icon {
     z-index: 2000; padding: 8px 0;
     opacity: 0; transform: translateY(-10px) scale(0.95);
     pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     font-size: 14px; color: #37352f; border: 1px solid rgba(0,0,0,0.05);
 }
 .user-menu.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
@@ -362,7 +362,7 @@ body.dark-mode .user-pill-icon {
 .social-icons { display: flex; gap: 25px; justify-content: center; }
 .social-btn {
     width: 48px; height: 48px; border-radius: 50%; border: 1px solid #e0e0e0; background: white;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .social-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #d0d0d0; }
 .social-btn svg { width: 24px; height: 24px; }
@@ -412,12 +412,12 @@ body.dark-mode .user-pill-icon {
 .candidate-section { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
 
 .style-select-group { display: flex; flex-direction: column; gap: 8px; }
-.style-option { padding: 5px 10px; border-radius: 8px; background: #e9e9eb; color: #555; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
+.style-option { padding: 5px 10px; border-radius: 8px; background: #e9e9eb; color: #555; font-size: 12px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, color 0.2s, box-shadow 0.2s; text-align: center; }
 .style-option:hover { background: #dcdce0; }
 .style-option.active { background: #007AFF; color: white; box-shadow: 0 2px 5px rgba(0,122,255,0.2); }
 
 .candidate-grid { display: grid; grid-template-columns: repeat(5, 44px); grid-template-rows: repeat(2, 44px); gap: 10px; }
-.candidate-item { width: 44px; height: 44px; border-radius: 10px; background: #fff; cursor: pointer; border: 2px solid transparent; display: flex; align-items: center; justify-content: center; transition: all 0.2s; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.candidate-item { width: 44px; height: 44px; border-radius: 10px; background: #fff; cursor: pointer; border: 2px solid transparent; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .candidate-item img { width: 80%; height: 80%; object-fit: contain; }
 .candidate-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .candidate-item.active { border-color: #007AFF; background: white; box-shadow: 0 4px 12px rgba(0,122,255,0.2); }
@@ -454,8 +454,21 @@ body.dark-mode .user-pill-icon {
 .modal-actions button.primary { background: #007AFF; color: white; }
 
 .page-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
-.page-list-item { display: flex; align-items: center; padding: 8px; background: #f5f7f9; border-radius: 10px; margin-bottom: 10px; border: none; transition: all 0.3s ease-out; }
-.page-list-item.fading-out { opacity: 0; transform: scale(0.9); margin-bottom: -40px; }
+.page-list-item {
+    display: flex; align-items: center; padding: 8px; background: #f5f7f9; border-radius: 10px;
+    margin-bottom: 10px; border: none;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.3s ease-out, padding 0.3s ease-out, margin-bottom 0.3s ease-out;
+    max-height: 100px; /* 预设一个足够大的高度 */
+    overflow: hidden;
+}
+.page-list-item.fading-out {
+    opacity: 0;
+    transform: scale(0.95);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
 .page-list-item:last-child { margin-bottom: 0; }
 .page-list-item.sortable-ghost { opacity: 0.4; background: #cce5ff; }
 .drag-handle { cursor: grab; padding: 0 10px; color: #999; }
@@ -472,7 +485,7 @@ body.dark-mode .user-pill-icon {
 .pagination-dots.visible, .pagination-dots:hover { opacity: 1; }
 .pagination-dots .dot {
     width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.3);
-    transition: all 0.3s cubic-bezier(0.25, 1.5, 0.5, 1); cursor: pointer; position: relative;
+    transition: background-color 0.3s cubic-bezier(0.25, 1.5, 0.5, 1), transform 0.3s cubic-bezier(0.25, 1.5, 0.5, 1); cursor: pointer; position: relative;
 }
 .pagination-dots .dot.active { background: rgba(0, 0, 0, 0.8); transform: scale(1.2); }
 .pagination-dots .dot:hover { background: #007AFF; transform: scale(1.8); }
@@ -481,7 +494,7 @@ body.dark-mode .user-pill-icon {
     opacity: 0; visibility: hidden; transform: translateX(-50%) scale(0.8); transform-origin: bottom center;
     background: rgba(0,0,0,0.85); color: white; padding: 5px 10px; font-size: 10px;
     border-radius: 12px; white-space: nowrap; pointer-events: none; font-weight: 500;
-    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: opacity 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .pagination-dots .dot:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
 
@@ -566,7 +579,7 @@ body.dark-mode .user-pill-icon {
     border-radius: 8px;
     cursor: pointer;
     font-size: 13px;
-    transition: all 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 .secondary-btn:hover {
     background: #f5f5f5;
