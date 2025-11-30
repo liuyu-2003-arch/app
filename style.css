@@ -254,8 +254,16 @@ body.dark-mode .sync-status { background: rgba(30, 30, 30, 0.9); color: #fff; bo
     position: fixed; top: 0; right: 0;
     width: auto; height: auto;
     z-index: 100;
-    padding: 20px;
+
+    /* --- 核心修改：扩大触发热区 --- */
+    /* 上、右保持 20px，确保图标视觉位置不变 */
+    /* 下、左增加到 120px，大幅扩大鼠标感应范围 */
+    padding: 20px 20px 120px 120px;
+
     box-sizing: border-box;
+
+    /* 开发调试用：如果您想看到这个区域有多大，可以暂时取消下面这行的注释 */
+    /* background: rgba(255, 0, 0, 0.1); */
 }
 
 .user-pill {
