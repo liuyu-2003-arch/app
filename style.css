@@ -749,6 +749,16 @@ body.dark-mode .user-pill-icon {
     position: relative;
 }
 
+.menu-item.has-submenu::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20px; /* Start from the left edge of the gap */
+    width: 20px; /* Cover the gap */
+    height: 100%;
+    background: transparent; /* Make it invisible */
+}
+
 .submenu {
     display: none;
     position: absolute;
